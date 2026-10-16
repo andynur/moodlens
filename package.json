@@ -13,9 +13,9 @@
     "fixture:sanitize": "node scripts/sanitize-fixture.ts"
   },
   "dependencies": {
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "lucide-react": "^0.468.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.283",
@@ -30,6 +30,6 @@
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.3",
     "vite": "^6.0.5",
-    "vitest": "^2.1.8"
+    "vitest": "^3.2.7"
   }
 }

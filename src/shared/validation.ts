@@ -54,9 +54,10 @@ export function isCourseSnapshot(input: unknown): input is CourseSnapshot {
   if (typeof s.sourceUrl !== 'string' || !isCourseUrl(s.sourceUrl)) return false;
   const actualId = new URL(s.sourceUrl).searchParams.get('id');
   if (canonicalCourseUrl(s.sourceUrl) !== s.sourceUrl) return false;
-  return typeof s.courseId === 'string' && s.courseId === actualId && s.courseId.length <= 80
+  const courseId = s.courseId;
+  return typeof courseId === 'string' && courseId === actualId && courseId.length <= 80
     && typeof s.courseName === 'string' && s.courseName.length > 0 && s.courseName.length <= 300
     && typeof s.capturedAt === 'string' && Number.isFinite(Date.parse(s.capturedAt))
     && Array.isArray(s.activities) && s.activities.length <= 200
-    && s.activities.every((activity) => validActivity(activity, s.courseId));
+    && s.activities.every((activity) => validActivity(activity, courseId));
 }
