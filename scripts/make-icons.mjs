@@ -18,16 +18,19 @@ function crc32(buffer) {
   return (c ^ 0xffffffff) >>> 0;
 }
 function chunk(type, data) {
-  const length = Buffer.alloc(4); length.writeUInt32BE(data.length);
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length);
   const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
-  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body));
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(body));
   return Buffer.concat([length, body, crc]);
 }
 
 // Coverage of a pixel by a shape, using 4x4 supersampling for smooth edges.
 function coverage(x, y, inside) {
   let hits = 0;
-  for (let sy = 0; sy < 4; sy++) for (let sx = 0; sx < 4; sx++) if (inside(x + (sx + 0.5) / 4, y + (sy + 0.5) / 4)) hits++;
+  for (let sy = 0; sy < 4; sy++)
+    for (let sx = 0; sx < 4; sx++) if (inside(x + (sx + 0.5) / 4, y + (sy + 0.5) / 4)) hits++;
   return hits / 16;
 }
 
@@ -57,11 +60,14 @@ function icon(size) {
     rows.push(row);
   }
   const header = Buffer.alloc(13);
-  header.writeUInt32BE(size, 0); header.writeUInt32BE(size, 4);
+  header.writeUInt32BE(size, 0);
+  header.writeUInt32BE(size, 4);
   header.set([8, 6, 0, 0, 0], 8); // 8-bit RGBA
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', header), chunk('IDAT', deflateSync(Buffer.concat(rows))), chunk('IEND', Buffer.alloc(0))
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(Buffer.concat(rows))),
+    chunk('IEND', Buffer.alloc(0))
   ]);
 }
 

@@ -1,6 +1,5 @@
 export type ActivityType =
-  | 'resource' | 'page' | 'url' | 'attendance'
-  | 'quiz' | 'forum' | 'assign' | 'folder' | 'book' | 'feedback' | 'unknown';
+  'resource' | 'page' | 'url' | 'attendance' | 'quiz' | 'forum' | 'assign' | 'folder' | 'book' | 'feedback' | 'unknown';
 export type CompletionStatus = 'complete' | 'incomplete' | 'unknown';
 
 export interface MoodleActivity {
@@ -24,9 +23,7 @@ export interface CourseSnapshot {
 export type Theme = 'light' | 'dark';
 export type Locale = 'en' | 'id';
 export type IncomingMessage =
-  | { type: 'COURSE_SNAPSHOT'; payload: CourseSnapshot }
-  | { type: 'GET_COURSE_SNAPSHOT' }
-  | { type: 'CLEAR_LOCAL_DATA' };
+  { type: 'COURSE_SNAPSHOT'; payload: CourseSnapshot } | { type: 'GET_COURSE_SNAPSHOT' } | { type: 'CLEAR_LOCAL_DATA' };
 export interface SnapshotResponse {
   ok: boolean;
   snapshot: CourseSnapshot | null;

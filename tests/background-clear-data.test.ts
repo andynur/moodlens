@@ -6,7 +6,10 @@ let listener: Listener;
 const localClear = vi.fn(() => Promise.resolve());
 const sessionClear = vi.fn(() => Promise.resolve());
 const area = (clear: () => Promise<void>) => ({
-  clear, setAccessLevel: () => Promise.resolve(), get: () => Promise.resolve({}), set: () => Promise.resolve()
+  clear,
+  setAccessLevel: () => Promise.resolve(),
+  get: () => Promise.resolve({}),
+  set: () => Promise.resolve()
 });
 
 beforeAll(async () => {
@@ -14,17 +17,26 @@ beforeAll(async () => {
     runtime: {
       id: 'moodlens-test',
       onInstalled: { addListener: () => undefined },
-      onMessage: { addListener: (fn: Listener) => { listener = fn; } }
+      onMessage: {
+        addListener: (fn: Listener) => {
+          listener = fn;
+        }
+      }
     },
     sidePanel: { setPanelBehavior: () => Promise.resolve() },
     storage: { local: area(localClear), session: area(sessionClear) }
   });
   await import('../src/background/index');
 });
-beforeEach(() => { localClear.mockClear(); sessionClear.mockClear(); });
+beforeEach(() => {
+  localClear.mockClear();
+  sessionClear.mockClear();
+});
 
 function send(sender: chrome.runtime.MessageSender): Promise<unknown> {
-  return new Promise((resolve) => { listener({ type: 'CLEAR_LOCAL_DATA' }, sender, resolve); });
+  return new Promise((resolve) => {
+    listener({ type: 'CLEAR_LOCAL_DATA' }, sender, resolve);
+  });
 }
 
 describe('CLEAR_LOCAL_DATA', () => {
@@ -35,8 +47,9 @@ describe('CLEAR_LOCAL_DATA', () => {
   });
   it('rejects content scripts and other extensions without clearing', async () => {
     const tab = { id: 1 } as chrome.tabs.Tab;
-    await expect(send({ id: 'moodlens-test', tab, url: 'https://solusi.sibermu.ac.id/course/view.php?id=1' }))
-      .resolves.toEqual({ ok: false });
+    await expect(
+      send({ id: 'moodlens-test', tab, url: 'https://solusi.sibermu.ac.id/course/view.php?id=1' })
+    ).resolves.toEqual({ ok: false });
     await expect(send({ id: 'other-extension' })).resolves.toEqual({ ok: false });
     expect(localClear).not.toHaveBeenCalled();
     expect(sessionClear).not.toHaveBeenCalled();

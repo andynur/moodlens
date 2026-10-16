@@ -32,7 +32,21 @@ describe('fixture sanitizer', () => {
   const report = sanitizeDocument(new DOMParser().parseFromString(RAW, 'text/html'));
 
   it('removes personal data, secrets and scripts', () => {
-    for (const leak of ['Budi', 'budi@', 'abc123', '2023010001', '<script', 'profile.php', 'data-userid', 'icon.png', 'Siti', 'Assalamualaikum', 'Normal...', '3456', '1111 2222']) {
+    for (const leak of [
+      'Budi',
+      'budi@',
+      'abc123',
+      '2023010001',
+      '<script',
+      'profile.php',
+      'data-userid',
+      'icon.png',
+      'Siti',
+      'Assalamualaikum',
+      'Normal...',
+      '3456',
+      '1111 2222'
+    ]) {
       expect(report.html).not.toContain(leak);
     }
     expect(report.warnings).toEqual([]);

@@ -14,6 +14,8 @@ const dom = new JSDOM(await readFile(input, 'utf8'));
 const report = sanitizeDocument(dom.window.document);
 await mkdir(dirname(output), { recursive: true });
 await writeFile(output, report.html);
-console.log(`Wrote ${output}: ${report.sections} sections, ${report.activities} activities, ${report.removed} elements removed.`);
+console.log(
+  `Wrote ${output}: ${report.sections} sections, ${report.activities} activities, ${report.removed} elements removed.`
+);
 for (const w of report.warnings) console.log(`WARNING: ${w}`);
 process.exit(report.warnings.length ? 2 : 0);

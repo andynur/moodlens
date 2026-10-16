@@ -27,7 +27,8 @@ Goal: trustworthy, green baseline on the pilot site.
 - [x] Separate storage-load error message from `noNavigation`.
 - [x] Enforce EN/ID key parity with `satisfies` and a test.
 - [x] Single version source (`package.json` → manifest and UI at build time).
-- [ ] Add ESLint + Prettier; dependency upgrade pass (React, Tailwind, vitest, `@types/chrome`) with lockfile.
+- [x] Add ESLint + Prettier.
+- [ ] Dependency upgrade pass (React, Tailwind, vitest, `@types/chrome`) with lockfile.
 - [x] Placeholder icons (16/32/48/128).
 - [x] Sanitized SiberMu fixtures (`tests/fixtures/sibermu-2026-10/`, 4 courses); observations in `docs/04_MOODLE_ADAPTER.md`.
 - [x] Parser on fixtures: strip `.accesshide` suffix, list restricted activities without links, map "To do" dropdown, support page/folder/book/feedback as `unknown` or new types.

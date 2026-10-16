@@ -24,6 +24,8 @@ capture();
 const observer = new MutationObserver(scheduleCapture);
 // Observe a narrow subtree when possible, as Moodle themes vary.
 observer.observe(document.querySelector('#page-content') ?? document.body, {
-  subtree: true, childList: true, characterData: true
+  subtree: true,
+  childList: true,
+  characterData: true
 });
 window.addEventListener('pagehide', () => observer.disconnect(), { once: true });

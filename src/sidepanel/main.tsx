@@ -6,5 +6,7 @@ import './styles.css';
 const element = document.getElementById('root');
 if (!element) throw new Error('Root element missing');
 createRoot(element).render(
-  <React.StrictMode><App /></React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

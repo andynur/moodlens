@@ -45,8 +45,10 @@ describe('manifest guard', () => {
   });
   it('contains no forbidden permission or broad host pattern', () => {
     const all = [
-      ...(manifest.permissions ?? []), ...(manifest.optional_permissions ?? []),
-      ...(manifest.host_permissions ?? []), ...(manifest.optional_host_permissions ?? []),
+      ...(manifest.permissions ?? []),
+      ...(manifest.optional_permissions ?? []),
+      ...(manifest.host_permissions ?? []),
+      ...(manifest.optional_host_permissions ?? []),
       ...(manifest.content_scripts ?? []).flatMap((script) => script.matches)
     ];
     expect(all.filter((value) => FORBIDDEN.includes(value) || /^\*:\/\/|^https?:\/\/\*\//.test(value))).toEqual([]);
@@ -55,8 +57,9 @@ describe('manifest guard', () => {
 
 describe('source guard', () => {
   it('never renders raw HTML', () => {
-    const offenders = sourceFiles(join(ROOT, 'src'))
-      .filter((file) => /dangerouslySetInnerHTML|\.(?:inner|outer)HTML\s*=/.test(readFileSync(file, 'utf8')));
+    const offenders = sourceFiles(join(ROOT, 'src')).filter((file) =>
+      /dangerouslySetInnerHTML|\.(?:inner|outer)HTML\s*=/.test(readFileSync(file, 'utf8'))
+    );
     expect(offenders).toEqual([]);
   });
 });

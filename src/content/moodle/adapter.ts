@@ -15,8 +15,16 @@ const SKIPPED_MODTYPES: ReadonlySet<string> = new Set(['label']);
 const MAX_ACTIVITIES = 200;
 
 const TYPE_FROM_PATH: Readonly<Record<string, ActivityType>> = {
-  resource: 'resource', page: 'page', url: 'url', attendance: 'attendance',
-  quiz: 'quiz', forum: 'forum', assign: 'assign', folder: 'folder', book: 'book', feedback: 'feedback'
+  resource: 'resource',
+  page: 'page',
+  url: 'url',
+  attendance: 'attendance',
+  quiz: 'quiz',
+  forum: 'forum',
+  assign: 'assign',
+  folder: 'folder',
+  book: 'book',
+  feedback: 'feedback'
 };
 
 function concise(value: string | null | undefined, max = 300): string {
@@ -33,11 +41,18 @@ function getType(path: string): ActivityType {
   return TYPE_FROM_PATH[moduleName ?? ''] ?? 'unknown';
 }
 function modType(container: Element): string | null {
-  return Array.from(container.classList).find((name) => name.startsWith('modtype_'))?.slice('modtype_'.length) ?? null;
+  return (
+    Array.from(container.classList)
+      .find((name) => name.startsWith('modtype_'))
+      ?.slice('modtype_'.length) ?? null
+  );
 }
 
 // An activity Moodle lists without a link: shown as restricted, never navigable.
-function restrictedActivity(container: Element, courseId: string): { identity: string; activity: MoodleActivity } | null {
+function restrictedActivity(
+  container: Element,
+  courseId: string
+): { identity: string; activity: MoodleActivity } | null {
   if (!container.matches('li.activity')) return null;
   const id = container.getAttribute('data-id') ?? '';
   const moduleName = modType(container);
@@ -48,8 +63,13 @@ function restrictedActivity(container: Element, courseId: string): { identity: s
   return {
     identity: `/mod/${moduleName}/view.php?id=${id}`,
     activity: {
-      id, courseId, title, type: TYPE_FROM_PATH[moduleName] ?? 'unknown',
-      url: null, restricted: true, completion: parseCompletion(container)
+      id,
+      courseId,
+      title,
+      type: TYPE_FROM_PATH[moduleName] ?? 'unknown',
+      url: null,
+      restricted: true,
+      completion: parseCompletion(container)
     }
   };
 }
@@ -61,17 +81,21 @@ export function parseCompletion(container: Element): CompletionStatus {
   const toggleType = scope.querySelector(MANUAL_TOGGLE)?.getAttribute('data-toggletype');
   if (toggleType === 'manual:undo') return 'complete';
   if (toggleType === 'manual:mark-done') return 'incomplete';
-  const candidate = concise([
-    scope.textContent,
-    scope.getAttribute('aria-label'),
-    scope.getAttribute('title'),
-    ...Array.from(scope.querySelectorAll('[aria-label], [title]'))
-      .slice(0, 6)
-      .map((node) => `${node.getAttribute('aria-label') ?? ''} ${node.getAttribute('title') ?? ''}`)
-  ].join(' '), 1000).toLowerCase();
+  const candidate = concise(
+    [
+      scope.textContent,
+      scope.getAttribute('aria-label'),
+      scope.getAttribute('title'),
+      ...Array.from(scope.querySelectorAll('[aria-label], [title]'))
+        .slice(0, 6)
+        .map((node) => `${node.getAttribute('aria-label') ?? ''} ${node.getAttribute('title') ?? ''}`)
+    ].join(' '),
+    1000
+  ).toLowerCase();
   // "Mark as not done" means the activity is complete, so test it before the "not done" pattern.
   if (/\bmark as not done\b/.test(candidate)) return 'complete';
-  if (/\b(?:not completed|not done|mark as done|to do|belum selesai|tandai selesai)\b/.test(candidate)) return 'incomplete';
+  if (/\b(?:not completed|not done|mark as done|to do|belum selesai|tandai selesai)\b/.test(candidate))
+    return 'incomplete';
   if (/\b(?:completed|done|sudah selesai|selesai)\b/.test(candidate)) return 'complete';
   return 'unknown';
 }
@@ -92,7 +116,9 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
       try {
         const u = new URL(a.href);
         return isActivityUrl(`${u.origin}${u.pathname}?id=${u.searchParams.get('id')}`);
-      } catch { return false; }
+      } catch {
+        return false;
+      }
     });
     if (!link) {
       const restricted = restrictedActivity(container, courseId);
@@ -110,9 +136,12 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
     const label = concise(visibleText(link) || link.getAttribute('aria-label') || link.title || '', 300);
     if (!label) continue;
     activities.push({
-      id, courseId, title: label,
+      id,
+      courseId,
+      title: label,
       type: getType(activityUrl.pathname),
-      url: `${LMS_ORIGIN}${activityUrl.pathname}?id=${id}`, restricted: false,
+      url: `${LMS_ORIGIN}${activityUrl.pathname}?id=${id}`,
+      restricted: false,
       completion: parseCompletion(container)
     });
   }

@@ -10,10 +10,7 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": [
-    "storage",
-    "sidePanel"
-  ],
+  "permissions": ["storage", "sidePanel"],
   "host_permissions": [],
   "background": {
     "service_worker": "background.js"
@@ -30,12 +27,8 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://solusi.sibermu.ac.id/course/view.php*"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["https://solusi.sibermu.ac.id/course/view.php*"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ]

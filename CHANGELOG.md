@@ -23,6 +23,7 @@
 
 ### Tooling
 
+- ESLint 10 (flat config, typescript-eslint, react-hooks) and Prettier 3 (`npm run lint`, `format`, `format:check`); `npm run check` now runs lint and format gates. Tree reformatted once with Prettier.
 - `npm run check` summary runner, `npm run fixture:sanitize` with tests, `.claude/settings.json` permission allowlist.
 
 ### Fixtures

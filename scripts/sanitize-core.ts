@@ -16,15 +16,48 @@ const TEXT_NODE = 3;
 const KEEP_ROOTS = ['#page-header', '#region-main'];
 const FALLBACK_ROOTS = ['#page-content', 'body'];
 const REMOVE = [
-  'script', 'noscript', 'style', 'link', 'meta', 'iframe', 'object', 'embed', 'template', 'video', 'audio',
-  '.usermenu', '.userbutton', '#user-action-menu', '[data-region="user-menu"]', '.logininfo',
-  '.userpicture', '.userinitials', '.avatars', '.block_online_users', '.block_recent_activity', '.block_myprofile',
-  '.instructor-info', '.instructor-info-wrapper', '.course-contacts', '.coursecontacts', '.teachers',
-  '.block_edwiseradvancedblock', '.block_html', 'nav.navbar', '#page-footer', 'footer'
+  'script',
+  'noscript',
+  'style',
+  'link',
+  'meta',
+  'iframe',
+  'object',
+  'embed',
+  'template',
+  'video',
+  'audio',
+  '.usermenu',
+  '.userbutton',
+  '#user-action-menu',
+  '[data-region="user-menu"]',
+  '.logininfo',
+  '.userpicture',
+  '.userinitials',
+  '.avatars',
+  '.block_online_users',
+  '.block_recent_activity',
+  '.block_myprofile',
+  '.instructor-info',
+  '.instructor-info-wrapper',
+  '.course-contacts',
+  '.coursecontacts',
+  '.teachers',
+  '.block_edwiseradvancedblock',
+  '.block_html',
+  'nav.navbar',
+  '#page-footer',
+  'footer'
 ].join(',');
 const DESCRIPTION = [
-  '.activity-altcontent', '.activity-description', '.contentafterlink', '.summary', '.summarytext',
-  '.course-description-item', '.description', '.no-overflow'
+  '.activity-altcontent',
+  '.activity-description',
+  '.contentafterlink',
+  '.summary',
+  '.summarytext',
+  '.course-description-item',
+  '.description',
+  '.no-overflow'
 ].join(',');
 const SECTION_NAME = '.sectionname, [data-for="section_title"]';
 const ACTIVITY = 'li.activity';
@@ -33,7 +66,8 @@ const PERSON_LINK_SELECTOR = 'a[href*="/user/profile.php"], a[href*="/user/view.
 const PERSON_LINK = /\/(user\/(profile|view)\.php|message\/|blog\/|badges\/user)|^mailto:/;
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 const SESSKEY = /sesskey=[^&"'\s<>]+/gi;
-const STATUS_TEXT = /^(not completed|completed|submitted|not attempted|attempted|passed|failed|expected by|due|selesai|belum)/i;
+const STATUS_TEXT =
+  /^(not completed|completed|submitted|not attempted|attempted|passed|failed|expected by|due|selesai|belum)/i;
 const LONG_NUMBER = /\b\d{8,}\b/g; // student numbers (NIM) in visible text
 const PHONE = /(\+62|\b0)\s?8\d[\d\s.-]{6,}\d/g; // Indonesian mobile numbers
 
@@ -67,7 +101,10 @@ function collectNames(doc: Document): { names: Map<string, string>; sections: nu
   if (!/^page-my-/.test(doc.body?.id ?? '')) {
     const heading = doc.querySelector('#page-header h1, .page-header-headings h1, h1');
     if (heading) add(ownName(heading), 'Sample Course');
-    const title = clean(doc.title).split('|')[0]?.replace(/^Course:\s*/i, '').trim();
+    const title = clean(doc.title)
+      .split('|')[0]
+      ?.replace(/^Course:\s*/i, '')
+      .trim();
     if (title) add(title, 'Sample Course');
   }
 
@@ -86,9 +123,13 @@ function collectNames(doc: Document): { names: Map<string, string>; sections: nu
     const label = `Activity ${++activities}`;
     const nameEl = item.querySelector(ACTIVITY_NAME);
     if (nameEl) add(ownName(nameEl), label);
-    item.querySelectorAll('[data-activityname]').forEach((el) => add(clean(el.getAttribute('data-activityname')), label));
+    item
+      .querySelectorAll('[data-activityname]')
+      .forEach((el) => add(clean(el.getAttribute('data-activityname')), label));
   });
-  doc.querySelectorAll('[data-activityname]').forEach((el) => add(clean(el.getAttribute('data-activityname')), 'Activity'));
+  doc
+    .querySelectorAll('[data-activityname]')
+    .forEach((el) => add(clean(el.getAttribute('data-activityname')), 'Activity'));
 
   // Dashboard (/my/): course cards, category names, Completion Progress block.
   let courses = 0;
@@ -96,7 +137,9 @@ function collectNames(doc: Document): { names: Map<string, string>; sections: nu
     const name = ownName(el).replace(/^Course name\s*/i, '');
     if (name && !names.has(name)) add(name, `Sample Course ${++courses}`);
   });
-  doc.querySelectorAll('.categoryname').forEach((el) => add(ownName(el).replace(/^Course category\s*/i, ''), 'Sample Category'));
+  doc
+    .querySelectorAll('.categoryname')
+    .forEach((el) => add(ownName(el).replace(/^Course category\s*/i, ''), 'Sample Category'));
   doc.querySelectorAll('.block_completion_progress h3').forEach((el) => add(ownName(el), `COURSE-${++courses}`));
 
   doc.querySelectorAll(PERSON_LINK_SELECTOR).forEach((el) => add(clean(el.textContent), 'Person'));
@@ -114,18 +157,28 @@ export function sanitizeDocument(doc: Document): SanitizeReport {
 
   let removed = 0;
   for (const root of roots) {
-    root.querySelectorAll(REMOVE).forEach((el) => { el.remove(); removed++; });
-    root.querySelectorAll(DESCRIPTION).forEach((el) => { el.innerHTML = '<p>Sample description.</p>'; });
+    root.querySelectorAll(REMOVE).forEach((el) => {
+      el.remove();
+      removed++;
+    });
+    root.querySelectorAll(DESCRIPTION).forEach((el) => {
+      el.innerHTML = '<p>Sample description.</p>';
+    });
     // Bulk-edit labels copy label text; restriction notes hold shortened ("...") activity names.
-    root.querySelectorAll('label[for*="Checkbox"]').forEach((el) => { el.textContent = 'Select item'; });
+    root.querySelectorAll('label[for*="Checkbox"]').forEach((el) => {
+      el.textContent = 'Select item';
+    });
     // Completion Progress info: keep status lines, replace activity names.
     root.querySelectorAll('.progressEventInfo').forEach((info) => {
       for (const node of textNodes(info)) {
         if (node.data.trim() && !STATUS_TEXT.test(node.data.trim())) node.data = 'Activity';
       }
     });
-    root.querySelectorAll('.availabilityinfo strong, .availabilityinfo a, [data-region="availabilityinfo"] strong')
-      .forEach((el) => { el.textContent = 'Activity'; });
+    root
+      .querySelectorAll('.availabilityinfo strong, .availabilityinfo a, [data-region="availabilityinfo"] strong')
+      .forEach((el) => {
+        el.textContent = 'Activity';
+      });
     // Any element whose text shows an email likely shows a person next to it.
     for (const node of textNodes(root)) {
       EMAIL.lastIndex = 0;
@@ -144,12 +197,18 @@ export function sanitizeDocument(doc: Document): SanitizeReport {
   };
 
   for (const root of roots) {
-    for (const node of textNodes(root)) node.data = scrub(node.data.replace(/\s+/g, " "), true);
+    for (const node of textNodes(root)) node.data = scrub(node.data.replace(/\s+/g, ' '), true);
     for (const el of [root, ...Array.from(root.querySelectorAll('*'))]) {
       for (const attr of Array.from(el.attributes)) {
         const name = attr.name.toLowerCase();
-        if (name.startsWith('on') || /user|email|avatar|token/.test(name)) { el.removeAttribute(attr.name); continue; }
-        if (name === 'src' || name === 'srcset') { el.removeAttribute(attr.name); continue; }
+        if (name.startsWith('on') || /user|email|avatar|token/.test(name)) {
+          el.removeAttribute(attr.name);
+          continue;
+        }
+        if (name === 'src' || name === 'srcset') {
+          el.removeAttribute(attr.name);
+          continue;
+        }
         el.setAttribute(attr.name, scrub(clean(attr.value), false));
       }
       if (el.tagName === 'INPUT' && el.getAttribute('type') !== 'checkbox') {
@@ -174,7 +233,8 @@ export function sanitizeDocument(doc: Document): SanitizeReport {
   if (/logged in as|anda masuk sebagai/i.test(html)) warnings.push('"Logged in as" text remains.');
   const leaked = ordered.filter((n) => n.length > 3 && html.includes(n));
   if (leaked.length) warnings.push(`${leaked.length} collected name(s) still present.`);
-  if (activities === 0 && /page-course-view/.test(body?.id ?? '')) warnings.push('No li.activity found: copy from a course page, or the theme uses other markup.');
+  if (activities === 0 && /page-course-view/.test(body?.id ?? ''))
+    warnings.push('No li.activity found: copy from a course page, or the theme uses other markup.');
 
   return { html, activities, sections, removed, warnings };
 }

@@ -6,6 +6,9 @@
   "description": "Independent bilingual student learning companion for an allowlisted Moodle-based LMS",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "build": "npm run typecheck && vite build && node scripts/build-extension.mjs",
@@ -19,6 +22,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/chrome": "^0.0.283",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.18",
@@ -26,10 +30,15 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "esbuild": "^0.24.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
+    "prettier": "^3.9.10",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.3",
+    "typescript-eslint": "^8.71.2",
     "vite": "^6.0.5",
     "vitest": "^3.2.7"
   }
