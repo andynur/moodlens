@@ -10,6 +10,7 @@
 
 ### Added
 
+- Placeholder icons 16/32/48/128 (`npm run icons`, `scripts/make-icons.mjs`, no new dependency) wired into the manifest and action; guard test checks files and sizes.
 - Settings: "Clear all local data" with an inline confirmation; background clears `chrome.storage.local` and `session` only for trusted extension pages (ML-023 part 1).
 - Parser lists activities without a link as restricted (`url: null`, `restricted: true`) and supports folder, book and feedback types.
 - CI workflow (`.github/workflows/ci.yml`) running `npm ci && npm run check`.

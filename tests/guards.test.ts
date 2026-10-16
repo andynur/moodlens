@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -10,6 +10,8 @@ const manifest = JSON.parse(readFileSync(join(ROOT, 'public/manifest.json'), 'ut
   host_permissions?: string[];
   optional_host_permissions?: string[];
   content_scripts?: { matches: string[] }[];
+  icons?: Record<string, string>;
+  action?: { default_icon?: Record<string, string> };
 };
 const FORBIDDEN = ['<all_urls>', 'cookies', 'tabs', 'webRequest', 'webRequestBlocking', 'debugger', 'history'];
 
@@ -22,6 +24,16 @@ function sourceFiles(dir: string): string[] {
 }
 
 describe('manifest guard', () => {
+  it('declares icons 16/32/48/128 that exist as PNG files', () => {
+    expect(Object.keys(manifest.icons ?? {}).sort((a, b) => Number(a) - Number(b))).toEqual(['16', '32', '48', '128']);
+    for (const [size, path] of Object.entries({ ...manifest.icons, ...manifest.action?.default_icon })) {
+      const file = join(ROOT, 'public', path);
+      expect(existsSync(file), path).toBe(true);
+      const png = readFileSync(file);
+      expect(png.subarray(1, 4).toString('ascii')).toBe('PNG');
+      expect(png.readUInt32BE(16)).toBe(Number(size));
+    }
+  });
   it('matches the approved permission snapshot', () => {
     expect(manifest.permissions).toEqual(['storage', 'sidePanel']);
     expect(manifest.optional_permissions ?? []).toEqual([]);
