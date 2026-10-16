@@ -1,0 +1,6 @@
+---
+description: Moodlens repository-wide coding rules
+alwaysApply: true
+---
+
+Follow `AGENTS.md`. Start each task with `docs/00_STATUS.md` and read only the docs listed in the AGENTS.md routing table.

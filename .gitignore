@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Raw LMS captures contain personal data. Sanitize into tests/fixtures/ instead.
+docs/moodle_courses/
+*_raw.html

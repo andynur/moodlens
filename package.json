@@ -1,0 +1,35 @@
+{
+  "name": "moodlens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent bilingual student learning companion for an allowlisted Moodle-based LMS",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "npm run typecheck && vite build && node scripts/build-extension.mjs",
+    "check": "node scripts/check.mjs",
+    "fixture:sanitize": "node scripts/sanitize-fixture.ts"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.283",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "esbuild": "^0.24.2",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.7.3",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}
