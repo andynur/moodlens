@@ -25,5 +25,11 @@ export const id = {
   untitledCourse: 'Mata kuliah tanpa judul',
   restricted: 'Terkunci: buka mata kuliah di Moodle untuk melihat syaratnya.',
   storageError: 'Data tersimpan tidak dapat dimuat. Muat ulang panel samping lalu coba lagi.',
+  clearData: 'Hapus semua data lokal',
+  clearDataHint: 'Menghapus semua pengaturan Moodlens dan data mata kuliah tersimpan dari browser ini. Moodle tidak diubah.',
+  clearDataConfirmQuestion: 'Hapus semua data Moodlens dari browser ini? Tindakan ini tidak dapat dibatalkan.',
+  clearDataConfirm: 'Hapus semuanya', cancel: 'Batal',
+  clearDataDone: 'Semua data lokal telah dihapus.',
+  clearDataError: 'Data lokal tidak dapat dihapus. Muat ulang panel samping lalu coba lagi.',
   copyright: 'Versi pengembangan lokal'
 } as const satisfies Record<TranslationKey, string>;

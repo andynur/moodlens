@@ -23,6 +23,12 @@ export const en = {
   untitledCourse: 'Untitled course',
   restricted: 'Restricted: open the course in Moodle to see the conditions.',
   storageError: 'Saved data could not be loaded. Reload the side panel and try again.',
+  clearData: 'Clear all local data',
+  clearDataHint: 'Deletes every Moodlens setting and saved course snapshot from this browser. Moodle is not changed.',
+  clearDataConfirmQuestion: 'Delete all Moodlens data from this browser? This cannot be undone.',
+  clearDataConfirm: 'Delete everything', cancel: 'Cancel',
+  clearDataDone: 'All local data was deleted.',
+  clearDataError: 'Local data could not be deleted. Reload the side panel and try again.',
   copyright: 'Local development build'
 } as const;
 

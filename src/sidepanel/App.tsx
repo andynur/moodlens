@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, CheckCircle2, CircleHelp, GraduationCap, LayoutDashboard, Moon, Settings2, Sun, ExternalLink, Sparkles, CircleDashed, Lock } from 'lucide-react';
-import type { CourseSnapshot, Locale, Theme, CompletionStatus, ActivityType } from '../shared/types';
+import { BookOpen, CheckCircle2, CircleHelp, GraduationCap, LayoutDashboard, Moon, Settings2, Sun, ExternalLink, Sparkles, CircleDashed, Lock, Trash2 } from 'lucide-react';
+import type { ClearDataResponse, CourseSnapshot, Locale, Theme, CompletionStatus, ActivityType } from '../shared/types';
 import { t, type TranslationKey } from '../shared/i18n';
 import { isActivityUrl, isCourseSnapshot } from '../shared/validation';
 
@@ -18,6 +18,8 @@ export default function App() {
   const [page, setPage] = useState<Page>('today');
   const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
   const [error, setError] = useState<TranslationKey | null>(null);
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [notice, setNotice] = useState<TranslationKey | null>(null);
   const translate = (key: TranslationKey) => t(locale, key);
 
   useEffect(() => {
@@ -48,6 +50,21 @@ export default function App() {
   function saveTheme(next: Theme) {
     setTheme(next);
     if (hasChrome) void chrome.storage.local.set({ theme: next });
+  }
+  async function clearLocalData() {
+    setConfirmingClear(false);
+    if (hasChrome) {
+      const response = await chrome.runtime.sendMessage({ type: 'CLEAR_LOCAL_DATA' })
+        .catch(() => null) as ClearDataResponse | null;
+      if (!response?.ok) { setError('clearDataError'); return; }
+    }
+    // Return to first-run state: defaults, no snapshot, first page.
+    setLocale('en');
+    setTheme('light');
+    setSnapshot(null);
+    setError(null);
+    setPage('today');
+    setNotice('clearDataDone');
   }
   function openActivity(url: string) {
     if (!isActivityUrl(url)) { setError('noNavigation'); return; }
@@ -98,6 +115,7 @@ export default function App() {
       </nav>
       <main className="space-y-4 px-4 py-5">
         {!hasChrome && <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">{translate('preview')}</p>}
+        {notice && <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">{translate(notice)}</p>}
         {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">{translate(error)}</p>}
         {(page === 'today' || page === 'courses') && <>
           <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -140,6 +158,17 @@ export default function App() {
           <h2 className="font-bold">{translate('settings')}</h2>
           <label className="block text-xs font-semibold">{translate('language')}<select value={locale} onChange={(e) => saveLocale(e.target.value as Locale)} className="mt-1 block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"><option value="en">English</option><option value="id">Bahasa Indonesia</option></select></label>
           <div><p className="text-xs font-semibold">{translate('theme')}</p><div className="mt-2 grid grid-cols-2 gap-2"><button type="button" onClick={() => saveTheme('light')} className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'light' ? 'border-blue-600 text-blue-600' : 'border-slate-300 dark:border-slate-700'}`}><Sun size={15}/>{translate('light')}</button><button type="button" onClick={() => saveTheme('dark')} className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'dark' ? 'border-blue-600 text-blue-400' : 'border-slate-300 dark:border-slate-700'}`}><Moon size={15}/>{translate('dark')}</button></div></div>
+          <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+            <p className="text-xs font-semibold">{translate('clearData')}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('clearDataHint')}</p>
+            {confirmingClear
+              ? <div className="mt-2 space-y-2"><p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">{translate('clearDataConfirmQuestion')}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => setConfirmingClear(false)} className="rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-700">{translate('cancel')}</button>
+                  <button type="button" onClick={() => void clearLocalData()} className="rounded-lg bg-red-600 p-2 text-sm font-semibold text-white">{translate('clearDataConfirm')}</button>
+                </div></div>
+              : <button type="button" onClick={() => { setNotice(null); setConfirmingClear(true); }} className="mt-2 inline-flex items-center gap-2 rounded-lg border border-red-300 p-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:text-red-400"><Trash2 size={15}/>{translate('clearData')}</button>}
+          </div>
         </section>}
       </main>
       <footer className="border-t border-slate-200 px-4 py-4 text-center text-[11px] text-slate-400 dark:border-slate-800"><p>{translate('unofficial')}</p><p className="mt-1">{translate('copyright')} · v{__APP_VERSION__}</p></footer>

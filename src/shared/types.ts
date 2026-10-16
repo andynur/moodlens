@@ -25,8 +25,12 @@ export type Theme = 'light' | 'dark';
 export type Locale = 'en' | 'id';
 export type IncomingMessage =
   | { type: 'COURSE_SNAPSHOT'; payload: CourseSnapshot }
-  | { type: 'GET_COURSE_SNAPSHOT' };
+  | { type: 'GET_COURSE_SNAPSHOT' }
+  | { type: 'CLEAR_LOCAL_DATA' };
 export interface SnapshotResponse {
   ok: boolean;
   snapshot: CourseSnapshot | null;
+}
+export interface ClearDataResponse {
+  ok: boolean;
 }

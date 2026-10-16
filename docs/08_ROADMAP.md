@@ -32,7 +32,7 @@ Goal: trustworthy, green baseline on the pilot site.
 - [x] Sanitized SiberMu fixtures (`tests/fixtures/sibermu-2026-10/`, 4 courses); observations in `docs/04_MOODLE_ADAPTER.md`.
 - [x] Parser on fixtures: strip `.accesshide` suffix, list restricted activities without links, map "To do" dropdown, support page/folder/book/feedback as `unknown` or new types.
 - [ ] One more capture with **completed** activities ("Done" / `manual:undo`) to verify the `complete` mapping.
-- [ ] Clear local data control (ML-023 part 1).
+- [x] Clear local data control (ML-023 part 1).
 
 **Exit gate:** CI green; unpacked extension loads with no errors; parser fixture tests pass on real sanitized SiberMu HTML; manual QA items 1–8 in `docs/09_TEST_PLAN.md` pass.
 
