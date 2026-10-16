@@ -51,7 +51,28 @@ describe('Moodle course adapter', () => {
     const doc = html('<li class="activity"><div class="activity-completion">More details</div></li>');
     expect(parseCompletion(doc.querySelector('li')!)).toBe('unknown');
   });
-  it('falls back to a neutral heading', () => {
-    expect(parseCourse(html('<p>No course heading</p>'), URL)?.courseName).toBe('Untitled course');
+  it('stores null when the course has no heading', () => {
+    const snapshot = parseCourse(html('<p>No course heading</p>'), URL);
+    expect(snapshot?.courseName).toBeNull();
+    expect(isCourseSnapshot(snapshot)).toBe(true);
+  });
+  it('maps "Mark as not done" text to complete', () => {
+    const doc = html('<li class="activity"><div class="activity-completion"><button>Mark as not done</button></div></li>');
+    expect(parseCompletion(doc.querySelector('li')!)).toBe('complete');
+  });
+  it('prefers the manual toggle type over text', () => {
+    const toggle = (type: string, text: string) => html(`<li class="activity"><div class="activity-completion"><div data-region="completion-info">
+      <button data-action="toggle-manual-completion" data-toggletype="${type}" aria-label="Mark Done reading as not done">${text}</button></div></div></li>`);
+    expect(parseCompletion(toggle('manual:undo', 'Done').querySelector('li')!)).toBe('complete');
+    expect(parseCompletion(toggle('manual:mark-done', 'Mark as done').querySelector('li')!)).toBe('incomplete');
+  });
+  it('maps the automatic "To do" dropdown to incomplete', () => {
+    const doc = html('<li class="activity"><div class="activity-completion"><button class="completion-dropdown">To do</button></div></li>');
+    expect(parseCompletion(doc.querySelector('li')!)).toBe('incomplete');
+  });
+  it('strips .accesshide type suffixes from titles', () => {
+    const doc = html(`<h1>Course</h1><li class="activity"><a href="https://solusi.sibermu.ac.id/mod/resource/view.php?id=11">
+      <span class="instancename">Reading <span class="accesshide"> File</span></span></a></li>`);
+    expect(parseCourse(doc, URL)?.activities[0]?.title).toBe('Reading');
   });
 });

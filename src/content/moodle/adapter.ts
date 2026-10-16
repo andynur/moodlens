@@ -6,6 +6,9 @@ const COURSE_HEADING = '.page-header-headings h1, #page-header h1, h1';
 const ACTIVITY_CONTAINER = '.activity-item, li.activity';
 const MODULE_LINK = 'a[href*="/mod/"][href*="/view.php"]';
 const COMPLETION_CONTAINER = '.activity-completion, [data-region="completion-info"], [data-region="completion"]';
+// Verified on SiberMu fixtures (manual:mark-done only); manual:undo follows Moodle 4.x core, unverified on SiberMu.
+const MANUAL_TOGGLE = 'button[data-action="toggle-manual-completion"][data-toggletype]';
+const ACCESSHIDE = '.accesshide';
 const MAX_ACTIVITIES = 200;
 
 const TYPE_FROM_PATH: Readonly<Record<string, ActivityType>> = {
@@ -16,6 +19,12 @@ const TYPE_FROM_PATH: Readonly<Record<string, ActivityType>> = {
 function concise(value: string | null | undefined, max = 300): string {
   return (value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 }
+// Link text without `.accesshide` spans, which append the module type (" File", " Forum").
+function visibleText(node: Element): string {
+  const copy = node.cloneNode(true) as Element;
+  copy.querySelectorAll(ACCESSHIDE).forEach((hidden) => hidden.remove());
+  return copy.textContent ?? '';
+}
 function getType(path: string): ActivityType {
   const moduleName = path.match(/^\/mod\/([a-z]+)\/view\.php$/)?.[1];
   return TYPE_FROM_PATH[moduleName ?? ''] ?? 'unknown';
@@ -24,6 +33,10 @@ function getType(path: string): ActivityType {
 export function parseCompletion(container: Element): CompletionStatus {
   const scope = container.querySelector(COMPLETION_CONTAINER);
   if (!scope) return 'unknown';
+  // The toggle type states the current state; prefer it over localized text.
+  const toggleType = scope.querySelector(MANUAL_TOGGLE)?.getAttribute('data-toggletype');
+  if (toggleType === 'manual:undo') return 'complete';
+  if (toggleType === 'manual:mark-done') return 'incomplete';
   const candidate = concise([
     scope.textContent,
     scope.getAttribute('aria-label'),
@@ -32,8 +45,10 @@ export function parseCompletion(container: Element): CompletionStatus {
       .slice(0, 6)
       .map((node) => `${node.getAttribute('aria-label') ?? ''} ${node.getAttribute('title') ?? ''}`)
   ].join(' '), 1000).toLowerCase();
-  if (/\b(?:not completed|not done|mark as done|belum selesai|tandai selesai)\b/.test(candidate)) return 'incomplete';
-  if (/\b(?:completed|done|mark as not done|sudah selesai|selesai)\b/.test(candidate)) return 'complete';
+  // "Mark as not done" means the activity is complete, so test it before the "not done" pattern.
+  if (/\bmark as not done\b/.test(candidate)) return 'complete';
+  if (/\b(?:not completed|not done|mark as done|to do|belum selesai|tandai selesai)\b/.test(candidate)) return 'incomplete';
+  if (/\b(?:completed|done|sudah selesai|selesai)\b/.test(candidate)) return 'complete';
   return 'unknown';
 }
 
@@ -42,7 +57,7 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
   const url = new URL(urlString);
   const courseId = url.searchParams.get('id')!;
   const heading = doc.querySelector(COURSE_HEADING);
-  const courseName = concise(heading?.textContent) || 'Untitled course';
+  const courseName = concise(heading?.textContent) || null;
   const activities: MoodleActivity[] = [];
   const seen = new Set<string>();
 
@@ -61,7 +76,7 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
     const identity = `${activityUrl.pathname}?id=${id}`;
     if (seen.has(identity)) continue;
     seen.add(identity);
-    const label = concise(link.textContent || link.getAttribute('aria-label') || link.title || '', 300);
+    const label = concise(visibleText(link) || link.getAttribute('aria-label') || link.title || '', 300);
     if (!label) continue;
     activities.push({
       id, courseId, title: label,

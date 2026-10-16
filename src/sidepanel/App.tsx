@@ -101,7 +101,7 @@ export default function App() {
         {(page === 'today' || page === 'courses') && <>
           <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{translate('currentCourse')}</p>
-            <h2 className="mt-2 text-lg font-bold">{snapshot?.courseName ?? translate('ready')}</h2>
+            <h2 className="mt-2 text-lg font-bold">{snapshot ? snapshot.courseName ?? translate('untitledCourse') : translate('ready')}</h2>
             {snapshot ? <><p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">{translate('lastSeen')}: {new Date(snapshot.capturedAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')}</p>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{translate('refreshHint')}</p></> : <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{translate('noData')}</p>}
           </section>

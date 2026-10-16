@@ -13,7 +13,8 @@ export interface MoodleActivity {
 }
 export interface CourseSnapshot {
   courseId: string;
-  courseName: string;
+  /** Null when the page has no visible heading; the UI shows a localized fallback. */
+  courseName: string | null;
   sourceUrl: string;
   capturedAt: string;
   activities: MoodleActivity[];

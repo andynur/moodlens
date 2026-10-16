@@ -22,6 +22,7 @@ export const strings = {
     emptyActivities: 'No supported activities were detected on this page.',
     limitations: 'Completion and deadline details must be verified against the actual LMS.',
     noNavigation: 'This activity link could not be validated.',
+    untitledCourse: 'Untitled course',
     copyright: 'Local development build · v0.1.0'
   },
   id: {
@@ -45,6 +46,7 @@ export const strings = {
     emptyActivities: 'Tidak ditemukan aktivitas yang didukung di halaman ini.',
     limitations: 'Status penyelesaian dan tenggat perlu diverifikasi pada LMS asli.',
     noNavigation: 'Tautan aktivitas ini tidak dapat divalidasi.',
+    untitledCourse: 'Mata kuliah tanpa judul',
     copyright: 'Versi pengembangan lokal · v0.1.0'
   }
 } as const;

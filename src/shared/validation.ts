@@ -56,7 +56,7 @@ export function isCourseSnapshot(input: unknown): input is CourseSnapshot {
   if (canonicalCourseUrl(s.sourceUrl) !== s.sourceUrl) return false;
   const courseId = s.courseId;
   return typeof courseId === 'string' && courseId === actualId && courseId.length <= 80
-    && typeof s.courseName === 'string' && s.courseName.length > 0 && s.courseName.length <= 300
+    && (s.courseName === null || (typeof s.courseName === 'string' && s.courseName.length > 0 && s.courseName.length <= 300))
     && typeof s.capturedAt === 'string' && Number.isFinite(Date.parse(s.capturedAt))
     && Array.isArray(s.activities) && s.activities.length <= 200
     && s.activities.every((activity) => validActivity(activity, courseId));
