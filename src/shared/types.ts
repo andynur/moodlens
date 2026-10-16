@@ -20,7 +20,8 @@ export interface CourseSnapshot {
   capturedAt: string;
   activities: MoodleActivity[];
 }
-export type Theme = 'light' | 'dark';
+/** `system` follows `prefers-color-scheme` until the student picks light or dark. */
+export type Theme = 'light' | 'dark' | 'system';
 export type Locale = 'en' | 'id';
 export type IncomingMessage =
   { type: 'COURSE_SNAPSHOT'; payload: CourseSnapshot } | { type: 'GET_COURSE_SNAPSHOT' } | { type: 'CLEAR_LOCAL_DATA' };

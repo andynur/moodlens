@@ -5,6 +5,7 @@ import {
   CircleHelp,
   GraduationCap,
   LayoutDashboard,
+  Monitor,
   Moon,
   Settings2,
   Sun,
@@ -26,9 +27,31 @@ const completionStyle: Record<CompletionStatus, string> = {
   unknown: 'text-slate-400 dark:text-slate-500'
 };
 
+const themeOptions: { key: Theme; icon: typeof Sun }[] = [
+  { key: 'light', icon: Sun },
+  { key: 'dark', icon: Moon },
+  { key: 'system', icon: Monitor }
+];
+
+function useSystemDark(): boolean {
+  const query = useMemo(
+    () => (typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-color-scheme: dark)') : null),
+    []
+  );
+  const [dark, setDark] = useState(query?.matches ?? false);
+  useEffect(() => {
+    if (!query) return;
+    const onChange = (event: MediaQueryListEvent) => setDark(event.matches);
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, [query]);
+  return dark;
+}
+
 export default function App() {
   const [locale, setLocale] = useState<Locale>('en');
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('system');
+  const systemDark = useSystemDark();
   const [page, setPage] = useState<Page>('today');
   const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
   const [error, setError] = useState<TranslationKey | null>(null);
@@ -42,7 +65,7 @@ export default function App() {
       .get(['locale', 'theme', 'lastCourseSnapshot'])
       .then((values) => {
         if (values.locale === 'en' || values.locale === 'id') setLocale(values.locale);
-        if (values.theme === 'light' || values.theme === 'dark') setTheme(values.theme);
+        if (values.theme === 'light' || values.theme === 'dark' || values.theme === 'system') setTheme(values.theme);
         if (isCourseSnapshot(values.lastCourseSnapshot)) setSnapshot(values.lastCourseSnapshot);
       })
       .catch(() => setError('storageError'));
@@ -57,8 +80,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = locale;
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [locale, theme]);
+    document.documentElement.classList.toggle('dark', theme === 'dark' || (theme === 'system' && systemDark));
+  }, [locale, theme, systemDark]);
 
   function saveLocale(next: Locale) {
     setLocale(next);
@@ -81,7 +104,7 @@ export default function App() {
     }
     // Return to first-run state: defaults, no snapshot, first page.
     setLocale('en');
-    setTheme('light');
+    setTheme('system');
     setSnapshot(null);
     setError(null);
     setPage('today');
@@ -306,23 +329,19 @@ export default function App() {
             </label>
             <div>
               <p className="text-xs font-semibold">{translate('theme')}</p>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => saveTheme('light')}
-                  className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'light' ? 'border-blue-600 text-blue-600' : 'border-slate-300 dark:border-slate-700'}`}
-                >
-                  <Sun size={15} />
-                  {translate('light')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => saveTheme('dark')}
-                  className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'dark' ? 'border-blue-600 text-blue-400' : 'border-slate-300 dark:border-slate-700'}`}
-                >
-                  <Moon size={15} />
-                  {translate('dark')}
-                </button>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {themeOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    aria-pressed={theme === option.key}
+                    onClick={() => saveTheme(option.key)}
+                    className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === option.key ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-slate-300 dark:border-slate-700'}`}
+                  >
+                    <option.icon size={15} />
+                    {translate(option.key)}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="border-t border-slate-200 pt-4 dark:border-slate-800">

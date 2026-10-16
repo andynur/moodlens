@@ -35,6 +35,7 @@ export const en = {
   theme: 'Appearance',
   light: 'Light',
   dark: 'Dark',
+  system: 'System',
   refreshHint: 'Visit or refresh the course page to update this snapshot.',
   emptyActivities: 'No supported activities were detected on this page.',
   limitations: 'Completion and deadline details must be verified against the actual LMS.',

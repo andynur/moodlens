@@ -37,6 +37,7 @@ export const id = {
   theme: 'Tampilan',
   light: 'Terang',
   dark: 'Gelap',
+  system: 'Sistem',
   refreshHint: 'Buka atau muat ulang halaman mata kuliah untuk memperbarui data.',
   emptyActivities: 'Tidak ditemukan aktivitas yang didukung di halaman ini.',
   limitations: 'Status penyelesaian dan tenggat perlu diverifikasi pada LMS asli.',
