@@ -17,7 +17,7 @@ All Moodle-specific knowledge lives in `src/content/moodle/`. UI and background 
 ## SiberMu observations (fixtures `tests/fixtures/sibermu-2026-10/`, captured 2026-10-16)
 
 - Body: `#page-course-view-topics`, classes `format-topics pagelayout-course lang-en uses-drawers edw-m405`. The `edw-` prefix and `.instructor-info` / `.dashboard-bar-wrapper` header suggest the Edwiser RemUI theme (inference, not confirmed).
-- Activities: `li.activity.modtype_<name>` with `data-for="cmitem"`, inner `.activity-item[data-activityname]`. Name in `.activityname > .instancename` with an `.accesshide` type suffix (" File", " Forum"). Confirmed: current parser keeps the suffix in titles.
+- Activities: `li.activity.modtype_<name>` with `data-for="cmitem"`, inner `.activity-item[data-activityname]`. Name in `.activityname > .instancename` with an `.accesshide` type suffix (" File", " Forum"). The parser strips the suffix (since 2026-10-16).
 - Module types seen: resource, url, assign, quiz, forum, attendance, label, page, folder, book, feedback.
 - **Locked activities have no `/mod/…/view.php` link** (93 of 321 non-label activities across 4 courses). The current parser drops them; v0.2 should list them as restricted.
 - Restriction notes: `.availabilityinfo` ("Not available unless: …", partly custom Indonesian text "Anda harus menyelesaikan …").
@@ -31,7 +31,7 @@ All Moodle-specific knowledge lives in `src/content/moodle/`. UI and background 
   - **Completion Progress block** (third-party plugin `block_completion_progress`) is installed: one `.barContainer` per course, cells `.progressBarCell.<state>` (seen: `futureNotCompleted`; plugin also uses completed/notCompleted/submittedNotComplete/failed), details in `.progressEventInfo` with status text such as "Not completed". It is a cross-course progress source without AJAX (candidate for v0.4/v0.5).
   - Level Up! XP block is **not** on the dashboard; it appears on course pages only.
 - My courses `/my/courses.php` (`my-courses.html`, `#page-my-index.page-mycourses`, `pagelayout-mycourses`): only the `myoverview` block. Same card markup as the dashboard. `[data-region="courses-view"]` carries `data-display="card"`, `data-grouping="all"`, `data-sort="fullname"`, `data-paging="12"` and `data-totalcoursecount="20"` while only 4 cards render (why 20 is **unverified**: maybe hidden or past enrolments). Moodle renders these cards from `core_course_get_enrolled_courses_by_timeline_classification` in standard 4.x (not confirmed on SiberMu); the DOM is a usable fallback for course list and progress.
-- Current parser result on fixtures: 13/17, 63/95, 50/94, 99/115 non-label activities parsed; completion mostly `unknown`, never `complete`.
+- Parser result on fixtures (2026-10-16): 17/17, 95/95, 92/94, 115/115 non-label activities; 91 restricted (no link). The 2 misses in course-3 are folders displayed inline (`.noname-grid`, no link, no `.instancename`). Completion: 148 `incomplete`, 171 `unknown`, 0 `complete`. Activities with a link to an unlisted module are still dropped (`isActivityUrl` allowlist).
 
 Update this table whenever a fixture or live QA confirms or rejects an item. Record site variant, Moodle version, theme and date, never personal data.
 

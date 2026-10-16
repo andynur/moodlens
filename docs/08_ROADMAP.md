@@ -16,21 +16,21 @@ Status legend: `[x]` done, `[ ]` open, `[~]` in progress.
 Goal: trustworthy, green baseline on the pilot site.
 
 - [x] `npm run check` summary runner (`scripts/check.mjs`).
-- [ ] `git init`, first commit, `.github/workflows/ci.yml` running `npm ci && npm run check`.
-- [ ] Machine-enforced rules as tests: manifest permission snapshot, forbidden permissions, no `dangerouslySetInnerHTML`, i18n parity.
+- [x] `git init`, first commit, `.github/workflows/ci.yml` running `npm ci && npm run check`.
+- [x] Machine-enforced rules as tests: manifest permission snapshot, forbidden permissions, no `dangerouslySetInnerHTML`, i18n parity.
 - [x] `npm run fixture:sanitize` (`scripts/sanitize-fixture.ts` + `scripts/sanitize-core.ts`, tested); see `tests/fixtures/README.md`.
 - [ ] Choose and add `LICENSE` (needed before outside contributors).
-- [ ] Fix `vite.config.ts` type conflict (vitest bundles its own vite) — upgrade vitest or split `vitest.config.ts`.
-- [ ] Fix `src/shared/validation.ts` narrowing error in `isCourseSnapshot`.
-- [ ] Fix completion regex: `mark as not done` must not map to `incomplete`.
-- [ ] Remove hardcoded `'Untitled course'` from stored data; localize in UI.
-- [ ] Separate storage-load error message from `noNavigation`.
-- [ ] Enforce EN/ID key parity with `satisfies` and a test.
-- [ ] Single version source (`package.json` → manifest and UI at build time).
+- [x] Fix `vite.config.ts` type conflict (vitest bundles its own vite) — upgrade vitest or split `vitest.config.ts`.
+- [x] Fix `src/shared/validation.ts` narrowing error in `isCourseSnapshot`.
+- [x] Fix completion regex: `mark as not done` must not map to `incomplete`.
+- [x] Remove hardcoded `'Untitled course'` from stored data; localize in UI.
+- [x] Separate storage-load error message from `noNavigation`.
+- [x] Enforce EN/ID key parity with `satisfies` and a test.
+- [x] Single version source (`package.json` → manifest and UI at build time).
 - [ ] Add ESLint + Prettier; dependency upgrade pass (React, Tailwind, vitest, `@types/chrome`) with lockfile.
 - [ ] Placeholder icons (16/32/48/128).
 - [x] Sanitized SiberMu fixtures (`tests/fixtures/sibermu-2026-10/`, 4 courses); observations in `docs/04_MOODLE_ADAPTER.md`.
-- [ ] Parser on fixtures: strip `.accesshide` suffix, list restricted activities without links, map "To do" dropdown, support page/folder/book/feedback as `unknown` or new types.
+- [x] Parser on fixtures: strip `.accesshide` suffix, list restricted activities without links, map "To do" dropdown, support page/folder/book/feedback as `unknown` or new types.
 - [ ] One more capture with **completed** activities ("Done" / `manual:undo`) to verify the `complete` mapping.
 - [ ] Clear local data control (ML-023 part 1).
 

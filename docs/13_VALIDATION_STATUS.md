@@ -2,6 +2,10 @@
 
 Update this file after every release gate check. State what ran, where, and the result.
 
+## 2026-10-16 (later) — local macOS, Node v24.11.0
+
+`npm run check`: typecheck, test (all files in `tests/`), build pass; lint skipped (not configured). Not verified: Chrome load of `dist/`, live Moodle, CI run on GitHub.
+
 ## 2026-10-16 — local macOS, Node v24.11.0, npm 11.6.1
 
 | Command | Result |

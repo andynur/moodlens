@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Fixed
+
+- Typecheck: vitest upgraded to 3.2 so it shares vite 6 with the build; `courseId` narrowing in `isCourseSnapshot`.
+- Parser: `manual:undo` and "Mark as not done" map to `complete`, "To do" to `incomplete`; `.accesshide` suffixes removed from titles; missing course heading stored as `null` and localized in the UI.
+- Side panel shows a dedicated storage-load error instead of the navigation error.
+
+### Added
+
+- Parser lists activities without a link as restricted (`url: null`, `restricted: true`) and supports folder, book and feedback types.
+- CI workflow (`.github/workflows/ci.yml`) running `npm ci && npm run check`.
+- Guard tests: manifest permission snapshot, forbidden permissions, no raw HTML rendering; i18n parity test; SiberMu fixture parser tests.
+
+### Changed
+
+- i18n split into `src/shared/i18n/en.ts` and `id.ts` (`satisfies Record<TranslationKey, string>`).
+- `package.json` is the single version source for the manifest and side panel footer.
+
 ### Tooling
 
 - `npm run check` summary runner, `npm run fixture:sanitize` with tests, `.claude/settings.json` permission allowlist.
