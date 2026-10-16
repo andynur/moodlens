@@ -1,6 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Scan only side panel sources, never Moodle fixtures. */
+@import 'tailwindcss' source(none);
+@source '../../sidepanel.html';
+@source '.';
+
+/* Dark mode follows the `dark` class set by App, not the media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Keep the Tailwind 3 pointer cursor on buttons. */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 :root {
   font-family:

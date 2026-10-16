@@ -187,7 +187,7 @@ export default function App() {
         )}
         {(page === 'today' || page === 'courses') && (
           <>
-            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
                 {translate('currentCourse')}
               </p>
@@ -208,7 +208,7 @@ export default function App() {
             </section>
             {snapshot && (
               <>
-                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                   <h3 className="text-sm font-semibold">{translate('statusSummary')}</h3>
                   <p className="mt-2 text-sm font-bold">
                     {total} {translate('activities')}
