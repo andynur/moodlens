@@ -23,6 +23,7 @@ export const strings = {
     limitations: 'Completion and deadline details must be verified against the actual LMS.',
     noNavigation: 'This activity link could not be validated.',
     untitledCourse: 'Untitled course',
+    storageError: 'Saved data could not be loaded. Reload the side panel and try again.',
     copyright: 'Local development build · v0.1.0'
   },
   id: {
@@ -47,6 +48,7 @@ export const strings = {
     limitations: 'Status penyelesaian dan tenggat perlu diverifikasi pada LMS asli.',
     noNavigation: 'Tautan aktivitas ini tidak dapat divalidasi.',
     untitledCourse: 'Mata kuliah tanpa judul',
+    storageError: 'Data tersimpan tidak dapat dimuat. Muat ulang panel samping lalu coba lagi.',
     copyright: 'Versi pengembangan lokal · v0.1.0'
   }
 } as const;

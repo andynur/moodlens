@@ -17,7 +17,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>('light');
   const [page, setPage] = useState<Page>('today');
   const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<TranslationKey | null>(null);
   const translate = (key: TranslationKey) => t(locale, key);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function App() {
       if (values.locale === 'en' || values.locale === 'id') setLocale(values.locale);
       if (values.theme === 'light' || values.theme === 'dark') setTheme(values.theme);
       if (isCourseSnapshot(values.lastCourseSnapshot)) setSnapshot(values.lastCourseSnapshot);
-    }).catch(() => setError(true));
+    }).catch(() => setError('storageError'));
     const onChange = (changes: { [key: string]: chrome.storage.StorageChange }, area: string) => {
       if (area === 'local' && changes.lastCourseSnapshot && isCourseSnapshot(changes.lastCourseSnapshot.newValue)) {
         setSnapshot(changes.lastCourseSnapshot.newValue);
@@ -50,7 +50,7 @@ export default function App() {
     if (hasChrome) void chrome.storage.local.set({ theme: next });
   }
   function openActivity(url: string) {
-    if (!isActivityUrl(url)) { setError(true); return; }
+    if (!isActivityUrl(url)) { setError('noNavigation'); return; }
     if (hasChrome) void chrome.tabs.create({ url });
     else window.open(url, '_blank', 'noopener,noreferrer');
   }
@@ -97,7 +97,7 @@ export default function App() {
       </nav>
       <main className="space-y-4 px-4 py-5">
         {!hasChrome && <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">{translate('preview')}</p>}
-        {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">{translate('noNavigation')}</p>}
+        {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">{translate(error)}</p>}
         {(page === 'today' || page === 'courses') && <>
           <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{translate('currentCourse')}</p>
