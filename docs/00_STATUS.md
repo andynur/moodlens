@@ -7,14 +7,13 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Last done
 
-- `prompts/FIRST_RUN_PROMPT.md` steps 1–6 committed: tree + CI workflow, typecheck fixes (vitest 3.2), parser fixes, storage error key, i18n split with parity test, guard tests.
-- Step 7 partial: single version source (`package.json`), parser lists restricted activities (`url: null`) and folder/book/feedback types.
-- `npm run check` green locally (lint skipped: not configured). CI not yet observed on GitHub (not pushed).
+- `prompts/FIRST_RUN_PROMPT.md` steps 1–7 done. Step 7 added: clear all local data (ML-023 part 1), placeholder icons, ESLint + Prettier gates, dependency upgrade pass (React 19, Tailwind 4, Vite 8, Vitest 5, TS 5.9), System theme default (PRD-001 AC 5).
+- `npm run check` green locally (lint, format, typecheck, test, build); `npm ci` clean, 0 audit findings. CI not yet observed on GitHub (not pushed).
 - Breaking for local dev data: stored snapshots without `restricted` fail validation; revisit the course page to refresh.
 
 ## Next task
 
-Remaining v0.2 roadmap items, one per change: ESLint + Prettier and dependency upgrade pass; placeholder icons; clear local data control (ML-023 part 1). Then push and confirm CI green, then manual QA 1–8 (`docs/09_TEST_PLAN.md`) with unpacked `dist/`.
+Owner pushes to `origin` and confirms CI green. Then manual QA 1–8 (`docs/09_TEST_PLAN.md`) with unpacked `dist/`, including Settings > Clear all local data and the Tailwind 4 visual check (light, dark, system). Then v0.2 exit review.
 
 ## Blockers / waiting on owner
 
@@ -24,4 +23,4 @@ Remaining v0.2 roadmap items, one per change: ESLint + Prettier and dependency u
 
 ## Known failing checks
 
-- None locally. Unverified: loading `dist/` in Chrome, live Moodle behavior, CI run.
+- None locally. Unverified: loading `dist/` in Chrome, live Moodle behavior, CI run, side panel visuals after the Tailwind 4 migration (no UI render tests).
