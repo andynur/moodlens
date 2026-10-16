@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest an idea for Moodlens.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Moodlens never writes to Moodle and never helps during live quizzes or graded work. Requests for those are closed.
+        Check the [feature backlog](https://github.com/andynur/moodlens/blob/main/docs/02_FEATURE_BACKLOG.md) and the [roadmap](https://github.com/andynur/moodlens/blob/main/docs/08_ROADMAP.md) first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What study problem does this solve? Who has it?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: input
+    id: feature-id
+    attributes:
+      label: Related feature ID, if any
+      placeholder: ML-012
+  - type: checkboxes
+    id: integrity
+    attributes:
+      label: Integrity check
+      options:
+        - label: This feature is read-only toward Moodle and does not help during live assessments.
+          required: true

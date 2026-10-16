@@ -4,6 +4,7 @@
 ![Status: pre-release](https://img.shields.io/badge/status-pre--release%20v0.2-orange)
 ![Chrome MV3](https://img.shields.io/badge/Chrome-MV3%20%E2%89%A5116-4285F4)
 ![Languages: EN | ID](https://img.shields.io/badge/i18n-EN%20%7C%20ID-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 > **All in One Moodle AI Agent for Student.** A free, local-first, integrity-safe study companion for any Moodle site you enable. English and Bahasa Indonesia.
 
@@ -135,24 +136,9 @@ prompts/           Task prompts for coding agents
 
 ## Contributing
 
-Contributions are welcome. Before you start:
+Contributions are welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, rules, commit style and the pull request checklist. Everyone who takes part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-1. Read [`AGENTS.md`](AGENTS.md). Its hard rules apply to human and AI contributors.
-2. Check [`docs/00_STATUS.md`](docs/00_STATUS.md) and [`docs/08_ROADMAP.md`](docs/08_ROADMAP.md). Work only on the current release.
-3. Find the feature ID in [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLOG.md) and read its PRD in [`docs/prd/`](docs/prd/).
-
-Pull request checklist:
-
-- `npm run check` passes.
-- Code, comments, tests, docs and commit messages are in English.
-- Every new UI string exists in both `en` and `id` ([`docs/07_I18N.md`](docs/07_I18N.md)).
-- No new permissions, dependencies or frameworks without a PRD reason.
-- No writes to Moodle of any kind.
-- No secrets, cookies, `sesskey`, student identifiers or course text in code, logs, fixtures or commits.
-- A line under **Unreleased** in [`CHANGELOG.md`](CHANGELOG.md).
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `build:`).
-
-To support a new Moodle site, open an issue first. Include the Moodle version and theme, but no personal data or course content.
+The short version: run `npm run check`, keep every UI string in `en` and `id`, never write to Moodle, and never commit personal data.
 
 ## Security and privacy
 
@@ -167,7 +153,7 @@ Core principles:
 
 The manifest requests only `storage` and `sidePanel`. Details: [`docs/06_SECURITY_PRIVACY.md`](docs/06_SECURITY_PRIVACY.md).
 
-**Reporting a vulnerability:** do not open a public issue. Report it privately to the maintainer through GitHub's **Security** tab on this repository.
+**Reporting a vulnerability:** do not open a public issue. Follow [`SECURITY.md`](SECURITY.md).
 
 ## Documentation
 
@@ -193,9 +179,12 @@ The manifest requests only `storage` and `sidePanel`. Details: [`docs/06_SECURIT
 | [`docs/prd/`](docs/prd/) | Feature PRDs |
 | [`prompts/`](prompts/) | Task prompts for coding agents |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute |
+| [`SECURITY.md`](SECURITY.md) | Vulnerability reporting |
+| [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Community standards |
 
 ## License
 
-No license has been chosen yet, so no open source license applies to this code. The maintainer plans to pick MIT or Apache-2.0 before v1.0. Until then, ask before you reuse the code.
+[MIT](LICENSE) © 2026 Andy Nur and Moodlens contributors.
 
 Moodle is a registered trademark of Moodle Pty Ltd. Moodlens uses the name only to describe compatibility.

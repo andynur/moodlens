@@ -72,3 +72,8 @@ Each decision has an ID, status, context, decision and consequences. Agents must
 
 - **Status:** Accepted.
 - **Decision:** Keep `minimum_chrome_version: 116` (covers Side Panel API, dynamic content scripts and storage access levels).
+
+## D-012 — License
+
+- **Status:** Accepted.
+- **Decision:** MIT. Simple, permissive and widely understood by student contributors. Copyright "Andy Nur and Moodlens contributors"; contributions are accepted under the same license (`CONTRIBUTING.md`).

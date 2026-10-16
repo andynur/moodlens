@@ -19,7 +19,7 @@ Goal: trustworthy, green baseline on the pilot site.
 - [x] `git init`, first commit, `.github/workflows/ci.yml` running `npm ci && npm run check`.
 - [x] Machine-enforced rules as tests: manifest permission snapshot, forbidden permissions, no `dangerouslySetInnerHTML`, i18n parity.
 - [x] `npm run fixture:sanitize` (`scripts/sanitize-fixture.ts` + `scripts/sanitize-core.ts`, tested); see `tests/fixtures/README.md`.
-- [ ] Choose and add `LICENSE` (needed before outside contributors).
+- [x] Choose and add `LICENSE` (MIT, D-012).
 - [x] Fix `vite.config.ts` type conflict (vitest bundles its own vite) — upgrade vitest or split `vitest.config.ts`.
 - [x] Fix `src/shared/validation.ts` narrowing error in `isCourseSnapshot`.
 - [x] Fix completion regex: `mark as not done` must not map to `incomplete`.

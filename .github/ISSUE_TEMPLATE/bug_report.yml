@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in Moodlens does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Remove personal data first:** names, student IDs, course names, URLs with IDs, cookies and `sesskey` values.
+        Security problems go through private reporting, not issues. See SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a course page
+        2. Open the side panel
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Moodlens version or commit
+      placeholder: 0.1.0 or 4a4c705
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 131
+    validations:
+      required: true
+  - type: input
+    id: moodle
+    attributes:
+      label: Moodle version and theme, if known
+      placeholder: Moodle 4.3, Boost
+  - type: dropdown
+    id: language
+    attributes:
+      label: UI language
+      options:
+        - English
+        - Bahasa Indonesia
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console errors or screenshots
+      description: Redact personal data before you paste.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This report contains no personal data, credentials or course content.
+          required: true

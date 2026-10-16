@@ -9,7 +9,7 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 - [ ] No university names or logos implying affiliation; "Independent project" disclaimer in UI and listing.
 - [ ] Privacy policy page published (GitHub Pages or repo) in EN and ID.
 - [ ] "What we never do" page published.
-- [ ] Open-source license chosen and added (`LICENSE`).
+- [x] Open-source license chosen and added (`LICENSE`, MIT).
 
 ## Store listing
 
