@@ -70,6 +70,24 @@ describe('Moodle course adapter', () => {
     const doc = html('<li class="activity"><div class="activity-completion"><button class="completion-dropdown">To do</button></div></li>');
     expect(parseCompletion(doc.querySelector('li')!)).toBe('incomplete');
   });
+  it('lists activities without a link as restricted and never navigable', () => {
+    const doc = html(`<h1>Course</h1>
+      <li class="activity modtype_quiz" data-id="21"><span class="instancename">Final quiz <span class="accesshide"> Quiz</span></span>
+        <div class="availabilityinfo isrestricted">Not available unless: …</div></li>
+      <li class="activity modtype_label" data-id="22"><span class="instancename">Label</span></li>
+      <li class="activity modtype_folder" data-id="23"><a href="https://solusi.sibermu.ac.id/mod/folder/view.php?id=23">Slides</a></li>`);
+    const snapshot = parseCourse(doc, URL);
+    expect(snapshot?.activities).toMatchObject([
+      { id: '21', title: 'Final quiz', type: 'quiz', url: null, restricted: true },
+      { id: '23', type: 'folder', url: 'https://solusi.sibermu.ac.id/mod/folder/view.php?id=23', restricted: false }
+    ]);
+    expect(isCourseSnapshot(snapshot)).toBe(true);
+  });
+  it('rejects a stored activity with no URL that is not restricted', () => {
+    const doc = html('<h1>Course</h1><li class="activity modtype_quiz" data-id="21"><span class="instancename">Quiz</span></li>');
+    const snapshot = parseCourse(doc, URL)!;
+    expect(isCourseSnapshot({ ...snapshot, activities: [{ ...snapshot.activities[0], restricted: false }] })).toBe(false);
+  });
   it('strips .accesshide type suffixes from titles', () => {
     const doc = html(`<h1>Course</h1><li class="activity"><a href="https://solusi.sibermu.ac.id/mod/resource/view.php?id=11">
       <span class="instancename">Reading <span class="accesshide"> File</span></span></a></li>`);

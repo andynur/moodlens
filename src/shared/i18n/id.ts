@@ -6,7 +6,8 @@ export const id = {
   navigation: 'Navigasi',
   activityResource: 'Materi', activityPage: 'Halaman', activityUrl: 'Tautan',
   activityAttendance: 'Presensi', activityQuiz: 'Kuis', activityForum: 'Forum',
-  activityAssign: 'Tugas', activityUnknown: 'Aktivitas lain',
+  activityAssign: 'Tugas', activityFolder: 'Folder', activityBook: 'Buku',
+  activityFeedback: 'Umpan balik', activityUnknown: 'Aktivitas lain',
   today: 'Hari ini', courses: 'Mata kuliah', study: 'AI Belajar', settings: 'Pengaturan',
   currentCourse: 'Mata kuliah terakhir dibuka', activities: 'Aktivitas',
   noData: 'Buka mata kuliah di LMS untuk memuat aktivitasnya.',
@@ -22,6 +23,7 @@ export const id = {
   limitations: 'Status penyelesaian dan tenggat perlu diverifikasi pada LMS asli.',
   noNavigation: 'Tautan aktivitas ini tidak dapat divalidasi.',
   untitledCourse: 'Mata kuliah tanpa judul',
+  restricted: 'Terkunci: buka mata kuliah di Moodle untuk melihat syaratnya.',
   storageError: 'Data tersimpan tidak dapat dimuat. Muat ulang panel samping lalu coba lagi.',
   copyright: 'Versi pengembangan lokal'
 } as const satisfies Record<TranslationKey, string>;

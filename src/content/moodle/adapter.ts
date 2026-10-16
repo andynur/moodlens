@@ -9,11 +9,14 @@ const COMPLETION_CONTAINER = '.activity-completion, [data-region="completion-inf
 // Verified on SiberMu fixtures (manual:mark-done only); manual:undo follows Moodle 4.x core, unverified on SiberMu.
 const MANUAL_TOGGLE = 'button[data-action="toggle-manual-completion"][data-toggletype]';
 const ACCESSHIDE = '.accesshide';
+// Verified on SiberMu fixtures: locked activities render `.instancename` without a link.
+const INSTANCE_NAME = '.instancename';
+const SKIPPED_MODTYPES: ReadonlySet<string> = new Set(['label']);
 const MAX_ACTIVITIES = 200;
 
 const TYPE_FROM_PATH: Readonly<Record<string, ActivityType>> = {
   resource: 'resource', page: 'page', url: 'url', attendance: 'attendance',
-  quiz: 'quiz', forum: 'forum', assign: 'assign'
+  quiz: 'quiz', forum: 'forum', assign: 'assign', folder: 'folder', book: 'book', feedback: 'feedback'
 };
 
 function concise(value: string | null | undefined, max = 300): string {
@@ -28,6 +31,27 @@ function visibleText(node: Element): string {
 function getType(path: string): ActivityType {
   const moduleName = path.match(/^\/mod\/([a-z]+)\/view\.php$/)?.[1];
   return TYPE_FROM_PATH[moduleName ?? ''] ?? 'unknown';
+}
+function modType(container: Element): string | null {
+  return Array.from(container.classList).find((name) => name.startsWith('modtype_'))?.slice('modtype_'.length) ?? null;
+}
+
+// An activity Moodle lists without a link: shown as restricted, never navigable.
+function restrictedActivity(container: Element, courseId: string): { identity: string; activity: MoodleActivity } | null {
+  if (!container.matches('li.activity')) return null;
+  const id = container.getAttribute('data-id') ?? '';
+  const moduleName = modType(container);
+  if (!/^\d+$/.test(id) || !moduleName || !/^[a-z]+$/.test(moduleName) || SKIPPED_MODTYPES.has(moduleName)) return null;
+  const name = container.querySelector(INSTANCE_NAME);
+  const title = concise(name ? visibleText(name) : '', 300);
+  if (!title) return null;
+  return {
+    identity: `/mod/${moduleName}/view.php?id=${id}`,
+    activity: {
+      id, courseId, title, type: TYPE_FROM_PATH[moduleName] ?? 'unknown',
+      url: null, restricted: true, completion: parseCompletion(container)
+    }
+  };
 }
 
 export function parseCompletion(container: Element): CompletionStatus {
@@ -70,7 +94,14 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
         return isActivityUrl(`${u.origin}${u.pathname}?id=${u.searchParams.get('id')}`);
       } catch { return false; }
     });
-    if (!link) continue;
+    if (!link) {
+      const restricted = restrictedActivity(container, courseId);
+      if (restricted && !seen.has(restricted.identity)) {
+        seen.add(restricted.identity);
+        activities.push(restricted.activity);
+      }
+      continue;
+    }
     const activityUrl = new URL(link.href);
     const id = activityUrl.searchParams.get('id')!;
     const identity = `${activityUrl.pathname}?id=${id}`;
@@ -81,7 +112,7 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
     activities.push({
       id, courseId, title: label,
       type: getType(activityUrl.pathname),
-      url: `${LMS_ORIGIN}${activityUrl.pathname}?id=${id}`, 
+      url: `${LMS_ORIGIN}${activityUrl.pathname}?id=${id}`, restricted: false,
       completion: parseCompletion(container)
     });
   }

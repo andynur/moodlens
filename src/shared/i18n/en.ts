@@ -4,7 +4,8 @@ export const en = {
   navigation: 'Navigation',
   activityResource: 'Resource', activityPage: 'Page', activityUrl: 'Link',
   activityAttendance: 'Attendance', activityQuiz: 'Quiz', activityForum: 'Forum',
-  activityAssign: 'Assignment', activityUnknown: 'Other activity',
+  activityAssign: 'Assignment', activityFolder: 'Folder', activityBook: 'Book',
+  activityFeedback: 'Feedback', activityUnknown: 'Other activity',
   today: 'Today', courses: 'Courses', study: 'Study AI', settings: 'Settings',
   currentCourse: 'Last viewed course', activities: 'Activities',
   noData: 'Open a course in the LMS to load its activities.',
@@ -20,6 +21,7 @@ export const en = {
   limitations: 'Completion and deadline details must be verified against the actual LMS.',
   noNavigation: 'This activity link could not be validated.',
   untitledCourse: 'Untitled course',
+  restricted: 'Restricted: open the course in Moodle to see the conditions.',
   storageError: 'Saved data could not be loaded. Reload the side panel and try again.',
   copyright: 'Local development build'
 } as const;

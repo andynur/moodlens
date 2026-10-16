@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, CheckCircle2, CircleHelp, GraduationCap, LayoutDashboard, Moon, Settings2, Sun, ExternalLink, Sparkles, CircleDashed } from 'lucide-react';
+import { BookOpen, CheckCircle2, CircleHelp, GraduationCap, LayoutDashboard, Moon, Settings2, Sun, ExternalLink, Sparkles, CircleDashed, Lock } from 'lucide-react';
 import type { CourseSnapshot, Locale, Theme, CompletionStatus, ActivityType } from '../shared/types';
 import { t, type TranslationKey } from '../shared/i18n';
 import { isActivityUrl, isCourseSnapshot } from '../shared/validation';
@@ -71,7 +71,8 @@ export default function App() {
   const typeLabel: Record<ActivityType, TranslationKey> = {
     resource: 'activityResource', page: 'activityPage', url: 'activityUrl',
     attendance: 'activityAttendance', quiz: 'activityQuiz', forum: 'activityForum',
-    assign: 'activityAssign', unknown: 'activityUnknown'
+    assign: 'activityAssign', folder: 'activityFolder', book: 'activityBook',
+    feedback: 'activityFeedback', unknown: 'activityUnknown'
   };
   const completionLabel: Record<CompletionStatus, TranslationKey> = {
     complete: 'completed', incomplete: 'incomplete', unknown: 'unknown'
@@ -126,7 +127,9 @@ export default function App() {
                     {translate(completionLabel[activity.completion])}
                   </div>
                 </div>
-                <button type="button" onClick={() => openActivity(activity.url)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400">{translate('open')} <ExternalLink size={12}/></button>
+                {activity.url === null
+                  ? <p className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400"><Lock size={12}/>{translate('restricted')}</p>
+                  : <button type="button" onClick={() => openActivity(activity.url!)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400">{translate('open')} <ExternalLink size={12}/></button>}
               </article>)}
             </section>
           </>}

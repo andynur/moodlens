@@ -1,6 +1,6 @@
 export type ActivityType =
   | 'resource' | 'page' | 'url' | 'attendance'
-  | 'quiz' | 'forum' | 'assign' | 'unknown';
+  | 'quiz' | 'forum' | 'assign' | 'folder' | 'book' | 'feedback' | 'unknown';
 export type CompletionStatus = 'complete' | 'incomplete' | 'unknown';
 
 export interface MoodleActivity {
@@ -8,7 +8,9 @@ export interface MoodleActivity {
   courseId: string;
   title: string;
   type: ActivityType;
-  url: string;
+  /** Null when Moodle shows the activity without a link (restricted). */
+  url: string | null;
+  restricted: boolean;
   completion: CompletionStatus;
 }
 export interface CourseSnapshot {

@@ -2,7 +2,7 @@ import type { CourseSnapshot, MoodleActivity, ActivityType, CompletionStatus } f
 
 export const LMS_ORIGIN = 'https://solusi.sibermu.ac.id';
 const KNOWN_TYPES: ReadonlySet<string> = new Set<ActivityType>([
-  'resource', 'page', 'url', 'attendance', 'quiz', 'forum', 'assign', 'unknown'
+  'resource', 'page', 'url', 'attendance', 'quiz', 'forum', 'assign', 'folder', 'book', 'feedback', 'unknown'
 ]);
 const KNOWN_COMPLETION: ReadonlySet<string> = new Set<CompletionStatus>([
   'complete', 'incomplete', 'unknown'
@@ -29,7 +29,7 @@ export function isActivityUrl(input: string): boolean {
   try {
     const url = new URL(input);
     return url.origin === LMS_ORIGIN
-      && /^\/mod\/(?:resource|page|url|attendance|quiz|forum|assign)\/view\.php$/.test(url.pathname)
+      && /^\/mod\/(?:resource|page|url|attendance|quiz|forum|assign|folder|book|feedback)\/view\.php$/.test(url.pathname)
       && /^\d+$/.test(url.searchParams.get('id') ?? '')
       && Array.from(url.searchParams.keys()).every((key) => key === 'id');
   } catch {
@@ -45,7 +45,8 @@ function validActivity(input: unknown, courseId: string): input is MoodleActivit
     && typeof item.title === 'string' && item.title.length > 0 && item.title.length <= 300
     && typeof item.type === 'string' && KNOWN_TYPES.has(item.type)
     && typeof item.completion === 'string' && KNOWN_COMPLETION.has(item.completion)
-    && typeof item.url === 'string' && isActivityUrl(item.url);
+    && typeof item.restricted === 'boolean'
+    && (item.url === null ? item.restricted : typeof item.url === 'string' && isActivityUrl(item.url));
 }
 
 export function isCourseSnapshot(input: unknown): input is CourseSnapshot {

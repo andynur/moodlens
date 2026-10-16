@@ -25,6 +25,13 @@ describe('SiberMu course fixtures', () => {
       expect(snapshot!.activities.some((a) => a.completion === 'complete')).toBe(false);
     });
   }
+  it('lists locked activities as restricted without links', () => {
+    const all = COURSES.flatMap((name) => parseCourse(load(name), 'https://solusi.sibermu.ac.id/course/view.php?id=1')!.activities);
+    const restricted = all.filter((a) => a.restricted);
+    expect(restricted.length).toBeGreaterThan(0);
+    expect(restricted.every((a) => a.url === null)).toBe(true);
+    expect(all.filter((a) => !a.restricted).every((a) => a.url !== null)).toBe(true);
+  });
   it('maps manual and automatic completion controls to incomplete', () => {
     const all = COURSES.flatMap((name) => parseCourse(load(name), 'https://solusi.sibermu.ac.id/course/view.php?id=1')!.activities);
     expect(all.filter((a) => a.completion === 'incomplete').length).toBeGreaterThan(0);
