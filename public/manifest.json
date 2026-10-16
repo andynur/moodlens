@@ -2,7 +2,6 @@
   "manifest_version": 3,
   "name": "Moodlens",
   "short_name": "Moodlens",
-  "version": "0.1.0",
   "description": "All in One Moodle AI Agent for Student. Independent EN/ID study companion; not affiliated with Moodle Pty Ltd.",
   "minimum_chrome_version": "116",
   "permissions": [

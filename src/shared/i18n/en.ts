@@ -21,7 +21,7 @@ export const en = {
   noNavigation: 'This activity link could not be validated.',
   untitledCourse: 'Untitled course',
   storageError: 'Saved data could not be loaded. Reload the side panel and try again.',
-  copyright: 'Local development build · v0.1.0'
+  copyright: 'Local development build'
 } as const;
 
 export type TranslationKey = keyof typeof en;

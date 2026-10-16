@@ -23,5 +23,5 @@ export const id = {
   noNavigation: 'Tautan aktivitas ini tidak dapat divalidasi.',
   untitledCourse: 'Mata kuliah tanpa judul',
   storageError: 'Data tersimpan tidak dapat dimuat. Muat ulang panel samping lalu coba lagi.',
-  copyright: 'Versi pengembangan lokal · v0.1.0'
+  copyright: 'Versi pengembangan lokal'
 } as const satisfies Record<TranslationKey, string>;

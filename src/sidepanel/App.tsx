@@ -139,7 +139,7 @@ export default function App() {
           <div><p className="text-xs font-semibold">{translate('theme')}</p><div className="mt-2 grid grid-cols-2 gap-2"><button type="button" onClick={() => saveTheme('light')} className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'light' ? 'border-blue-600 text-blue-600' : 'border-slate-300 dark:border-slate-700'}`}><Sun size={15}/>{translate('light')}</button><button type="button" onClick={() => saveTheme('dark')} className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === 'dark' ? 'border-blue-600 text-blue-400' : 'border-slate-300 dark:border-slate-700'}`}><Moon size={15}/>{translate('dark')}</button></div></div>
         </section>}
       </main>
-      <footer className="border-t border-slate-200 px-4 py-4 text-center text-[11px] text-slate-400 dark:border-slate-800"><p>{translate('unofficial')}</p><p className="mt-1">{translate('copyright')}</p></footer>
+      <footer className="border-t border-slate-200 px-4 py-4 text-center text-[11px] text-slate-400 dark:border-slate-800"><p>{translate('unofficial')}</p><p className="mt-1">{translate('copyright')} · v{__APP_VERSION__}</p></footer>
     </div>
   );
 }
