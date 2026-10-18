@@ -1,12 +1,10 @@
 import { detectMoodle, isDetection } from '../content/moodle/detect';
 import { cleanLabel, isSiteList, MAX_SITES, normalizeSiteOrigin, originPattern, siteIdFor } from '../shared/sites';
 import type { Site } from '../shared/types';
-import { isCourseUrl } from '../shared/validation';
 
 const SITES_KEY = 'sites';
 const SCRIPT_PREFIX = 'moodlens-';
-// Course pages only: the parser reads nothing else yet.
-const COURSE_PATH = '/course/view.php*';
+const ENABLED_ORIGIN_PATH = '/*';
 
 export async function loadSites(): Promise<Site[]> {
   const stored = await chrome.storage.local.get(SITES_KEY);
@@ -24,7 +22,7 @@ function hasAccess(origin: string): Promise<boolean> {
 function scriptFor(site: Site): chrome.scripting.RegisteredContentScript {
   return {
     id: `${SCRIPT_PREFIX}${site.id}`,
-    matches: [`${site.origin}${COURSE_PATH}`],
+    matches: [`${site.origin}${ENABLED_ORIGIN_PATH}`],
     js: ['content.js'],
     runAt: 'document_idle',
     persistAcrossSessions: true
@@ -80,8 +78,8 @@ export async function enableSite(input: unknown, now = new Date()): Promise<Site
   }
   await saveSites([...sites.filter((item) => item.id !== id), site]);
   await reconcileScripts();
-  // Registered scripts only reach pages loaded later; capture the open course page now.
-  if (tab?.id !== undefined && site.detection !== 'none' && tab.url && isCourseUrl(tab.url, origin)) {
+  // Registered scripts only reach pages loaded later; capture the open enabled-site page now.
+  if (tab?.id !== undefined && site.detection !== 'none' && tabUrl?.origin === origin) {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }).catch(() => undefined);
   }
   return site;

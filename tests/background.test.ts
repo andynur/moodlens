@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createChromeStub } from './chrome-stub';
 import { parseCourse } from '../src/content/moodle/adapter';
-import { snapshotKey } from '../src/shared/sites';
-import type { CourseSnapshot } from '../src/shared/types';
+import { snapshotKey, taskDataKey } from '../src/shared/sites';
+import type { CourseSnapshot, TaskDataset } from '../src/shared/types';
 
 const A = 'https://moodle-a.example.edu';
 const B = 'https://moodle-b.example.edu';
@@ -46,20 +46,22 @@ describe('ENABLE_SITE', () => {
     await expect(stub.send({ type: 'ENABLE_SITE', origin: A }, fromContent(A))).resolves.toEqual({ ok: false });
     expect(stub.local.get('sites')).toBeUndefined();
   });
-  it('registers the site and a content script for its course pages only', async () => {
+  it('registers the site and a content script for that enabled origin only', async () => {
     const response = (await enable(A)) as { ok: boolean; site: { id: string; detection?: string } };
     expect(response.ok).toBe(true);
     expect(response.site).toMatchObject({ id: 'moodle-a.example.edu', origin: A, label: 'moodle-a.example.edu' });
     expect(response.site.detection).toBeUndefined();
     expect([...stub.scripts.values()]).toEqual([
-      expect.objectContaining({ id: 'moodlens-moodle-a.example.edu', matches: [`${A}/course/view.php*`] })
+      expect.objectContaining({ id: 'moodlens-moodle-a.example.edu', matches: [`${A}/*`] })
     ]);
   });
   it('runs detection once on the active tab of that origin', async () => {
     stub.state.activeTab = { id: 3, url: `${A}/my/` } as chrome.tabs.Tab;
     const response = (await enable(A)) as { site: { detection: string; versionHint: string } };
     expect(response.site).toMatchObject({ detection: 'high', versionHint: '4.x' });
-    expect(stub.executeScript).toHaveBeenCalledOnce();
+    expect(stub.executeScript).toHaveBeenCalledTimes(2);
+    expect(stub.executeScript.mock.calls[0]?.[0]).toHaveProperty('func');
+    expect(stub.executeScript.mock.calls[1]?.[0]).toMatchObject({ files: ['content.js'] });
   });
   it('records a page that is not Moodle and ignores malformed detection results', async () => {
     stub.state.activeTab = { id: 3, url: `${A}/` } as chrome.tabs.Tab;
@@ -67,6 +69,48 @@ describe('ENABLE_SITE', () => {
     expect(((await enable(A)) as { site: { detection: string } }).site.detection).toBe('none');
     stub.state.detection = { isMoodle: true, confidence: 'certain' };
     expect(((await enable(B)) as { site: { detection?: string } }).site.detection).toBeUndefined();
+  });
+});
+
+describe('TASK_DATASET', () => {
+  const taskData = (siteId = 'moodle-a.example.edu'): TaskDataset => ({
+    siteId,
+    courses: [{ siteId, id: '5', name: 'Course', visible: true }],
+    tasks: [
+      {
+        siteId,
+        courseId: '5',
+        kind: 'quiz',
+        title: 'Quiz',
+        dueAt: '2027-01-15T08:00:00.000Z',
+        url: `${A}/mod/quiz/view.php?id=9`,
+        status: 'open',
+        source: 'ajax'
+      }
+    ],
+    capturedAt: '2026-10-19T00:00:00.000Z',
+    source: 'ajax'
+  });
+
+  it('claims no more than once per 15 minutes unless refresh is explicit', async () => {
+    await enable(A);
+    const sender = { id: 'moodlens-test', tab, url: `${A}/my/`, origin: A };
+    await expect(stub.send({ type: 'TASK_CAPTURE_CLAIM' }, sender)).resolves.toMatchObject({ ok: true, due: true });
+    await expect(stub.send({ type: 'TASK_CAPTURE_CLAIM' }, sender)).resolves.toMatchObject({ ok: true, due: false });
+    await expect(stub.send({ type: 'TASK_CAPTURE_CLAIM', force: true }, sender)).resolves.toMatchObject({
+      ok: true,
+      due: true
+    });
+  });
+
+  it('stores only validated normalized data from its registered origin', async () => {
+    await enable(A);
+    const sender = { id: 'moodlens-test', tab, url: `${A}/my/`, origin: A };
+    await expect(stub.send({ type: 'TASK_DATASET', payload: taskData() }, sender)).resolves.toEqual({ ok: true });
+    expect(stub.local.get(taskDataKey('moodle-a.example.edu'))).toEqual(taskData());
+    await expect(stub.send({ type: 'TASK_DATASET', payload: taskData('other.example') }, sender)).resolves.toEqual({
+      ok: false
+    });
   });
 });
 

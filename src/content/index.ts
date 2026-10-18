@@ -1,7 +1,8 @@
 import { parseCourse } from './moodle/adapter';
-import type { IncomingMessage } from '../shared/types';
+import { captureTaskDataset } from './moodle/task-capture';
+import type { IncomingMessage, TaskCaptureClaimResponse } from '../shared/types';
 
-// Registered by the background only for course pages of sites the student enabled (D-002).
+// Registered by the background only for origins the student enabled (D-002).
 function capture(): void {
   const snapshot = parseCourse(document, location.href);
   if (!snapshot) return;
@@ -9,6 +10,20 @@ function capture(): void {
   chrome.runtime.sendMessage(message).catch(() => {
     // Extension may be reloading or temporarily unavailable. Avoid emitting sensitive logs.
   });
+}
+
+async function captureTasks(force = false): Promise<void> {
+  const claim = (await chrome.runtime
+    .sendMessage({ type: 'TASK_CAPTURE_CLAIM', force })
+    .catch(() => null)) as TaskCaptureClaimResponse | null;
+  if (!claim?.ok || !claim.due || !claim.siteId) return;
+  try {
+    const payload = await captureTaskDataset(document, location.href, claim.siteId);
+    const message: IncomingMessage = { type: 'TASK_DATASET', payload };
+    await chrome.runtime.sendMessage(message);
+  } catch {
+    // The page may be navigating or lack a usable Moodle session. No sensitive logs.
+  }
 }
 
 // Debounce DOM bursts, but cap the wait: pages with constant mutations (lazy video, session timers)
@@ -30,6 +45,12 @@ function scheduleCapture(): void {
 }
 
 capture();
+void captureTasks();
+chrome.runtime.onMessage.addListener((message: unknown) => {
+  if (message && typeof message === 'object' && (message as { type?: unknown }).type === 'REFRESH_TASKS') {
+    void captureTasks(true);
+  }
+});
 // A page restored from the back/forward cache does not rerun this script; recapture so
 // completion changed on an activity page shows up after going back.
 window.addEventListener('pageshow', (event) => {

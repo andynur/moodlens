@@ -1,6 +1,6 @@
-import type { EnableSiteResponse, OkResponse } from '../shared/types';
-import { snapshotKey } from '../shared/sites';
-import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl } from '../shared/validation';
+import type { EnableSiteResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
+import { snapshotKey, taskDataKey, taskFetchKey } from '../shared/sites';
+import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
 import { migrateStorage } from './migrate';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
@@ -37,6 +37,37 @@ async function storeSnapshot(payload: unknown, sender: chrome.runtime.MessageSen
   return { ok: true };
 }
 
+const TASK_FETCH_INTERVAL_MS = 15 * 60 * 1000;
+
+async function senderSite(sender: chrome.runtime.MessageSender) {
+  if (!sender.tab || !sender.url) return null;
+  const url = new URL(sender.url);
+  if (url.protocol !== 'https:') return null;
+  return (await loadSites()).find((site) => site.origin === (sender.origin ?? url.origin)) ?? null;
+}
+
+async function claimTaskCapture(
+  force: unknown,
+  sender: chrome.runtime.MessageSender
+): Promise<TaskCaptureClaimResponse> {
+  const site = await senderSite(sender);
+  if (!site) return { ok: false, due: false };
+  const key = taskFetchKey(site.id);
+  const stored = await chrome.storage.local.get(key);
+  const previous = typeof stored[key] === 'string' ? Date.parse(stored[key] as string) : NaN;
+  const now = Date.now();
+  const due = force === true || !Number.isFinite(previous) || now - previous >= TASK_FETCH_INTERVAL_MS;
+  if (due) await chrome.storage.local.set({ [key]: new Date(now).toISOString() });
+  return { ok: true, due, siteId: site.id };
+}
+
+async function storeTaskDataset(payload: unknown, sender: chrome.runtime.MessageSender): Promise<OkResponse> {
+  const site = await senderSite(sender);
+  if (!site || !isTaskDataset(payload, site.id, site.origin)) return { ok: false };
+  await chrome.storage.local.set({ [taskDataKey(site.id)]: payload });
+  return { ok: true };
+}
+
 async function clearAll(): Promise<OkResponse> {
   await revokeAllSites();
   await Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear()]);
@@ -45,13 +76,15 @@ async function clearAll(): Promise<OkResponse> {
   return { ok: true };
 }
 
-type Task = () => Promise<OkResponse | EnableSiteResponse>;
+type Task = () => Promise<OkResponse | EnableSiteResponse | TaskCaptureClaimResponse>;
 
 /** Picks the work for a message synchronously, so the listener knows whether it will respond. */
 function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null {
   if (!raw || typeof raw !== 'object') return null;
   const message = raw as Record<string, unknown>;
   if (message.type === 'COURSE_SNAPSHOT') return () => storeSnapshot(message.payload, sender);
+  if (message.type === 'TASK_CAPTURE_CLAIM') return () => claimTaskCapture(message.force, sender);
+  if (message.type === 'TASK_DATASET') return () => storeTaskDataset(message.payload, sender);
   const known = ['ENABLE_SITE', 'RENAME_SITE', 'REMOVE_SITE', 'CLEAR_LOCAL_DATA'];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below changes the registry or deletes data: trusted extension pages only.

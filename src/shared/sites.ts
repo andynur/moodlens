@@ -34,6 +34,14 @@ export function snapshotKey(siteId: string): string {
   return `site:${siteId}:lastCourseSnapshot`;
 }
 
+export function taskDataKey(siteId: string): string {
+  return `site:${siteId}:tasks`;
+}
+
+export function taskFetchKey(siteId: string): string {
+  return `site:${siteId}:taskFetchAt`;
+}
+
 export function isSite(input: unknown): input is Site {
   if (!input || typeof input !== 'object') return false;
   const site = input as Partial<Site>;
