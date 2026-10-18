@@ -19,9 +19,11 @@ import type { OkResponse, Locale, Site, Theme, CompletionStatus, ActivityType } 
 import { t, type TranslationKey } from '../shared/i18n';
 import { isActivityUrl } from '../shared/validation';
 import { SiteAlerts, SiteEnableForm, SitesSettings } from './components/Sites';
+import { TasksView } from './components/Tasks';
 import { hasChrome, useSites } from './useSites';
+import { taskText } from './taskStrings';
 
-type Page = 'today' | 'courses' | 'study' | 'settings';
+type Page = 'today' | 'tasks' | 'courses' | 'study' | 'settings';
 const completionStyle: Record<CompletionStatus, string> = {
   complete: 'text-emerald-600 dark:text-emerald-400',
   incomplete: 'text-amber-600 dark:text-amber-400',
@@ -148,8 +150,9 @@ export default function App() {
     [snapshot]
   );
 
-  const navigation: { key: Page; icon: typeof LayoutDashboard; label: TranslationKey }[] = [
+  const navigation: { key: Page; icon: typeof LayoutDashboard; label: TranslationKey | 'tasks' }[] = [
     { key: 'today', icon: LayoutDashboard, label: 'today' },
+    { key: 'tasks', icon: BookOpen, label: 'tasks' },
     { key: 'courses', icon: BookOpen, label: 'courses' },
     { key: 'study', icon: Sparkles, label: 'study' },
     { key: 'settings', icon: Settings2, label: 'settings' }
@@ -197,7 +200,7 @@ export default function App() {
       </header>
       <nav
         aria-label={translate('navigation')}
-        className="grid grid-cols-4 gap-1 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-800 dark:bg-slate-900"
+        className="grid grid-cols-5 gap-1 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-800 dark:bg-slate-900"
       >
         {navigation.map((item) => (
           <button
@@ -207,7 +210,9 @@ export default function App() {
             className={`flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-2 text-[11px] ${page === item.key ? 'bg-blue-50 font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-slate-500 dark:text-slate-300'}`}
           >
             <item.icon size={17} />
-            <span className="truncate">{translate(item.label)}</span>
+            <span className="truncate">
+              {item.label === 'tasks' ? taskText(locale, 'tasks') : translate(item.label)}
+            </span>
           </button>
         ))}
       </nav>
@@ -343,6 +348,7 @@ export default function App() {
             <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{translate('limitations')}</p>
           </>
         )}
+        {page === 'tasks' && <TasksView sites={sitesState.sites} locale={locale} />}
         {page === 'study' && (
           <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
             <Sparkles className="text-blue-600" />
