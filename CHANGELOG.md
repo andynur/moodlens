@@ -2,9 +2,30 @@
 
 ## Unreleased
 
+### Fixed (v0.4)
+
+- Timeline capture asked for `limitnum: 500`, which Moodle rejects ("Limit must be between 1 and 50 (inclusive)"); the error marked the capability unsupported for 24 hours and forced DOM fallback. The request now uses the documented maximum of 50 (`TIMELINE_LIMIT`), verified against a live Moodle 4.x site.
+
+### Changed (tooling)
+
+- `npm run check` runs gates in parallel with lint, format and typecheck caches, accepts gate names (`npm run check -- test lint`) and shows per-gate time; tests default to the `node` environment and DOM tests opt in to jsdom.
+
+### Added (v0.6 groundwork, practice and motivation)
+
+- Quiz review mistake capture (ML-020): guarded parser for finished review pages and private `quiz-review` cards that never export (D-009); selectors unverified.
+- Assessment guard rules (ML-022): fail-closed evaluation of quiz attempt/review, timer, Safe Exam Browser, assignment editing, lesson and H5P states, plus a background-side validator. Not wired yet; DOM markers unverified.
+- Local XP rules (ML-021): points per study event, daily cap, time-zone-aware streak with weekly freeze, levels and weekly goal. Pure logic, not wired.
+- Flashcard scheduler (ML-019): FSRS-5 day-based scheduling matching ts-fsrs 4.7.1 reference values, daily review queue, retention setting; card import/export as CSV/JSON that never includes quiz-derived cards (D-009). Pure logic, not wired; no new dependency.
+- IndexedDB study store design (D-014): one `moodlens-study` database with decks, cards and review logs keyed by site, per-site caps, review-log retention and validated reads. Not wired yet; IndexedDB paths checked by hand in Chrome, no automated coverage.
+
 ### Added (v0.4, data layer and tasks)
 
-- Guarded same-origin Moodle AJAX client core (ML-014): typed read allowlist, write-name rejection, call-time-only `sesskey`, rolling rate limit, timeout, response-size cap, unsupported-function cache and validator boundary. Not wired to page capture yet.
+- Guarded same-origin Moodle AJAX data layer (ML-014): typed read allowlist, write-name rejection, call-time-only `sesskey`, per-site rolling rate limit, timeout/size caps, strict response normalization, 24-hour unsupported-capability cache and DOM fallback.
+- Task records from Moodle timeline/calendar data, grouped Tasks view with site/course/type filters and title search, safe Moodle navigation, source/last-updated disclosure and EN/ID strings (ML-015).
+- Local RFC 5545 `.ics` export for selected or filtered tasks, with deterministic UIDs, escaping and UTF-8 line folding.
+- Opt-in deadline reminders using `alarms` and optional `notifications`; lead times of 1 hour, 3 hours or 1 day; startup recreation and removal cleanup (ML-011).
+- Attendance items are normalized only from explicit `mod_attendance` events with real timestamps; attendance insight remains blocked pending a sanitized timeline fixture (ML-005).
+- `npm run fixture:sanitize` accepts saved AJAX event responses (`.json`): allowlisted fields only, renamed events/courses, URL query stripped to `id`, and an attendance evidence summary for ML-005.
 
 ### Changed (v0.3, multi-instance)
 
@@ -13,6 +34,19 @@
 - All URL validators take the site origin; `LMS_ORIGIN` removed. Messages are accepted only from registered origins.
 - Storage `schemaVersion` 2: v0.2 SiberMu snapshot migrates to the first site; host access must be granted again.
 - "Clear all local data" also revokes every site permission and content script.
+
+### Added (v0.5, dashboard and personalization)
+
+- What's new (ML-017): `src/shared/diff.ts` diffs course snapshots by activity id; background keeps per-course records (`site:<id>:snapshots`, last 2 different states, max 50 courses per site); course badge, "New since last visit" list and local "Mark as seen".
+- Personalization (ML-016): pin, hide, nickname, color tag and manual order per course (`site:<id>:courses`), via validated `SET_COURSE_PREFS` / `MOVE_COURSE` messages. Moodle is never changed.
+- Today dashboard (ML-004, partial): Due soon (open tasks in the next 7 days, from v0.4 task data), What's new, Pinned courses and Course progress widgets; show, hide and reorder stored locally (`dashboard`). Streak widget waits for v0.6 XP.
+- Moodle page appearance (ML-018, D-015): per-site opt-in dark mode, larger text, comfortable line width and hiding blocks from a fixed list; one packaged stylesheet scoped to `<html>` classes, registered at `document_start` only while an option is on; open tabs update at once and reset on site removal. Block selectors unverified.
+- Courses page lists every stored course with a detail view; hidden courses in a collapsed section.
+- Backup (ML-023 part 2): allowlist-based JSON export (settings, sites, snapshots, course prefs, appearance; tasks and reminders are re-captured, not exported); import with strict validation, preview and confirmation; revokes origins not in the backup and never grants access.
+- Background runs message tasks one at a time so read-modify-write of per-site keys cannot race.
+- Tasks view leaves out tasks and course filter entries of hidden courses (PRD-009); data stays stored.
+- First-run onboarding (PRD-007): 3 screens EN/ID (what Moodlens does, what it never does, how to enable a site); skippable, stored as `onboarded`, shown again after "Clear all local data"; users with enabled sites skip it.
+- Study data cleanup (D-014): removing a site deletes its IndexedDB decks, cards and review logs first; clear-all deletes the study database; backup import drops study data of sites the backup does not list. IndexedDB paths checked by hand in Chrome on 2026-10-19.
 
 ### Fixed
 
@@ -50,6 +84,7 @@
 
 ### Fixtures
 
+- Added sanitized SiberMu `core_calendar_get_action_events_by_timesort` response (observed empty) with a normalizer test.
 - Added sanitized `course-5.html` with completed activities; fixture test checks 3 `complete` mappings.
 - Added 4 sanitized SiberMu course fixtures plus dashboard (`/my/`) and My courses (`/my/courses.php`) fixtures, and recorded markup observations in `docs/04_MOODLE_ADAPTER.md`.
 - Sanitizer collects names from the whole page and replaces them in one pass; handles instructor header, bulk-edit labels, restriction notes, whitespace variants, dashboard cards, Completion Progress, announcement blocks and phone numbers; keeps UI headings on `/my/` pages.

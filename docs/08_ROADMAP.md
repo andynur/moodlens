@@ -48,7 +48,7 @@ Goal: works on any Moodle site the student enables.
 - [~] Moodle detection heuristics (body classes, `M.cfg`-free DOM markers, version hints) with fixtures.
 - [x] Site registry in storage; per-site data namespace; remove-site action deletes data and revokes permission.
 - [x] Replace `LMS_ORIGIN` constant with per-site validation everywhere.
-- [ ] Onboarding screens EN/ID.
+- [x] Onboarding screens EN/ID.
 
 **Exit gate:** enable/disable works on SiberMu plus at least one other Moodle 4.x site (for example a public Moodle demo site); no static host permissions remain; permission request appears only on user click.
 
@@ -56,35 +56,35 @@ Goal: works on any Moodle site the student enables.
 
 Goal: accurate deadlines without fragile scraping.
 
-- [ ] D-003 security review signed off before merge.
-- [~] Read-only AJAX client with function allowlist, response validation, rate limit (ML-014). Guarded client core and unit tests done; Moodle response validators, normalization and capture integration pending.
-- [ ] Enrolled course list and timeline/calendar events normalized into `Task` records.
-- [ ] Tasks view: overdue, today, this week, later; filters by course and type (ML-015).
-- [ ] `.ics` export of selected tasks.
-- [ ] Opt-in reminders via `alarms` + optional `notifications` (ML-011).
-- [ ] Attendance insight only if evidence shows attendance events in timeline/calendar (ML-005); else stays Blocked.
-- [ ] DOM fallback when AJAX unavailable; UI shows data source.
+- [x] D-003 source/test security review signed off (2026-10-19); live Network inspection remains part of the exit gate.
+- [x] Read-only AJAX client with function allowlist, strict response validation, per-site rate limit and 24-hour unsupported cache (ML-014).
+- [x] Enrolled course list and timeline/calendar events normalized into bounded `Task` records.
+- [x] Tasks view: overdue, today, this week, later, no date; site/course/type filters and title search (ML-015).
+- [x] Local RFC 5545 `.ics` export of selected or filtered tasks; Google/Apple import QA pending.
+- [x] Opt-in reminders via `alarms` + optional `notifications` (ML-011); browser-restart QA pending.
+- [ ] **Blocked:** attendance insight needs a sanitized timeline/calendar fixture proving `mod_attendance` timestamps and states (ML-005).
+- [x] DOM fallback when AJAX is unavailable; UI shows `AJAX` or `DOM` source.
 
 **Exit gate:** deadlines match Moodle's own timeline block on 3 sites; network inspection shows only allowlisted read functions; zero write calls.
 
 ## v0.5 — Dashboard and personalization
 
-- [ ] Today dashboard with widgets: due soon, progress per course, what's new, streak (ML-004).
-- [ ] Pin, reorder, color, nickname, hide courses (ML-016).
-- [ ] Snapshot history and "what's new since last visit" diff (ML-017).
-- [ ] Opt-in Moodle page appearance: dark mode, font size, line width (ML-018).
+- [~] Today dashboard with widgets: due soon, progress per course, what's new, streak (ML-004). Due soon, what's new, pinned and progress widgets with show/hide/reorder done; streak waits for v0.6 XP wiring.
+- [x] Pin, reorder, color, nickname, hide courses (ML-016).
+- [x] Snapshot history and "what's new since last visit" diff (ML-017): per-course records, badge, list, local "Mark as seen".
+- [x] Opt-in Moodle page appearance: dark mode, font size, line width, hide blocks from a fixed list (ML-018, D-015). Live check on 2 Moodle themes pending (PRD-009 AC 4).
 - [ ] Candidate (needs PRD-009 update first): appearance theme presets that restyle Moodle with design tokens (color, type, spacing, cards) and CSS-only layout tweaks; no DOM rewriting, no third-party brand assets, off on assessment-guarded pages (ML-018).
-- [ ] Export/import local backup JSON (ML-023 part 2).
+- [x] Export/import local backup JSON (ML-023 part 2).
 
 **Exit gate:** dashboard usable at 320px; diff tests cover add/remove/rename; appearance injection reversible and scoped to enabled sites.
 
 ## v0.6 — Practice and motivation
 
-- [ ] Assessment guard first (ML-022): fail-closed detection of attempt pages and timed/locked states.
-- [ ] IndexedDB store design and retention settings.
-- [ ] Flashcards: user-authored decks, FSRS-style scheduling, daily review (ML-019).
-- [ ] Save mistakes from closed quiz review pages into private decks (ML-020, D-009).
-- [ ] Local XP, levels, streaks, weekly goals (ML-021, D-006).
+- [~] Assessment guard first (ML-022): fail-closed detection of attempt pages and timed/locked states. Rules and validator done (`src/content/moodle/guard.ts`); wiring, banner and quiz fixtures pending.
+- [~] IndexedDB store design and retention settings. D-014 design, `src/background/studyStore.ts` and retention rules done; wiring into site removal/clear-all and a retention control in Settings pending.
+- [~] Flashcards: user-authored decks, FSRS-style scheduling, daily review (ML-019). Scheduler (PRD-010 AC 4) and CSV/JSON import/export done; IndexedDB store and review UI pending.
+- [~] Save mistakes from closed quiz review pages into private decks (ML-020, D-009). Guarded capture and private card builder done (PRD-010 AC 2); review fixture, save button and store wiring pending.
+- [~] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules done (`src/shared/xp.ts`, PRD-010 AC 5); storage and UI pending.
 - [ ] P2: focus timer and per-activity notes (ML-026).
 
 **Exit gate:** guard tests pass for every known attempt URL and state; no quiz content leaves the device; XP rules documented and tested.

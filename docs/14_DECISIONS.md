@@ -21,7 +21,7 @@ Each decision has an ID, status, context, decision and consequences. Agents must
 
 ## D-003 — Read-only Moodle AJAX client using the student's session
 
-- **Status:** Accepted with constraints; security review required before merge (v0.4).
+- **Status:** Accepted with constraints; source/test security review completed 2026-10-19 (`docs/06_SECURITY_PRIVACY.md` §4). Live Network inspection remains an exit gate.
 - **Context:** DOM selectors vary per theme. Moodle's own frontend calls `/lib/ajax/service.php` for timeline, calendar and course lists. These functions are consistent across sites. This supersedes the earlier rule that forbade session-based network requests.
 - **Decision:** Allow same-origin read-only calls from the content script, under these rules:
   1. Function allowlist in one file (`src/content/moodle/ajax.ts`). Initial candidates: `core_course_get_enrolled_courses_by_timeline_classification`, `core_calendar_get_action_events_by_timesort`, `core_course_get_contents` (if exposed to AJAX), `core_completion_get_activities_completion_status`. Each must be verified per site; unsupported functions degrade to DOM.
@@ -84,4 +84,18 @@ Each decision has an ID, status, context, decision and consequences. Agents must
 - **Context:** Without `tabs`, `activeTab` or host access, Chrome hides the active tab URL, so the side panel cannot offer "Enable on this site" for a site it cannot see. Whether `activeTab` is granted when the action opens the side panel is unverified (`docs/04_MOODLE_ADAPTER.md` §1).
 - **Decision:** The panel shows an address field ("Moodle site address", prefilled when Chrome exposes the tab URL) and an "Enable on this site" button. The click calls `chrome.permissions.request` for that one HTTPS origin; the background then registers the content script for `<origin>/course/view.php*` and runs `detect.ts` once on the active tab if it is on that origin. No new permission.
 - **Consequences:** One extra step (typing or pasting the address) compared with PRD-007's one-click flow. Revisit with `activeTab` only after it is verified to work with `openPanelOnActionClick`. Site id = origin host (plus non-default port); data lives under `site:<id>:*`; storage `schemaVersion` 2.
+
+## D-014 — One IndexedDB database for study data, keyed by site
+
+- **Status:** Accepted (2026-10-19, v0.6).
+- **Context:** PRD-010 keeps flashcards and review logs in IndexedDB per site. Object stores can only be created during a version upgrade, so one store set per site would need a schema upgrade on every site enable.
+- **Decision:** One database `moodlens-study` with fixed stores (`decks`, `cards`, `reviewLogs`). Every record has `siteId` and a `bySite` index; site removal and clear-all delete by that index. The background owns the database and validates every record it reads. Per-site caps and a review-log retention setting (90, 365 or 730 days, default 365) bound storage. No IndexedDB library.
+- **Consequences:** Site isolation is enforced in code (index queries), not by separate databases. Schema changes add upgrade steps; shipped steps never change. IndexedDB code is untested in CI until an IndexedDB test double is approved.
+
+## D-015 — Moodle appearance through scoped classes and one packaged stylesheet
+
+- **Status:** Accepted (2026-10-19, v0.5).
+- **Context:** PRD-009 ML-018 asks for opt-in, fully reversible appearance changes on Moodle pages. Content scripts cannot read `chrome.storage.local` (`TRUSTED_CONTEXTS`), and stylesheets added by a registered content script cannot be removed from an open page.
+- **Decision:** Per site, while at least one option is on, the background registers `moodlens-appearance-<site>` (`appearance.js` + `appearance.css`, `document_start`, `<origin>/*`). The script asks the background (`GET_APPEARANCE`, registered origins only) and toggles classes on `<html>`; every CSS rule is scoped to those classes. Changes reach open tabs by `tabs.sendMessage`; tabs opened before registration get `insertCSS` + `executeScript`. Site removal and clear-all reset open tabs before access is revoked. No new permission.
+- **Consequences:** Reversal is a class toggle, so it is idempotent and tested. The stylesheet stays in open pages after all options are off but styles nothing. Theme presets (roadmap candidate) remain open and need a PRD-009 update.
 

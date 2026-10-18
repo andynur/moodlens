@@ -3,11 +3,10 @@
 ## Automated checks (every PR, enforced in CI from v0.2)
 
 ```bash
-npm run lint        # from v0.2
-npm run typecheck
-npm run test
-npm run build
+npm run check       # lint, format, typecheck, test, build in parallel (CI runs the same)
 ```
+
+Tests run in the `node` environment by default. A test file that needs the DOM starts with `// @vitest-environment jsdom`.
 
 ## Unit and fixture test matrix
 

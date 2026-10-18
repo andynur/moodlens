@@ -9,9 +9,13 @@ All Moodle-specific knowledge lives in `src/content/moodle/`. UI and background 
 | SiberMu origin and course path `/course/view.php?id=` | **Verified** (fixtures `sibermu-2026-10`, 4 courses) |
 | Course page markup on SiberMu | **Verified** from fixtures; see "SiberMu observations" below |
 | AJAX function availability per site | **Unverified**; must be feature-detected |
+| `core_calendar_get_action_events_by_timesort` on SiberMu | **Verified** 2026-10-19 on `/my/`: available to the student. With `timesortfrom: 0, limitnum: 50, limittononsuspendedevents: true` it returns 30 events (`resource` 18, `quiz` 8, `feedback` 2, `forum` 1, `assign` 1), each with `action.url` of the form `/mod/<module>/view.php?id=<n>`, `timesort`, `overdue`, `modulename`, `eventtype`. A narrow window (now ±7 days) returns `events: []`, which is what the earlier empty fixture captured |
+| `limitnum` maximum | **Verified** 2026-10-19: values above 50 fail with `Limit must be between 1 and 50 (inclusive)`; 50 and below succeed. Moodlens sends `TIMELINE_LIMIT = 50` (`src/content/moodle/task-capture.ts`) |
+| `mod_attendance` in timeline events | **Verified absent** 2026-10-19 over the full timeline range for the test account; ML-005 stays blocked |
+| SiberMu dashboard AJAX | **Verified** 2026-10-19: `/my/` itself calls only `theme_remui_get_myoverviewcourses` and `theme_remui_get_msg_contact_list_count` (Edwiser RemUI), not the core timeline function |
 | Level Up! XP plugin (`block_xp`) on SiberMu | **Present** in raw captures (block outside `#region-main`, removed from fixtures); student-visible data **unverified** |
 | `mod_attendance` on SiberMu | **Present** (`modtype_attendance`, 16 per course in 3 of 4 courses) |
-| Attendance events in calendar/timeline | **Unverified** |
+| Attendance events in calendar/timeline | **Unverified** (SiberMu capture 2026-10-19 had zero events) |
 | Activity due dates on course page | **Absent** on SiberMu (`[data-region="activity-dates"]` = 0); deadlines need AJAX/timeline (D-003) |
 
 ## SiberMu observations (fixtures `tests/fixtures/sibermu-2026-10/`, captured 2026-10-16)
@@ -26,7 +30,7 @@ All Moodle-specific knowledge lives in `src/content/moodle/`. UI and background 
 - Section titles: `.sectionname` / `[data-for="section_title"]` inside `li.section.course-section` with `data-number`, `data-id`; header `.course-section-header`.
 - Bulk-edit labels `label[for^="cmCheckbox"]` / `label[for^="sectionCheckbox"]` exist in the DOM even for students.
 - Dashboard `/my/` (`dashboard.html`, `#page-my-index`, `pagelayout-mydashboard`): blocks in `#region-main` are `myoverview`, `timeline`, `completion_progress`, `edwiseradvancedblock`; side blocks `myprofile`, `course_list`, `online_users`.
-  - **Timeline is loaded by AJAX after page load.** Captured HTML has an empty, hidden `[data-region="event-list-content"]`, and `[data-region="event-list-container"]` has `data-days-limit="7"` and `data-midnight`. The site frontend therefore calls the timeline AJAX function, which is strong evidence that `core_calendar_get_action_events_by_timesort` is available to students (still verify in v0.4). DOM fallback from the timeline block is **not reliable**.
+  - **Timeline is loaded by AJAX after page load.** Captured HTML has an empty, hidden `[data-region="event-list-content"]`, and `[data-region="event-list-container"]` has `data-days-limit="7"` and `data-midnight`. A live network trace on 2026-10-19 showed that the theme loads the dashboard through `theme_remui_*` calls instead, so the timeline block is not a reliable DOM source; `core_calendar_get_action_events_by_timesort` is nonetheless available to the student when Moodlens calls it directly (30 events, see the table above). The block's own `data-days-limit="7"` is why a 7-day window looks empty.
   - My Overview cards: `.dashboard-card[data-region="course-content"][data-course-id]`, course name in `.coursename .multiline`, progress bar with `aria-valuenow`, plus text "0 out of N activities completed".
   - **Completion Progress block** (third-party plugin `block_completion_progress`) is installed: one `.barContainer` per course, cells `.progressBarCell.<state>` (seen: `futureNotCompleted`; plugin also uses completed/notCompleted/submittedNotComplete/failed), details in `.progressEventInfo` with status text such as "Not completed". It is a cross-course progress source without AJAX (candidate for v0.4/v0.5).
   - Level Up! XP block is **not** on the dashboard; it appears on course pages only.
@@ -81,6 +85,10 @@ Rules:
 5. Rate limit per site; response size cap; timeout 10 s.
 6. Validate response shape, then map to `Course`, `Task`, `CompletionRecord` (see `docs/03_ARCHITECTURE.md`). Drop unknown fields.
 
+Implemented in v0.4: course/timeline responses are reduced to bounded `Course`/`Task` fields in the content script; background rejects invalid normalized payloads. Capture runs on an enabled site's open page at most once per 15 minutes unless the student presses Refresh, with a persistent ceiling of five two-call captures per minute per site. Unsupported course/task capabilities are skipped for 24 hours. Availability and response parity remain unverified until the 3-site exit QA.
+
+DOM task fallback accepts only timeline items with an explicit course id, same-origin Moodle view URL and machine-readable timestamp. Dashboard course cards are a fallback for course name/progress. These task selectors are candidates; the SiberMu saved dashboard has an empty AJAX-loaded timeline, so a populated sanitized timeline fixture is still required.
+
 ## 3. DOM parser — `adapter.ts`
 
 Policy:
@@ -125,9 +133,16 @@ Block AI, practice capture and answer-related UI when any is true:
 
 Allow practice capture only on `/mod/quiz/review.php` with finished-state evidence (D-009).
 
-## 5. Appearance (v0.5) — `appearance.ts`
+Mistake capture (ML-020, `quiz-review.ts`, selectors **unverified**, no review fixture): runs only when the guard allows it. Takes `.que` blocks with class `incorrect`, `partiallycorrect` or `notanswered`; question from `.qtext`, answer from `.outcome .rightanswer` with the EN/ID "correct answer is" label removed. Images, media, scripts and `.accesshide` text are dropped. Questions without a shown answer are skipped. Keeps `cmid`, never the attempt id. Max 200 questions per page.
 
-Opt-in per site. Inject a single `<style id="moodlens-appearance">` element; remove it on disable. CSS only, no DOM rewriting of Moodle controls.
+## 5. Appearance (v0.5) — `src/content/appearance.ts`, `public/appearance.css`
+
+Opt-in per site (D-015). One packaged stylesheet, registered with a small script at `document_start` only while an option is on. Every rule is scoped to `html.moodlens-*` classes or `html[data-moodlens-hide]`; the script sets them from the background's answer, so turning options off restores the page. CSS only, no DOM rewriting of Moodle controls.
+
+- Dark mode: `filter: invert(1) hue-rotate(180deg)` on `<html>`, media inverted back. Theme-independent; unverified on live Moodle themes.
+- Larger text: root `font-size: 112.5%` (Boost sizes in rem). Unverified on non-Boost themes.
+- Line width: `max-width: 72ch` for text inside `#region-main`.
+- Hideable blocks (fixed list): `.block_online_users`, `.block_calendar_month`, `.block_recentlyaccesseditems`, `.block_badges`. Standard Moodle block classes, **unverified** (no SiberMu fixture contains them). Timeline, upcoming events, news and HTML blocks are never offered.
 
 ## Sanitized fixture process
 

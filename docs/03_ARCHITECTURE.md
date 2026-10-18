@@ -30,7 +30,7 @@ src/
   content/
     index.ts       entry, observer, message sending
     moodle/        detect.ts, ajax.ts, adapter.ts, guard.ts, appearance.ts
-  shared/          types.ts, validation.ts, i18n/ (en.ts, id.ts), messages.ts, xp.ts, srs.ts
+  shared/          types.ts, validation.ts, i18n/ (en.ts, id.ts), messages.ts, days.ts, xp.ts, srs.ts, cards.ts
   sidepanel/       App.tsx, views/, components/, hooks/
   ai/              (v0.8) providers/, consent.ts, pdf/, retrieval.ts
 tests/
@@ -70,9 +70,9 @@ No `<all_urls>`, no `tabs`, no `cookies`, no `webRequest`, no `downloads` in v1.
 
 ## Storage plan
 
-- `chrome.storage.local`, keyed by site: `sites`, `site:<id>:courses`, `site:<id>:tasks`, `site:<id>:snapshots`, `prefs`, `xp`. Access level `TRUSTED_CONTEXTS`.
+- `chrome.storage.local`, keyed by site: `sites`, `site:<id>:lastCourseSnapshot`, `site:<id>:snapshots` (what's new records per course), `site:<id>:courses` (personalization per course), `site:<id>:tasks`, global `locale`, `theme`, `onboarded`, `dashboard`, `xp`. Access level `TRUSTED_CONTEXTS`. Backup export is allowlist-based (`src/shared/backup.ts`).
 - `chrome.storage.session`: BYOK keys (v0.8), short-lived caches.
-- IndexedDB (v0.6): flashcards, review logs, notes, PDF chunks (v0.8). Per-site stores; quotas; delete on site removal.
+- IndexedDB (v0.6, D-014): database `moodlens-study` v1 with stores `decks`, `cards`, `reviewLogs` (`src/background/studyStore.ts`). Every record carries `siteId` and a `bySite` index; site removal and clear-all delete by index. Caps per site: 200 decks, 10,000 cards, 50,000 review logs. Review logs kept 90, 365 (default) or 730 days. Notes (ML-026) and PDF chunks (v0.8) add stores in later schema versions.
 - Storage schema has a `schemaVersion` and a migration function in background (v0.3).
 - Size caps per site; oldest snapshots pruned (keep last 2 per course for diff).
 

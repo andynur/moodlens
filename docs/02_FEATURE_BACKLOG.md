@@ -10,10 +10,10 @@ Definitions: **Done** = merged, tested, verified on a real site; **Provisional**
 | ML-023 | Clear data (v0.2), export/import backup (v0.5) | P0 | v0.2/v0.5 | Planned | PRD-001 | — |
 | ML-013 | Multi-instance support | P0 | v0.3 | Planned | PRD-007 | D-002 |
 | ML-024 | Onboarding and site enablement UX | P0 | v0.3 | Planned | PRD-007 | ML-013 |
-| ML-014 | Read-only Moodle AJAX client | P0 | v0.4 | Planned | PRD-008 | D-003, security review |
-| ML-015 | Task and deadline tracker, `.ics` export | P0 | v0.4 | Planned | PRD-008 | ML-014 |
+| ML-014 | Read-only Moodle AJAX client | P0 | v0.4 | Implemented; live QA pending | PRD-008 | D-003, security review |
+| ML-015 | Task and deadline tracker, `.ics` export | P0 | v0.4 | Implemented; calendar import QA pending | PRD-008 | ML-014 |
 | ML-005 | Attendance insight (verified data only) | P1 | v0.4 | Blocked | PRD-008 | Evidence that attendance events reach calendar/timeline |
-| ML-011 | Opt-in local notifications | P1 | v0.4 | Planned | PRD-008 | ML-015, `alarms` + optional `notifications` |
+| ML-011 | Opt-in local notifications | P1 | v0.4 | Implemented; restart QA pending | PRD-008 | ML-015, `alarms` + optional `notifications` |
 | ML-004 | Today dashboard | P0 | v0.5 | Planned | PRD-009 | ML-015 |
 | ML-016 | Personalization: pin, color, nickname, hide | P1 | v0.5 | Planned | PRD-009 | ML-013 |
 | ML-017 | What's new since last visit | P1 | v0.5 | Planned | PRD-009 | Snapshot history |

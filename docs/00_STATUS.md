@@ -2,32 +2,38 @@
 
 Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old entries; history lives in git and `CHANGELOG.md`.
 
-**Current release:** v0.3 — Multi-instance (`docs/08_ROADMAP.md`, `docs/prd/PRD-007_MULTI_INSTANCE.md`).
-**Last updated:** 2026-10-18.
+**Current release:** v0.4 — Data layer and tasks (`docs/08_ROADMAP.md`, `docs/prd/PRD-008_TASKS_AND_DEADLINES.md`).
+**Last updated:** 2026-10-19.
 
 ## Last done
 
-- v0.2 exit review: gate met locally (checks green, owner QA 1–8 passed); CI on latest `main` still pending push. v0.3 started at owner request.
-- v0.3 core (D-002, D-013): manifest drops static `content_scripts`, adds `scripting` + `optional_host_permissions: ["https://*/*"]`.
-- Site registry (`src/background/sites.ts`): enable by address (permission requested on click in the panel), register `<origin>/course/view.php*` script, detection once on the active tab, rename, remove (data + permission + script), reconcile on install/startup/permission change.
-- `src/content/moodle/detect.ts` with fixture tests; bundled function verified self-contained for `executeScript`.
-- `LMS_ORIGIN` removed; validators take the registry origin; background accepts snapshots only from registered origins.
-- Storage `schemaVersion` 2 + migration (`src/background/migrate.ts`): v0.2 SiberMu snapshot becomes the first site; access must be re-granted ("Grant access" in panel).
-- Side panel: enable card when no site, alerts for revoked access / not detected, Settings → Sites list; clear-all also revokes access.
-- Tests: background (AC 1, 4, 5 unit, 6), migration (AC 7), detection, site origins. `npm run check` green.
-- v0.4 discovery slice: guarded Moodle AJAX client core (ML-014) with typed allowlist, call-time-only `sesskey`, rate/size/timeout limits, unsupported cache and validator boundary; 7 focused tests. Not wired to capture yet.
+- v0.2 gate met locally (CI pending push). v0.3 core done (D-002, D-013): runtime per-origin access, site registry, detection, schema v2 migration, Sites UI; details in `CHANGELOG.md`.
+- Harness (2026-10-19): `npm run check` runs gates in parallel with eslint/prettier/tsc caches and accepts gate names (`-- test lint`); tests default to the `node` environment, DOM tests opt in with `// @vitest-environment jsdom`. Full check about 12s to 6s.
+- Owner-requested v0.5 work (2026-10-19): ML-017 wired (records, badge, list, Mark as seen), ML-016 (pin/hide/nickname/color/order), Today widgets (due soon from v0.4 tasks, what's new, pinned, progress; layout stored), Courses list + detail, ML-023 backup, ML-018 appearance (D-015). Not done: streak widget (v0.6 XP), theme presets (needs PRD-009 update). Tasks view excludes hidden courses.
+- Owner-requested v0.6 groundwork (no dependency on other tasks): ML-022 guard rules (`src/content/moodle/guard.ts`, `tests/guard.test.ts`; fail-closed, all DOM markers unverified, no quiz fixture) and ML-021 XP rules (`src/shared/xp.ts`, `tests/xp.test.ts`, rules table in PRD-010). Pure logic, not wired; EN/ID strings `guardPaused`, `xpLabel` added.
+- Owner-requested v0.6 groundwork: ML-019 FSRS-5 scheduler (`src/shared/srs.ts`, matches ts-fsrs 4.7.1 reference, AC 4) and card CSV/JSON import/export without quiz-derived cards (`src/shared/cards.ts`, part of AC 3); day helpers moved to `src/shared/days.ts`. Pure logic, not wired.
+- v0.6 IndexedDB study store (D-014): `src/background/studyStore.ts` (decks, cards, review logs, per-site caps, delete by site, log retention 90/365/730 days) plus record validators in `src/shared/cards.ts`. IndexedDB paths exercised in Chrome on 2026-10-19 (still no automated test double); wired to `removeSite`, clear-all and backup import.
+- v0.6 ML-020 capture: `src/content/moodle/quiz-review.ts` returns wrong questions only when the guard allows it (AC 2 tested), `newQuizReviewCard` builds never-exported cards. Selectors unverified, no review fixture; not wired.
+- v0.3 onboarding (PRD-007): 3 skippable screens EN/ID, `onboarded` flag, shown again after clear-all (`tests/onboarding.test.ts`).
+- v0.4 ML-005 tooling: `fixture:sanitize` now sanitizes AJAX event JSON and prints attendance evidence (`scripts/sanitize-ajax-core.ts`, `tests/sanitize-ajax.test.ts`).
+- v0.4 live evidence (2026-10-19): the empty `events: []` fixture + test came from a 7-day window; see the corrected note below. SiberMu theme is Edwiser RemUI (`theme_remui`). ML-005 still Blocked.
+- v0.4 implementation: guarded AJAX capture + strict Course/Task normalization, 15-minute capture throttle and per-site 10-call/minute ceiling, persistent 24-hour unsupported cache, DOM fallback, Tasks view/filter/search, local ICS export and opt-in reminders. D-003 source/test review passed; `npm run check` green.
+- Agent QA (2026-10-19, v0.3 + v0.4, no Moodle login): `npm run check` green. Detection run live on `https://school.moodledemo.net/` (front page `high`, hint `4.x`) and `/login/index.php` (`high`, no hint — `uses-drawers` is absent on the login layout); `https://example.com/` returns `none`. Side panel driven from a local chrome-API harness at 320px: onboarding 3 screens ID, Today widgets, Tasks groups (overdue/today/this week/later/no date), search, site filter, EN/ID switch, reminders toggle sending `SET_REMINDERS {enabled:true,leadMinutes:[1440]}`; no console errors, no layout overflow. ICS output verified against RFC 5545 structure (CRLF, 75-octet folding, escaping, unique UIDs, dateless tasks skipped). Static network audit: one `fetch` in `src/content/moodle/ajax.ts`, only two read functions called, `host_permissions: []`, no `cookies`/`tabs`/`webRequest`/`<all_urls>`.
+- Live SiberMu evidence (2026-10-19, owner-authorized browser session, `/my/`): detection `high` + hint `4.x`. **Bug found and fixed:** `captureTaskDataset` sent `limitnum: 500`, which `core_calendar_get_action_events_by_timesort` rejects with `Limit must be between 1 and 50 (inclusive)`; the error envelope read as `unsupported`, so tasks were cached unsupported for 24 hours and the site fell back to DOM for good. Now `TIMELINE_LIMIT = 50` with a regression test in `tests/task-capture.test.ts`. At that limit the live call returns 30 events (resource 18, quiz 8, feedback 2, forum 1, assign 1); `core_course_get_enrolled_courses_by_timeline_classification` with `limit: 200` works (4 courses). No `mod_attendance` event in the whole timeline, so ML-005 stays Blocked. The dashboard itself calls only `theme_remui_get_myoverviewcourses` and `theme_remui_get_msg_contact_list_count` (Edwiser RemUI), not `core_calendar_get_action_events_by_timesort` — the earlier note saying it does was wrong.
+- Agent QA v0.5/v0.6 (2026-10-19, only the parts that needed a browser): ML-018 appearance verified live on SiberMu `/my/` with the installed build — `moodlens-width` gives `max-width: 726.75px` in `#region-main`, `moodlens-large-text` 16px to 18px, `moodlens-dark` applies the inversion filter, `data-moodlens-hide="online_users"` hides `.block_online_users`, and removing the classes restores the original computed styles and root attributes exactly. `calendar_month`, `recentlyaccesseditems` and `badges` are absent on that dashboard, so those selectors stay unverified. D-014 study store exercised against real Chrome IndexedDB (esbuild bundle on localhost): open/upgrade, `putDeck`/`putCards` validation and site check, `recordReview` card+log pair and mismatch refusal, `deleteDeck` (cards and its logs), `deleteSiteStudyData` and `deleteStudyDb` all behave as specified, and `pruneReviewLogs` at 365 days keeps only the in-window log and leaves the other site untouched. v0.6 logic-only work (guard, XP, FSRS, card import/export) was skipped: unit tests already cover it.
+- QA findings (not fixed): Today "Due soon", "Pinned" and "Course progress" show the course name without the site label (`src/sidepanel/components/Today.tsx:88,130,155`), so two sites with the same course name are indistinguishable; the Courses list does show the site. `chrome://extensions` cannot be driven by the browser tool, so unpacked-load QA stays with the owner.
 
 ## Next task
 
-0. Continue ML-014: add strict course/timeline response validators and normalize Moodle data without allowing raw responses past the content boundary.
-1. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (test plan item 9; PRD-007 AC 2, 3, 5).
-2. Enable a second Moodle 4.x site (for example a public Moodle demo) and add a sanitized detection fixture (AC 8).
-3. Onboarding screens EN/ID (3 screens, PRD-007), last open v0.3 roadmap item.
+0. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
+1. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
+2. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
+3. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
 
 ## Blockers / waiting on owner
 
-- Push `main` so CI runs (v0.2 gate and the v0.3 work).
+- Authenticated access to 3 Moodle sites for the v0.4 exit gate; push `main` so CI runs.
 
 ## Known failing checks
 
-- None locally. Unverified by agent: everything in Chrome (permission prompt, `registerContentScripts`, `executeScript` detection, migration on a real v0.2 profile), side panel visuals, any non-SiberMu site.
+- None locally. Unverified (needs an authenticated Moodle session or Chrome internals, both out of agent reach): live Moodle AJAX availability/results, 3-site deadline parity, live `service.php` network trace, unpacked load in `chrome://extensions`, browser-restart reminder delivery, `notifications` permission prompt, ICS import in Google/Apple Calendar.

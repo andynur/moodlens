@@ -38,6 +38,12 @@ Never read or store: passwords, cookies, `sesskey` (beyond one in-memory call), 
 5. Responses validated and normalized in the content script; raw responses never leave it.
 6. Network inspection checklist in `docs/09_TEST_PLAN.md` must show zero non-allowlisted calls.
 
+### v0.4 implementation review — 2026-10-19
+
+Source/test review passed for merge: function names remain in `src/content/moodle/`; requests are same-origin credentialed POSTs; `sesskey` is read at call time and appears in no message, storage write or log; arguments are static and read-only; responses are size-bounded, strictly normalized and background-validated; raw responses do not leave the content script; capture is limited to five two-call attempts per minute per site; unsupported capabilities are cached per site for 24 hours; no LMS polling runs without an open page. `npm run check` passes.
+
+This is not live-network evidence. The v0.4 exit gate still requires authenticated Network inspection on 3 sites and must show only allowlisted `info=` values and zero writes.
+
 ## 5. Academic integrity
 
 - No automation of mark-done, attendance, forums, assignments or quizzes. Ever.
@@ -65,6 +71,7 @@ Never read or store: passwords, cookies, `sesskey` (beyond one in-memory call), 
 
 - Clear all data (v0.2) and remove site (v0.3) in Settings.
 - Snapshot pruning: last 2 per course.
+- Study store (IndexedDB, D-014): review logs older than the retention setting (90, 365 or 730 days) are deleted; cards stay until the student deletes them, the deck or the site.
 - Export/import backup (v0.5) excludes quiz-derived cards and API keys.
 - Uninstall removes all extension storage (Chrome behavior); privacy policy states it.
 
