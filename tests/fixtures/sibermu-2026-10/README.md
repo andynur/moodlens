@@ -21,3 +21,5 @@
 - Completion types present: automatic ("To do" dropdown), manual ("Mark as done"). **No completed items.**
 - Restricted activities: present, without activity links.
 - Course names, section names, activity names and people are replaced with `Sample Course`, `Section N`, `Activity N`, `Person`. Real module ids and URLs are kept.
+
+- `course-5.html` (2026-10-18): course with completed activities; 3 automatic "Done" dropdowns and 1 `manual:undo` on a label. Saved as "HTML only", so the JS-rendered course index drawer is not included.

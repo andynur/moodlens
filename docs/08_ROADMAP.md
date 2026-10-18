@@ -32,7 +32,7 @@ Goal: trustworthy, green baseline on the pilot site.
 - [x] Placeholder icons (16/32/48/128).
 - [x] Sanitized SiberMu fixtures (`tests/fixtures/sibermu-2026-10/`, 4 courses); observations in `docs/04_MOODLE_ADAPTER.md`.
 - [x] Parser on fixtures: strip `.accesshide` suffix, list restricted activities without links, map "To do" dropdown, support page/folder/book/feedback as `unknown` or new types.
-- [ ] One more capture with **completed** activities ("Done" / `manual:undo`) to verify the `complete` mapping.
+- [x] One more capture with **completed** activities ("Done" / `manual:undo`) to verify the `complete` mapping.
 - [x] Clear local data control (ML-023 part 1).
 
 **Exit gate:** CI green; unpacked extension loads with no errors; parser fixture tests pass on real sanitized SiberMu HTML; manual QA items 1–8 in `docs/09_TEST_PLAN.md` pass.
@@ -71,6 +71,7 @@ Goal: accurate deadlines without fragile scraping.
 - [ ] Pin, reorder, color, nickname, hide courses (ML-016).
 - [ ] Snapshot history and "what's new since last visit" diff (ML-017).
 - [ ] Opt-in Moodle page appearance: dark mode, font size, line width (ML-018).
+- [ ] Candidate (needs PRD-009 update first): appearance theme presets that restyle Moodle with design tokens (color, type, spacing, cards) and CSS-only layout tweaks; no DOM rewriting, no third-party brand assets, off on assessment-guarded pages (ML-018).
 - [ ] Export/import local backup JSON (ML-023 part 2).
 
 **Exit gate:** dashboard usable at 320px; diff tests cover add/remove/rename; appearance injection reversible and scoped to enabled sites.

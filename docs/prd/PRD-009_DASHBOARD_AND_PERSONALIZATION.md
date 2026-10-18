@@ -31,6 +31,7 @@ As a student, I open one screen and immediately know what to do today, what chan
 - Per-site opt-in: dark mode for Moodle pages, larger font, comfortable line width, reduced clutter (hide blocks the student chooses from a fixed list).
 - One packaged stylesheet; inject/remove cleanly.
 - Never hide Moodle notices about deadlines, restrictions or academic integrity.
+- Open question (owner, 2026-10-18): theme presets (for example a clean, neutral look) built from design tokens plus CSS-only layout changes. Scope, token list and guarded-page behavior to be decided before v0.5 starts.
 
 ### Backup (ML-023 part 2)
 

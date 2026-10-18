@@ -12,6 +12,7 @@
 
 ### Added
 
+- Roadmap v0.5: candidate item for Moodle appearance theme presets (ML-018), pending a PRD-009 update.
 - MIT `LICENSE` (D-012), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), GitHub issue forms and pull request template.
 - Theme option "System" (default): follows `prefers-color-scheme` until the student picks light or dark; clearing data returns to it (PRD-001 AC 5).
 - Placeholder icons 16/32/48/128 (`npm run icons`, `scripts/make-icons.mjs`, no new dependency) wired into the manifest and action; guard test checks files and sizes.
@@ -36,6 +37,7 @@
 
 ### Fixtures
 
+- Added sanitized `course-5.html` with completed activities; fixture test checks 3 `complete` mappings.
 - Added 4 sanitized SiberMu course fixtures plus dashboard (`/my/`) and My courses (`/my/courses.php`) fixtures, and recorded markup observations in `docs/04_MOODLE_ADAPTER.md`.
 - Sanitizer collects names from the whole page and replaces them in one pass; handles instructor header, bulk-edit labels, restriction notes, whitespace variants, dashboard cards, Completion Progress, announcement blocks and phone numbers; keeps UI headings on `/my/` pages.
 
