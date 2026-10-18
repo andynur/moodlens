@@ -87,7 +87,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules (PRD-010 AC 5), storage (`src/background/xp.ts`, key `xp`, in the backup allowlist), awards for card reviews, finished review sessions and tasks opened early, the Study page XP card and the Today streak widget done.
 - [ ] P2: focus timer and per-activity notes (ML-026).
 
-**Exit gate:** guard tests pass for every known attempt URL and state; no quiz content leaves the device; XP rules documented and tested.
+**Exit gate:** guard tests pass for every known attempt URL and state; no quiz content leaves the device; XP rules documented and tested. Met in tests; the quiz DOM markers themselves still need a sanitized attempt/review fixture.
 
 ## v0.7 — Closed beta on Chrome Web Store
 

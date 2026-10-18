@@ -20,16 +20,21 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - v0.6 ML-019 flashcards (2026-10-19): `src/background/study.ts` (overview, create/delete deck, add cards, review, export) routed through the background; `src/sidepanel/components/Study.tsx` deck list, card entry, 4-rating review and JSON/CSV import/export EN/ID. `tests/study.test.ts` covers the validation and trust decisions; the IndexedDB paths were run in Chrome (17 checks: create deck, add 2 cards, queue and intervals, review `good` -> due 2026-10-22, repeat review refused, export JSON/CSV counts, deck removal) because the project has no IndexedDB test double.
 - v0.6 ML-020 wiring (2026-10-19): review page reports only a count (`PRACTICE_OFFER`); `src/background/practice.ts` keeps the offer in session storage, drops it when the tab navigates away, asks the page for the mistakes only on Save, and writes `quiz-review` cards whose source link is the cmid, never the attempt id (`tests/practice.test.ts`). Also fixed: the background task queue passed the previous task's result as the next task's first argument.
 - v0.6 ML-021 XP wired (2026-10-19): `src/background/xp.ts` stores the state under `xp` (validated by `isXpState`, part of the backup allowlist) and awards card reviews, finished review sessions and tasks opened at least 3 days early (`src/sidepanel/openTask.ts`); Study page XP card (level bar, today, streak, longest, weekly goal) and the Today `streak` widget, EN/ID (`tests/xp-store.test.ts`).
+- UI restyle (2026-10-19, owner request): side panel tokens from `DESIGN.md` in `src/sidepanel/styles.css` (`brand` purple scale, `stone` neutrals); class swap only, no new dependency. Not yet checked visually at 320px or in dark mode.
+- Agent QA of the new v0.6 UI (2026-10-19, local chrome-API harness, built side panel): Study page renders EN/ID with the XP card (level bar, today, streak, longest, weekly goal), the review card with the four rating intervals, the decks list, the new-deck and add-card forms and import/export; `guard=on` hides the review and the save offer and shows the paused banner with its reason; the save offer lists only decks of the offering site; Today shows the streak widget. At 320px both locales render with `scrollWidth == clientWidth` and no element wider than 320px. The study service itself was run against real Chrome IndexedDB (17 checks).
+
 ## Next task
 
-0. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
-1. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
-2. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
-3. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
+0. Owner: a sanitized quiz attempt and review fixture (ML-020/ML-022). Every quiz selector and the save path stay unverified until then; SiberMu has quizzes but no finished attempt was available in this session.
+1. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
+2. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
+3. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
+4. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
 
 ## Blockers / waiting on owner
 
-- Authenticated access to 3 Moodle sites for the v0.4 exit gate; push `main` so CI runs.
+- Authenticated access to 3 Moodle sites for the v0.4 exit gate; a finished quiz attempt for the ML-020/ML-022 fixtures; push `main` so CI runs.
+- Design pass in progress by the owner (brand tokens, `stone` neutrals in `src/sidepanel/`): uncommitted in the working tree, left untouched. The Today site-label fix from the QA findings waits for it.
 ## Known failing checks
 
 - None locally. Unverified (needs an authenticated Moodle session or Chrome internals, both out of agent reach): live Moodle AJAX availability/results, 3-site deadline parity, live `service.php` network trace, unpacked load in `chrome://extensions`, browser-restart reminder delivery, `notifications` permission prompt, ICS import in Google/Apple Calendar.
