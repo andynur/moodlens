@@ -26,6 +26,17 @@ tests/fixtures/<site-variant>/
 5. Add `README.md` for the variant from the template below.
 6. Delete the raw saved file.
 
+## Capture an AJAX timeline response (ML-005 evidence)
+
+1. Open the Moodle Dashboard with the Timeline block, DevTools → Network, filter `service.php`.
+2. Find the request with `methodname` `core_calendar_get_action_events_by_timesort` (or `..._by_course`). Copy the **Response** into a `.json` file **outside** this repo. Never copy the request URL or headers (they contain `sesskey`).
+3. Run:
+   ```bash
+   npm run fixture:sanitize -- <saved.json> tests/fixtures/<site-variant>/ajax-core_calendar_get_action_events_by_timesort.json
+   ```
+4. The script keeps only allowlisted event fields (ids, timestamps, module/component/event type, flags), renames events and courses, drops descriptions, user ids and icons, and strips every URL query parameter except `id`. It prints an attendance summary: event count and how many carry `timestart`, `timesort` and `timeduration`. Exit code 2 also means no attendance event was found.
+5. Review the output manually, then delete the raw file.
+
 ## Variant README template
 
 ```markdown

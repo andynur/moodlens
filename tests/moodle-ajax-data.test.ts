@@ -40,7 +40,12 @@ describe('Moodle AJAX response normalization', () => {
     expect(normalizeCourseResponse({ courses: [{ id: 1, fullname: '', visible: true }] }, 'site')).toBeNull();
     expect(
       normalizeCourseResponse(
-        { courses: [{ id: 1, fullname: 'A', visible: true }, { id: '1', fullname: 'B', visible: true }] },
+        {
+          courses: [
+            { id: 1, fullname: 'A', visible: true },
+            { id: '1', fullname: 'B', visible: true }
+          ]
+        },
         'site'
       )
     ).toBeNull();
@@ -121,7 +126,13 @@ describe('Moodle AJAX response normalization', () => {
       url: `${origin}/mod/quiz/view.php?id=3`
     };
     expect(normalizeTaskResponse({ events: [{ ...event, timesort: 'tomorrow' }] }, 'site', origin)).toBeNull();
-    expect(normalizeTaskResponse({ events: [{ ...event, url: 'https://evil.example/mod/quiz/view.php?id=3' }] }, 'site', origin)).toBeNull();
+    expect(
+      normalizeTaskResponse(
+        { events: [{ ...event, url: 'https://evil.example/mod/quiz/view.php?id=3' }] },
+        'site',
+        origin
+      )
+    ).toBeNull();
     expect(normalizeTaskUrl(`${origin}/course/mod.php?id=3`, origin)).toBeNull();
   });
 
@@ -136,6 +147,17 @@ describe('Moodle AJAX response normalization', () => {
       url: `${origin}/mod/quiz/view.php?id=3`
     };
     expect(normalizeTaskResponse({ events: [event] }, 'site', origin)).toEqual([]);
-    expect(normalizeTaskResponse({ events: [{ ...event, visible: true }, { ...event, visible: true }] }, 'site', origin)).toBeNull();
+    expect(
+      normalizeTaskResponse(
+        {
+          events: [
+            { ...event, visible: true },
+            { ...event, visible: true }
+          ]
+        },
+        'site',
+        origin
+      )
+    ).toBeNull();
   });
 });
