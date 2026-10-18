@@ -13,6 +13,7 @@ const common = {
 };
 await build({ ...common, entryPoints: ['src/background/index.ts'], outfile: 'dist/background.js' });
 await build({ ...common, entryPoints: ['src/content/index.ts'], outfile: 'dist/content.js' });
+await build({ ...common, entryPoints: ['src/content/appearance.ts'], outfile: 'dist/appearance.js' });
 // package.json is the single version source.
 const { version } = JSON.parse(await readFile('package.json', 'utf8'));
 const manifest = JSON.parse(await readFile('public/manifest.json', 'utf8'));

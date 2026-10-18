@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { migrateStorage, SCHEMA_VERSION } from '../src/background/migrate';
 import { parseCourse } from '../src/content/moodle/adapter';

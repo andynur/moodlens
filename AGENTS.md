@@ -50,10 +50,12 @@ Product background (`docs/01`, `docs/15`) is for planning tasks only.
 ## Verify
 
 ```bash
-npm run check   # one command: all gates, short output
+npm run check --silent              # all gates in parallel, cached, short output
+npm run check --silent -- test lint  # inner loop: named gates only (lint, format, typecheck, test, build)
+npx vitest run tests/<file>.test.ts  # one test file
 ```
 
-Run it before reporting. If it cannot run, say what ran and what is unverified.
+Run the full check once before reporting. If it cannot run, say what ran and what is unverified.
 
 ## End of every task
 

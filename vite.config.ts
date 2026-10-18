@@ -14,7 +14,7 @@ export default defineConfig({
     rollupOptions: { input: 'sidepanel.html' }
   },
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     include: ['tests/**/*.test.ts']
   }
 });

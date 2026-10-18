@@ -38,10 +38,15 @@ export function createChromeStub() {
   const state = {
     listener: undefined as Listener | undefined,
     activeTab: undefined as chrome.tabs.Tab | undefined,
+    tabListening: false,
     detection: { isMoodle: true, confidence: 'high', versionHint: '4.x' } as unknown
   };
   const executeScript = vi.fn((injection: { func?: unknown; files?: string[] }) =>
     Promise.resolve(injection.func ? [{ result: state.detection }] : [{ result: undefined }])
+  );
+  // Rejects like Chrome when no content script listens; tests set `state.tabListening`.
+  const tabMessages = vi.fn<(tabId: number, message: unknown) => Promise<unknown>>(() =>
+    state.tabListening ? Promise.resolve(undefined) : Promise.reject(new Error('no receiver'))
   );
   const chromeStub = {
     runtime: {
@@ -87,9 +92,13 @@ export function createChromeStub() {
         for (const id of ids) scripts.delete(id);
         return Promise.resolve();
       }),
-      executeScript
+      executeScript,
+      insertCSS: vi.fn(() => Promise.resolve())
     },
-    tabs: { query: () => Promise.resolve(state.activeTab ? [state.activeTab] : []) }
+    tabs: {
+      query: () => Promise.resolve(state.activeTab ? [state.activeTab] : []),
+      sendMessage: tabMessages
+    }
   };
   function send(message: unknown, sender: chrome.runtime.MessageSender): Promise<unknown> {
     return new Promise((resolve) => {
@@ -102,8 +111,9 @@ export function createChromeStub() {
     scripts.clear();
     alarms.clear();
     state.activeTab = undefined;
+    state.tabListening = false;
     state.detection = { isMoodle: true, confidence: 'high', versionHint: '4.x' };
     vi.clearAllMocks();
   }
-  return { chromeStub, local, granted, scripts, state, send, reset, executeScript };
+  return { chromeStub, local, granted, scripts, state, send, reset, executeScript, tabMessages };
 }

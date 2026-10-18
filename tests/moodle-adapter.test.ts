@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { parseCourse, parseCompletion, parseCourseIndexCompletion } from '../src/content/moodle/adapter';
 import { isActivityUrl, isCourseSnapshot, isCourseUrl } from '../src/shared/validation';

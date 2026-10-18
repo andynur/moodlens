@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { isAllowedReadMethod, MoodleAjaxClient, type MoodleReadMethod } from '../src/content/moodle/ajax';
 

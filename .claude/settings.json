@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(npm run check)",
+      "Bash(npm run check:*)",
       "Bash(npm run check --silent)",
       "Bash(npm run typecheck)",
       "Bash(npm run test)",
@@ -23,7 +24,12 @@
     ],
     "deny": [
       "Read(./.env)",
-      "Read(./.env.*)"
+      "Read(./.env.*)",
+      "Read(./dist/**)",
+      "Read(./node_modules/**)",
+      "Read(./package-lock.json)",
+      "Read(./coverage/**)",
+      "Read(./docs/moodle_courses/**)"
     ]
   }
 }
