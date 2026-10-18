@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { captureTaskDataset } from '../src/content/moodle/task-capture';
+import { captureTaskDataset, TIMELINE_LIMIT } from '../src/content/moodle/task-capture';
 
 const origin = 'https://learn.example.edu';
 const siteId = 'learn.example.edu';
@@ -55,6 +56,18 @@ describe('task capture source fallback', () => {
     expect(result.unsupported).toEqual(['courses', 'tasks']);
     expect(result.courses).toHaveLength(1);
     expect(result.tasks[0]).toMatchObject({ title: 'Quiz', source: 'dom' });
+  });
+
+  it('keeps the timeline limit within the Moodle maximum of 50', async () => {
+    const client = { call: vi.fn().mockResolvedValue({ ok: false, reason: 'unsupported' }) };
+    await captureTaskDataset(document, `${origin}/my/`, siteId, new Date(), client as never);
+    const timelineArgs = client.call.mock.calls.find(
+      ([method]) => method === 'core_calendar_get_action_events_by_timesort'
+    )?.[1] as { limitnum: number; timesortfrom: number };
+    expect(timelineArgs.limitnum).toBe(TIMELINE_LIMIT);
+    expect(timelineArgs.limitnum).toBeLessThanOrEqual(50);
+    expect(timelineArgs.limitnum).toBeGreaterThanOrEqual(1);
+    expect(timelineArgs.timesortfrom).toBe(0);
   });
 
   it('does not retry capabilities held in the per-site unsupported cache', async () => {

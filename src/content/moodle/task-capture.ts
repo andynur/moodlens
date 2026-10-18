@@ -3,6 +3,13 @@ import { MoodleAjaxClient } from './ajax';
 import { normalizeCourseResponse, normalizeTaskResponse } from './ajax-data';
 import { parseDashboardCourses, parseTimelineTasks } from './timeline';
 
+/**
+ * Moodle rejects `core_calendar_get_action_events_by_timesort` with "Limit must be between 1 and 50
+ * (inclusive)" above this value (verified on SiberMu, Moodle 4.x, 2026-10-19). A larger number makes the
+ * call fail and the capability is then cached as unsupported, so the site falls back to DOM for a day.
+ */
+export const TIMELINE_LIMIT = 50;
+
 export async function captureTaskDataset(
   doc: Document,
   pageUrl: string,
@@ -24,7 +31,7 @@ export async function captureTaskDataset(
       ? Promise.resolve({ ok: false as const, reason: 'unsupported' as const })
       : client.call(
           'core_calendar_get_action_events_by_timesort',
-          { timesortfrom: 0, limitnum: 500, limittononsuspendedevents: true },
+          { timesortfrom: 0, limitnum: TIMELINE_LIMIT, limittononsuspendedevents: true },
           (data) => normalizeTaskResponse(data, siteId, origin)
         )
   ]);
