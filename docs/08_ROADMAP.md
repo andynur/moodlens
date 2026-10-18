@@ -57,7 +57,7 @@ Goal: works on any Moodle site the student enables.
 Goal: accurate deadlines without fragile scraping.
 
 - [ ] D-003 security review signed off before merge.
-- [ ] Read-only AJAX client with function allowlist, response validation, rate limit (ML-014).
+- [~] Read-only AJAX client with function allowlist, response validation, rate limit (ML-014). Guarded client core and unit tests done; Moodle response validators, normalization and capture integration pending.
 - [ ] Enrolled course list and timeline/calendar events normalized into `Task` records.
 - [ ] Tasks view: overdue, today, this week, later; filters by course and type (ML-015).
 - [ ] `.ics` export of selected tasks.

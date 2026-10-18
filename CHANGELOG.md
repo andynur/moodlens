@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added (v0.4, data layer and tasks)
+
+- Guarded same-origin Moodle AJAX client core (ML-014): typed read allowlist, write-name rejection, call-time-only `sesskey`, rolling rate limit, timeout, response-size cap, unsupported-function cache and validator boundary. Not wired to page capture yet.
+
 ### Changed (v0.3, multi-instance)
 
 - Manifest: no static content script or hardcoded host; adds `scripting` and `optional_host_permissions: ["https://*/*"]` (D-002). Fresh installs have zero host access.

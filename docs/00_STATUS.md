@@ -15,9 +15,11 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - Storage `schemaVersion` 2 + migration (`src/background/migrate.ts`): v0.2 SiberMu snapshot becomes the first site; access must be re-granted ("Grant access" in panel).
 - Side panel: enable card when no site, alerts for revoked access / not detected, Settings → Sites list; clear-all also revokes access.
 - Tests: background (AC 1, 4, 5 unit, 6), migration (AC 7), detection, site origins. `npm run check` green.
+- v0.4 discovery slice: guarded Moodle AJAX client core (ML-014) with typed allowlist, call-time-only `sesskey`, rate/size/timeout limits, unsupported cache and validator boundary; 7 focused tests. Not wired to capture yet.
 
 ## Next task
 
+0. Continue ML-014: add strict course/timeline response validators and normalize Moodle data without allowing raw responses past the content boundary.
 1. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (test plan item 9; PRD-007 AC 2, 3, 5).
 2. Enable a second Moodle 4.x site (for example a public Moodle demo) and add a sanitized detection fixture (AC 8).
 3. Onboarding screens EN/ID (3 screens, PRD-007), last open v0.3 roadmap item.
