@@ -46,7 +46,17 @@ Candidate signals (combine at least two):
 - Logout link containing `/login/logout.php?sesskey=`.
 - `meta[name="keywords"]` containing `moodle` (weak signal).
 
-Return `{ isMoodle: boolean, confidence: 'high' | 'low', versionHint?: string }`. Low confidence shows a warning; the student can still enable.
+Return `{ isMoodle: boolean, confidence: 'high' | 'low' | 'none', versionHint?: string }`. Low confidence shows a warning; the student can still enable. `none` shows "not detected" with a remove action.
+
+Implemented 2026-10-18 (`detect.ts`, D-013). Scoring: 2+ strong signals = high, 1 strong or 2 weak = low, else none. Strong: `body#page-*` + `pagelayout-*`; `path-*` + `context-<n>` classes; Moodle asset URLs (`/lib/javascript.php/`, `/lib/requirejs.php/`, `/theme/yui_combo.php`, `/theme/styles.php/`, `/theme/image.php/`); logout link selector. Weak: `#region-main`, keywords meta. `versionHint: '4.x'` from `uses-drawers`.
+
+| Signal | Status |
+|---|---|
+| Body layout and context classes | **Verified** on SiberMu fixtures (course, dashboard, my courses) |
+| `/theme/image.php/` asset URL | **Verified** on SiberMu dashboard fixture |
+| Other asset URLs, logout link, keywords meta | **Unverified** (stripped from sanitized fixtures) |
+| `uses-drawers` = Moodle 4.x | **Inference**; unverified on non-Boost themes |
+| Any second Moodle 4.x site | **Unverified**; needed for the v0.3 exit gate |
 
 ## 2. Read-only AJAX client (v0.4) — `ajax.ts` (D-003)
 

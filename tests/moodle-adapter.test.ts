@@ -2,23 +2,29 @@ import { describe, expect, it } from 'vitest';
 import { parseCourse, parseCompletion, parseCourseIndexCompletion } from '../src/content/moodle/adapter';
 import { isActivityUrl, isCourseSnapshot, isCourseUrl } from '../src/shared/validation';
 
-const URL = 'https://solusi.sibermu.ac.id/course/view.php?id=42';
+const ORIGIN = 'https://solusi.sibermu.ac.id';
+const URL = `${ORIGIN}/course/view.php?id=42`;
 function html(content: string): Document {
   return new DOMParser().parseFromString(content, 'text/html');
 }
 
 describe('URL policies', () => {
   it('allows only exact course host, scheme, and path', () => {
-    expect(isCourseUrl(URL)).toBe(true);
-    expect(isCourseUrl('http://solusi.sibermu.ac.id/course/view.php?id=42')).toBe(false);
-    expect(isCourseUrl('https://solusi.sibermu.ac.id.evil.test/course/view.php?id=42')).toBe(false);
-    expect(isCourseUrl('https://solusi.sibermu.ac.id/mod/quiz/attempt.php?attempt=42')).toBe(false);
+    expect(isCourseUrl(URL, ORIGIN)).toBe(true);
+    expect(isCourseUrl('http://solusi.sibermu.ac.id/course/view.php?id=42', ORIGIN)).toBe(false);
+    expect(isCourseUrl('https://solusi.sibermu.ac.id.evil.test/course/view.php?id=42', ORIGIN)).toBe(false);
+    expect(isCourseUrl('https://solusi.sibermu.ac.id/mod/quiz/attempt.php?attempt=42', ORIGIN)).toBe(false);
+  });
+  it('takes the origin from the site registry, not a constant', () => {
+    expect(isCourseUrl('https://moodle.example.edu/course/view.php?id=3', 'https://moodle.example.edu')).toBe(true);
+    expect(isCourseUrl('https://moodle.example.edu/course/view.php?id=3', ORIGIN)).toBe(false);
+    expect(isActivityUrl('https://moodle.example.edu/mod/quiz/view.php?id=7', ORIGIN)).toBe(false);
   });
   it('requires known activity paths and module IDs', () => {
-    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/view.php?id=7')).toBe(true);
-    expect(isActivityUrl('https://evil.test/mod/quiz/view.php?id=7')).toBe(false);
-    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/view.php?id=7&sesskey=secret')).toBe(false);
-    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/attempt.php?id=7')).toBe(false);
+    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/view.php?id=7', ORIGIN)).toBe(true);
+    expect(isActivityUrl('https://evil.test/mod/quiz/view.php?id=7', ORIGIN)).toBe(false);
+    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/view.php?id=7&sesskey=secret', ORIGIN)).toBe(false);
+    expect(isActivityUrl('https://solusi.sibermu.ac.id/mod/quiz/attempt.php?id=7', ORIGIN)).toBe(false);
   });
 });
 
@@ -36,7 +42,7 @@ describe('Moodle course adapter', () => {
     expect(snapshot?.courseName).toBe('Intro to Databases');
     expect(snapshot?.activities.map((a) => a.type)).toEqual(['resource', 'quiz', 'attendance']);
     expect(snapshot?.activities.map((a) => a.completion)).toEqual(['complete', 'incomplete', 'unknown']);
-    expect(isCourseSnapshot(snapshot)).toBe(true);
+    expect(isCourseSnapshot(snapshot, ORIGIN)).toBe(true);
   });
   it('drops incidental or sensitive query strings in stored URLs', () => {
     const doc = html(
@@ -56,7 +62,7 @@ describe('Moodle course adapter', () => {
   it('stores null when the course has no heading', () => {
     const snapshot = parseCourse(html('<p>No course heading</p>'), URL);
     expect(snapshot?.courseName).toBeNull();
-    expect(isCourseSnapshot(snapshot)).toBe(true);
+    expect(isCourseSnapshot(snapshot, ORIGIN)).toBe(true);
   });
   it('maps "Mark as not done" text to complete', () => {
     const doc = html(
@@ -88,16 +94,16 @@ describe('Moodle course adapter', () => {
       { id: '21', title: 'Final quiz', type: 'quiz', url: null, restricted: true },
       { id: '23', type: 'folder', url: 'https://solusi.sibermu.ac.id/mod/folder/view.php?id=23', restricted: false }
     ]);
-    expect(isCourseSnapshot(snapshot)).toBe(true);
+    expect(isCourseSnapshot(snapshot, ORIGIN)).toBe(true);
   });
   it('rejects a stored activity with no URL that is not restricted', () => {
     const doc = html(
       '<h1>Course</h1><li class="activity modtype_quiz" data-id="21"><span class="instancename">Quiz</span></li>'
     );
     const snapshot = parseCourse(doc, URL)!;
-    expect(isCourseSnapshot({ ...snapshot, activities: [{ ...snapshot.activities[0], restricted: false }] })).toBe(
-      false
-    );
+    expect(
+      isCourseSnapshot({ ...snapshot, activities: [{ ...snapshot.activities[0], restricted: false }] }, ORIGIN)
+    ).toBe(false);
   });
   it('strips .accesshide type suffixes from titles', () => {
     const doc =

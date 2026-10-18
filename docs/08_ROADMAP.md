@@ -37,15 +37,17 @@ Goal: trustworthy, green baseline on the pilot site.
 
 **Exit gate:** CI green; unpacked extension loads with no errors; parser fixture tests pass on real sanitized SiberMu HTML; manual QA items 1–8 in `docs/09_TEST_PLAN.md` pass.
 
+Exit review 2026-10-18: met locally (all checks green, owner QA 1–8 passed); CI on the latest `main` pending push. v0.3 started at the owner's request.
+
 ## v0.3 — Multi-instance
 
 Goal: works on any Moodle site the student enables.
 
-- [ ] `optional_host_permissions: ["https://*/*"]`; remove static `content_scripts`.
-- [ ] Site enablement flow: detect Moodle on current tab, request origin permission, register content script with `chrome.scripting.registerContentScripts`.
-- [ ] Moodle detection heuristics (body classes, `M.cfg`-free DOM markers, version hints) with fixtures.
-- [ ] Site registry in storage; per-site data namespace; remove-site action deletes data and revokes permission.
-- [ ] Replace `LMS_ORIGIN` constant with per-site validation everywhere.
+- [x] `optional_host_permissions: ["https://*/*"]`; remove static `content_scripts`.
+- [~] Site enablement flow: detect Moodle on current tab, request origin permission, register content script with `chrome.scripting.registerContentScripts`.
+- [~] Moodle detection heuristics (body classes, `M.cfg`-free DOM markers, version hints) with fixtures.
+- [x] Site registry in storage; per-site data namespace; remove-site action deletes data and revokes permission.
+- [x] Replace `LMS_ORIGIN` constant with per-site validation everywhere.
 - [ ] Onboarding screens EN/ID.
 
 **Exit gate:** enable/disable works on SiberMu plus at least one other Moodle 4.x site (for example a public Moodle demo site); no static host permissions remain; permission request appears only on user click.

@@ -1,5 +1,5 @@
 import type { ActivityType, CompletionStatus, CourseSnapshot, MoodleActivity } from '../../shared/types';
-import { isActivityUrl, isCourseUrl, LMS_ORIGIN, canonicalCourseUrl } from '../../shared/validation';
+import { isActivityUrl, isCourseUrl, canonicalCourseUrl } from '../../shared/validation';
 
 // Candidate selectors only. Real authenticated Moodle page fixtures have NOT been verified.
 const COURSE_HEADING = '.page-header-headings h1, #page-header h1, h1';
@@ -115,8 +115,17 @@ export function parseCourseIndexCompletion(doc: Document, moduleId: string): Com
   return 'unknown';
 }
 
+/** Parses a course page of the site at `urlString`'s origin; the background checks that origin against the registry. */
 export function parseCourse(doc: Document, urlString: string, now = new Date()): CourseSnapshot | null {
-  if (!isCourseUrl(urlString)) return null;
+  let origin: string;
+  try {
+    const parsed = new URL(urlString);
+    if (parsed.protocol !== 'https:') return null;
+    origin = parsed.origin;
+  } catch {
+    return null;
+  }
+  if (!isCourseUrl(urlString, origin)) return null;
   const url = new URL(urlString);
   const courseId = url.searchParams.get('id')!;
   const heading = doc.querySelector(COURSE_HEADING);
@@ -130,7 +139,7 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
     const link = anchors.find((a) => {
       try {
         const u = new URL(a.href);
-        return isActivityUrl(`${u.origin}${u.pathname}?id=${u.searchParams.get('id')}`);
+        return isActivityUrl(`${u.origin}${u.pathname}?id=${u.searchParams.get('id')}`, origin);
       } catch {
         return false;
       }
@@ -155,7 +164,7 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
       courseId,
       title: label,
       type: getType(activityUrl.pathname),
-      url: `${LMS_ORIGIN}${activityUrl.pathname}?id=${id}`,
+      url: `${origin}${activityUrl.pathname}?id=${id}`,
       restricted: false,
       completion: parseCompletion(container)
     });
@@ -163,5 +172,11 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
   for (const activity of activities) {
     if (activity.completion === 'unknown') activity.completion = parseCourseIndexCompletion(doc, activity.id);
   }
-  return { courseId, courseName, sourceUrl: canonicalCourseUrl(urlString)!, capturedAt: now.toISOString(), activities };
+  return {
+    courseId,
+    courseName,
+    sourceUrl: canonicalCourseUrl(urlString, origin)!,
+    capturedAt: now.toISOString(),
+    activities
+  };
 }

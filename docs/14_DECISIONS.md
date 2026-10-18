@@ -77,3 +77,11 @@ Each decision has an ID, status, context, decision and consequences. Agents must
 
 - **Status:** Accepted.
 - **Decision:** MIT. Simple, permissive and widely understood by student contributors. Copyright "Andy Nur and Moodlens contributors"; contributions are accepted under the same license (`CONTRIBUTING.md`).
+
+## D-013 — Site enablement by address, without `tabs` or `activeTab`
+
+- **Status:** Accepted (2026-10-18, v0.3).
+- **Context:** Without `tabs`, `activeTab` or host access, Chrome hides the active tab URL, so the side panel cannot offer "Enable on this site" for a site it cannot see. Whether `activeTab` is granted when the action opens the side panel is unverified (`docs/04_MOODLE_ADAPTER.md` §1).
+- **Decision:** The panel shows an address field ("Moodle site address", prefilled when Chrome exposes the tab URL) and an "Enable on this site" button. The click calls `chrome.permissions.request` for that one HTTPS origin; the background then registers the content script for `<origin>/course/view.php*` and runs `detect.ts` once on the active tab if it is on that origin. No new permission.
+- **Consequences:** One extra step (typing or pasting the address) compared with PRD-007's one-click flow. Revisit with `activeTab` only after it is verified to work with `openPanelOnActionClick`. Site id = origin host (plus non-default port); data lives under `site:<id>:*`; storage `schemaVersion` 2.
+

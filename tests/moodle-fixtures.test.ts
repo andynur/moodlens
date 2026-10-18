@@ -18,7 +18,7 @@ describe('SiberMu course fixtures', () => {
     it(`${name} yields a valid snapshot without type suffixes`, () => {
       const snapshot = parseCourse(load(name), 'https://solusi.sibermu.ac.id/course/view.php?id=1');
       expect(snapshot).not.toBeNull();
-      expect(isCourseSnapshot(snapshot)).toBe(true);
+      expect(isCourseSnapshot(snapshot, 'https://solusi.sibermu.ac.id')).toBe(true);
       expect(snapshot!.activities.length).toBeGreaterThan(0);
       const suffix = / (?:File|Forum|Assignment|Quiz|URL|Attendance|Page)$/;
       expect(snapshot!.activities.filter((a) => suffix.test(a.title))).toEqual([]);
@@ -37,7 +37,7 @@ describe('SiberMu course fixtures', () => {
   });
   it('course-5.html maps automatic Done badges to complete', () => {
     const snapshot = parseCourse(load('course-5.html'), 'https://solusi.sibermu.ac.id/course/view.php?id=1');
-    expect(isCourseSnapshot(snapshot)).toBe(true);
+    expect(isCourseSnapshot(snapshot, 'https://solusi.sibermu.ac.id')).toBe(true);
     const complete = snapshot!.activities.filter((a) => a.completion === 'complete');
     // 3 automatic "Done" dropdowns (url, resource x2). The one manual:undo button sits on a label,
     // which is skipped by design. Matches the live panel count on 2026-10-18.

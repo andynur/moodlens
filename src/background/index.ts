@@ -1,66 +1,79 @@
-import type { ClearDataResponse, CourseSnapshot, SnapshotResponse } from '../shared/types';
+import type { EnableSiteResponse, OkResponse } from '../shared/types';
+import { snapshotKey } from '../shared/sites';
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl } from '../shared/validation';
-
-const SNAPSHOT_KEY = 'lastCourseSnapshot';
+import { migrateStorage } from './migrate';
+import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
 // Keep extension local/session storage inaccessible to lower-trust content scripts.
 void chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 void chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 
+// Every event waits for the storage layout to be current; the worker keeps no other state.
+const ready = migrateStorage(chrome.storage.local).catch(() => undefined);
+const reconcile = () => void ready.then(reconcileScripts).catch(() => undefined);
+
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  reconcile();
 });
+chrome.runtime.onStartup.addListener(reconcile);
+chrome.permissions.onAdded.addListener(reconcile);
+chrome.permissions.onRemoved.addListener(reconcile);
 
-chrome.runtime.onMessage.addListener(
-  (raw: unknown, sender, sendResponse: (value: SnapshotResponse | ClearDataResponse) => void) => {
-    if (!raw || typeof raw !== 'object') return false;
-    const type = (raw as { type?: unknown }).type;
+function fromExtensionPage(sender: chrome.runtime.MessageSender): boolean {
+  return !sender.tab && sender.id === chrome.runtime.id;
+}
 
-    if (type === 'COURSE_SNAPSHOT') {
-      // Only accept content-script messages from the exact authorized LMS course URL.
-      if (!sender.tab || !sender.url || !isCourseUrl(sender.url)) {
-        sendResponse({ ok: false, snapshot: null });
-        return false;
-      }
-      const payload = (raw as { payload?: unknown }).payload;
-      if (!isCourseSnapshot(payload) || payload.sourceUrl !== canonicalCourseUrl(sender.url)) {
-        sendResponse({ ok: false, snapshot: null });
-        return false;
-      }
-      void chrome.storage.local
-        .set({ [SNAPSHOT_KEY]: payload })
-        .then(() => {
-          sendResponse({ ok: true, snapshot: payload });
-        })
-        .catch(() => sendResponse({ ok: false, snapshot: null }));
-      return true;
-    }
-    if (type === 'GET_COURSE_SNAPSHOT') {
-      // Requests must originate from a trusted extension page, never from LMS content scripts.
-      if (sender.tab || sender.id !== chrome.runtime.id) {
-        sendResponse({ ok: false, snapshot: null });
-        return false;
-      }
-      void chrome.storage.local
-        .get(SNAPSHOT_KEY)
-        .then((value) => {
-          const snapshot: CourseSnapshot | null = isCourseSnapshot(value[SNAPSHOT_KEY]) ? value[SNAPSHOT_KEY] : null;
-          sendResponse({ ok: true, snapshot });
-        })
-        .catch(() => sendResponse({ ok: false, snapshot: null }));
-      return true;
-    }
-    if (type === 'CLEAR_LOCAL_DATA') {
-      // Destructive: only an explicit command from a trusted extension page may wipe storage.
-      if (sender.tab || sender.id !== chrome.runtime.id) {
-        sendResponse({ ok: false });
-        return false;
-      }
-      void Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear()])
-        .then(() => sendResponse({ ok: true }))
-        .catch(() => sendResponse({ ok: false }));
-      return true;
-    }
-    return false;
+async function storeSnapshot(payload: unknown, sender: chrome.runtime.MessageSender): Promise<OkResponse> {
+  // Only content scripts on a registered site's course page may report, and only for that page.
+  if (!sender.tab || !sender.url) return { ok: false };
+  const senderOrigin = sender.origin ?? new URL(sender.url).origin;
+  const site = (await loadSites()).find((item) => item.origin === senderOrigin);
+  if (!site || !isCourseUrl(sender.url, site.origin)) return { ok: false };
+  if (!isCourseSnapshot(payload, site.origin) || payload.sourceUrl !== canonicalCourseUrl(sender.url, site.origin)) {
+    return { ok: false };
   }
-);
+  await chrome.storage.local.set({ [snapshotKey(site.id)]: payload });
+  return { ok: true };
+}
+
+async function clearAll(): Promise<OkResponse> {
+  await revokeAllSites();
+  await Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear()]);
+  // Keep the cleared store on the current layout so the next start does not migrate it again.
+  await migrateStorage(chrome.storage.local);
+  return { ok: true };
+}
+
+type Task = () => Promise<OkResponse | EnableSiteResponse>;
+
+/** Picks the work for a message synchronously, so the listener knows whether it will respond. */
+function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const message = raw as Record<string, unknown>;
+  if (message.type === 'COURSE_SNAPSHOT') return () => storeSnapshot(message.payload, sender);
+  const known = ['ENABLE_SITE', 'RENAME_SITE', 'REMOVE_SITE', 'CLEAR_LOCAL_DATA'];
+  if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
+  // Everything below changes the registry or deletes data: trusted extension pages only.
+  if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
+  switch (message.type) {
+    case 'ENABLE_SITE':
+      return () => enableSite(message.origin).then((site) => ({ ok: site !== null, site }));
+    case 'RENAME_SITE':
+      return () => renameSite(message.siteId, message.label).then((ok) => ({ ok }));
+    case 'REMOVE_SITE':
+      return () => removeSite(message.siteId).then((ok) => ({ ok }));
+    default:
+      return clearAll;
+  }
+}
+
+chrome.runtime.onMessage.addListener((raw: unknown, sender, sendResponse: (value: unknown) => void) => {
+  const task = route(raw, sender);
+  if (!task) return false;
+  void ready
+    .then(task)
+    .then(sendResponse)
+    .catch(() => sendResponse({ ok: false }));
+  return true;
+});

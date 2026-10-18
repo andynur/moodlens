@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Changed (v0.3, multi-instance)
+
+- Manifest: no static content script or hardcoded host; adds `scripting` and `optional_host_permissions: ["https://*/*"]` (D-002). Fresh installs have zero host access.
+- Site registry: enable a Moodle site by address (D-013), Moodle detection (`src/content/moodle/detect.ts`), per-site data namespace `site:<id>:*`, rename and remove (remove deletes data, permission and content script). Content scripts are reconciled on install, browser start and permission changes.
+- All URL validators take the site origin; `LMS_ORIGIN` removed. Messages are accepted only from registered origins.
+- Storage `schemaVersion` 2: v0.2 SiberMu snapshot migrates to the first site; host access must be granted again.
+- "Clear all local data" also revokes every site permission and content script.
+
 ### Fixed
 
 - Parser: when an activity has no readable completion badge, read the course index drawer icon (`[data-for="cm_completion"]`, verified live on SiberMu).

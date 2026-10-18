@@ -35,20 +35,20 @@ describe('manifest guard', () => {
     }
   });
   it('matches the approved permission snapshot', () => {
-    expect(manifest.permissions).toEqual(['storage', 'sidePanel']);
+    expect(manifest.permissions).toEqual(['storage', 'sidePanel', 'scripting']);
     expect(manifest.optional_permissions ?? []).toEqual([]);
+    // D-002: zero host access at install; one HTTPS origin is requested at runtime on a user click.
     expect(manifest.host_permissions ?? []).toEqual([]);
-    expect(manifest.optional_host_permissions ?? []).toEqual([]);
-    expect(manifest.content_scripts?.flatMap((script) => script.matches)).toEqual([
-      'https://solusi.sibermu.ac.id/course/view.php*'
-    ]);
+    expect(manifest.optional_host_permissions).toEqual(['https://*/*']);
+    // Content scripts are registered per enabled site, never statically.
+    expect(manifest.content_scripts).toBeUndefined();
   });
   it('contains no forbidden permission or broad host pattern', () => {
+    // The only broad pattern allowed is the optional HTTPS host permission checked above.
     const all = [
       ...(manifest.permissions ?? []),
       ...(manifest.optional_permissions ?? []),
       ...(manifest.host_permissions ?? []),
-      ...(manifest.optional_host_permissions ?? []),
       ...(manifest.content_scripts ?? []).flatMap((script) => script.matches)
     ];
     expect(all.filter((value) => FORBIDDEN.includes(value) || /^\*:\/\/|^https?:\/\/\*\//.test(value))).toEqual([]);

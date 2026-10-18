@@ -1,0 +1,120 @@
+import { detectMoodle, isDetection } from '../content/moodle/detect';
+import { cleanLabel, isSiteList, MAX_SITES, normalizeSiteOrigin, originPattern, siteIdFor } from '../shared/sites';
+import type { Site } from '../shared/types';
+import { isCourseUrl } from '../shared/validation';
+
+const SITES_KEY = 'sites';
+const SCRIPT_PREFIX = 'moodlens-';
+// Course pages only: the parser reads nothing else yet.
+const COURSE_PATH = '/course/view.php*';
+
+export async function loadSites(): Promise<Site[]> {
+  const stored = await chrome.storage.local.get(SITES_KEY);
+  return isSiteList(stored[SITES_KEY]) ? stored[SITES_KEY] : [];
+}
+
+async function saveSites(sites: Site[]): Promise<void> {
+  await chrome.storage.local.set({ [SITES_KEY]: sites });
+}
+
+function hasAccess(origin: string): Promise<boolean> {
+  return chrome.permissions.contains({ origins: [originPattern(origin)] });
+}
+
+function scriptFor(site: Site): chrome.scripting.RegisteredContentScript {
+  return {
+    id: `${SCRIPT_PREFIX}${site.id}`,
+    matches: [`${site.origin}${COURSE_PATH}`],
+    js: ['content.js'],
+    runAt: 'document_idle',
+    persistAcrossSessions: true
+  };
+}
+
+/**
+ * Makes registered content scripts match the registry: one per site with granted access, nothing else.
+ * Runs on install, browser start and permission changes (the student can revoke access in Chrome).
+ */
+export async function reconcileScripts(): Promise<void> {
+  const wanted = new Map<string, chrome.scripting.RegisteredContentScript>();
+  for (const site of await loadSites()) {
+    if (await hasAccess(site.origin)) wanted.set(scriptFor(site).id, scriptFor(site));
+  }
+  const registered = await chrome.scripting.getRegisteredContentScripts();
+  const current = (script: chrome.scripting.RegisteredContentScript) =>
+    script.matches?.join() === wanted.get(script.id)?.matches?.join();
+  const stale = registered.filter((script) => script.id.startsWith(SCRIPT_PREFIX) && !current(script));
+  if (stale.length > 0) await chrome.scripting.unregisterContentScripts({ ids: stale.map((script) => script.id) });
+  const kept = new Set(registered.filter(current).map((script) => script.id));
+  const missing = [...wanted.values()].filter((script) => !kept.has(script.id));
+  if (missing.length > 0) await chrome.scripting.registerContentScripts(missing);
+}
+
+/**
+ * Registers a site after the side panel obtained the origin permission on a user click.
+ * Detection runs once on the active tab when it is on that origin; otherwise it stays unchecked.
+ */
+export async function enableSite(input: unknown, now = new Date()): Promise<Site | null> {
+  const origin = typeof input === 'string' ? normalizeSiteOrigin(input) : null;
+  if (!origin || !(await hasAccess(origin))) return null;
+  const sites = await loadSites();
+  const id = siteIdFor(origin);
+  const existing = sites.find((site) => site.id === id);
+  if (!existing && sites.length >= MAX_SITES) return null;
+  const site: Site = existing ?? { id, origin, label: id, enabledAt: now.toISOString() };
+
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const tabUrl = tab?.url ? new URL(tab.url) : null;
+  if (tab?.id !== undefined && tabUrl?.origin === origin) {
+    try {
+      const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: detectMoodle });
+      const detection: unknown = injection?.result;
+      if (isDetection(detection)) {
+        site.detection = detection.confidence;
+        if (detection.versionHint) site.versionHint = detection.versionHint;
+        else delete site.versionHint;
+      }
+    } catch {
+      // Error pages and pages Chrome protects cannot be scripted; detection stays unchecked.
+    }
+  }
+  await saveSites([...sites.filter((item) => item.id !== id), site]);
+  await reconcileScripts();
+  // Registered scripts only reach pages loaded later; capture the open course page now.
+  if (tab?.id !== undefined && site.detection !== 'none' && tab.url && isCourseUrl(tab.url, origin)) {
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }).catch(() => undefined);
+  }
+  return site;
+}
+
+export async function renameSite(siteId: unknown, input: unknown): Promise<boolean> {
+  const label = cleanLabel(input);
+  const sites = await loadSites();
+  const site = sites.find((item) => item.id === siteId);
+  if (!label || !site) return false;
+  site.label = label;
+  await saveSites(sites);
+  return true;
+}
+
+/** Removes a site: its registry entry, content script, host permission and every `site:<id>:` key. */
+export async function removeSite(siteId: unknown): Promise<boolean> {
+  const sites = await loadSites();
+  const site = sites.find((item) => item.id === siteId);
+  if (!site) return false;
+  await saveSites(sites.filter((item) => item.id !== site.id));
+  const keys = Object.keys(await chrome.storage.local.get(null)).filter((key) => key.startsWith(`site:${site.id}:`));
+  if (keys.length > 0) await chrome.storage.local.remove(keys);
+  await chrome.permissions.remove({ origins: [originPattern(site.origin)] });
+  await reconcileScripts();
+  return true;
+}
+
+/** Revokes every granted origin and unregisters every Moodlens script; used by "Clear all local data". */
+export async function revokeAllSites(): Promise<void> {
+  const { origins = [] } = await chrome.permissions.getAll();
+  if (origins.length > 0) await chrome.permissions.remove({ origins });
+  const registered = await chrome.scripting.getRegisteredContentScripts();
+  const ids = registered.map((script) => script.id).filter((id) => id.startsWith(SCRIPT_PREFIX));
+  if (ids.length > 0) await chrome.scripting.unregisterContentScripts({ ids });
+}

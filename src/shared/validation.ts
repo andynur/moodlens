@@ -1,6 +1,5 @@
 import type { CourseSnapshot, MoodleActivity, ActivityType, CompletionStatus } from './types';
 
-export const LMS_ORIGIN = 'https://solusi.sibermu.ac.id';
 const KNOWN_TYPES: ReadonlySet<string> = new Set<ActivityType>([
   'resource',
   'page',
@@ -16,28 +15,29 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set<ActivityType>([
 ]);
 const KNOWN_COMPLETION: ReadonlySet<string> = new Set<CompletionStatus>(['complete', 'incomplete', 'unknown']);
 
-export function canonicalCourseUrl(input: string): string | null {
-  if (!isCourseUrl(input)) return null;
+// Every URL policy takes the enabled site's origin (from the site registry) instead of a constant (D-002).
+export function canonicalCourseUrl(input: string, origin: string): string | null {
+  if (!isCourseUrl(input, origin)) return null;
   const u = new URL(input);
-  return `${LMS_ORIGIN}/course/view.php?id=${u.searchParams.get('id')}`;
+  return `${origin}/course/view.php?id=${u.searchParams.get('id')}`;
 }
 
-export function isCourseUrl(input: string): boolean {
+export function isCourseUrl(input: string, origin: string): boolean {
   try {
     const url = new URL(input);
     return (
-      url.origin === LMS_ORIGIN && url.pathname === '/course/view.php' && /^\d+$/.test(url.searchParams.get('id') ?? '')
+      url.origin === origin && url.pathname === '/course/view.php' && /^\d+$/.test(url.searchParams.get('id') ?? '')
     );
   } catch {
     return false;
   }
 }
 
-export function isActivityUrl(input: string): boolean {
+export function isActivityUrl(input: string, origin: string): boolean {
   try {
     const url = new URL(input);
     return (
-      url.origin === LMS_ORIGIN &&
+      url.origin === origin &&
       /^\/mod\/(?:resource|page|url|attendance|quiz|forum|assign|folder|book|feedback)\/view\.php$/.test(
         url.pathname
       ) &&
@@ -49,7 +49,7 @@ export function isActivityUrl(input: string): boolean {
   }
 }
 
-function validActivity(input: unknown, courseId: string): input is MoodleActivity {
+function validActivity(input: unknown, courseId: string, origin: string): input is MoodleActivity {
   if (!input || typeof input !== 'object') return false;
   const item = input as Partial<MoodleActivity>;
   return (
@@ -64,16 +64,16 @@ function validActivity(input: unknown, courseId: string): input is MoodleActivit
     typeof item.completion === 'string' &&
     KNOWN_COMPLETION.has(item.completion) &&
     typeof item.restricted === 'boolean' &&
-    (item.url === null ? item.restricted : typeof item.url === 'string' && isActivityUrl(item.url))
+    (item.url === null ? item.restricted : typeof item.url === 'string' && isActivityUrl(item.url, origin))
   );
 }
 
-export function isCourseSnapshot(input: unknown): input is CourseSnapshot {
+export function isCourseSnapshot(input: unknown, origin: string): input is CourseSnapshot {
   if (!input || typeof input !== 'object') return false;
   const s = input as Partial<CourseSnapshot>;
-  if (typeof s.sourceUrl !== 'string' || !isCourseUrl(s.sourceUrl)) return false;
+  if (typeof s.sourceUrl !== 'string' || !isCourseUrl(s.sourceUrl, origin)) return false;
   const actualId = new URL(s.sourceUrl).searchParams.get('id');
-  if (canonicalCourseUrl(s.sourceUrl) !== s.sourceUrl) return false;
+  if (canonicalCourseUrl(s.sourceUrl, origin) !== s.sourceUrl) return false;
   const courseId = s.courseId;
   return (
     typeof courseId === 'string' &&
@@ -85,6 +85,6 @@ export function isCourseSnapshot(input: unknown): input is CourseSnapshot {
     Number.isFinite(Date.parse(s.capturedAt)) &&
     Array.isArray(s.activities) &&
     s.activities.length <= 200 &&
-    s.activities.every((activity) => validActivity(activity, courseId))
+    s.activities.every((activity) => validActivity(activity, courseId, origin))
   );
 }

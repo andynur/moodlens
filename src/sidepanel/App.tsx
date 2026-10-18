@@ -15,12 +15,13 @@ import {
   Lock,
   Trash2
 } from 'lucide-react';
-import type { ClearDataResponse, CourseSnapshot, Locale, Theme, CompletionStatus, ActivityType } from '../shared/types';
+import type { OkResponse, Locale, Site, Theme, CompletionStatus, ActivityType } from '../shared/types';
 import { t, type TranslationKey } from '../shared/i18n';
-import { isActivityUrl, isCourseSnapshot } from '../shared/validation';
+import { isActivityUrl } from '../shared/validation';
+import { SiteAlerts, SiteEnableForm, SitesSettings } from './components/Sites';
+import { hasChrome, useSites } from './useSites';
 
 type Page = 'today' | 'courses' | 'study' | 'settings';
-const hasChrome = typeof chrome !== 'undefined' && Boolean(chrome?.runtime?.id);
 const completionStyle: Record<CompletionStatus, string> = {
   complete: 'text-emerald-600 dark:text-emerald-400',
   incomplete: 'text-amber-600 dark:text-amber-400',
@@ -53,7 +54,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>('system');
   const systemDark = useSystemDark();
   const [page, setPage] = useState<Page>('today');
-  const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
+  const sitesState = useSites();
   const [error, setError] = useState<TranslationKey | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [notice, setNotice] = useState<TranslationKey | null>(null);
@@ -62,21 +63,40 @@ export default function App() {
   useEffect(() => {
     if (!hasChrome) return;
     void chrome.storage.local
-      .get(['locale', 'theme', 'lastCourseSnapshot'])
+      .get(['locale', 'theme'])
       .then((values) => {
         if (values.locale === 'en' || values.locale === 'id') setLocale(values.locale);
         if (values.theme === 'light' || values.theme === 'dark' || values.theme === 'system') setTheme(values.theme);
-        if (isCourseSnapshot(values.lastCourseSnapshot)) setSnapshot(values.lastCourseSnapshot);
       })
       .catch(() => setError('storageError'));
-    const onChange = (changes: { [key: string]: chrome.storage.StorageChange }, area: string) => {
-      if (area === 'local' && changes.lastCourseSnapshot && isCourseSnapshot(changes.lastCourseSnapshot.newValue)) {
-        setSnapshot(changes.lastCourseSnapshot.newValue);
-      }
-    };
-    chrome.storage.onChanged.addListener(onChange);
-    return () => chrome.storage.onChanged.removeListener(onChange);
   }, []);
+  const shownError = error ?? (sitesState.failed ? 'storageError' : null);
+
+  // Show the most recently captured course across all enabled sites.
+  const { snapshot, snapshotSite } = useMemo(() => {
+    let best: { snapshot: (typeof sitesState.snapshots)[string] | null; snapshotSite: Site | null } = {
+      snapshot: null,
+      snapshotSite: null
+    };
+    for (const site of sitesState.sites) {
+      const candidate = sitesState.snapshots[site.id];
+      if (candidate && (!best.snapshot || candidate.capturedAt > best.snapshot.capturedAt)) {
+        best = { snapshot: candidate, snapshotSite: site };
+      }
+    }
+    return best;
+  }, [sitesState]);
+  const feedback = {
+    translate,
+    onNotice: (key: TranslationKey) => {
+      setError(null);
+      setNotice(key);
+    },
+    onError: (key: TranslationKey) => {
+      setNotice(null);
+      setError(key);
+    }
+  };
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -96,22 +116,21 @@ export default function App() {
     if (hasChrome) {
       const response = (await chrome.runtime
         .sendMessage({ type: 'CLEAR_LOCAL_DATA' })
-        .catch(() => null)) as ClearDataResponse | null;
+        .catch(() => null)) as OkResponse | null;
       if (!response?.ok) {
         setError('clearDataError');
         return;
       }
     }
-    // Return to first-run state: defaults, no snapshot, first page.
+    // Return to first-run state: defaults, first page. Sites and snapshots reload from the cleared storage.
     setLocale('en');
     setTheme('system');
-    setSnapshot(null);
     setError(null);
     setPage('today');
     setNotice('clearDataDone');
   }
   function openActivity(url: string) {
-    if (!isActivityUrl(url)) {
+    if (!snapshotSite || !isActivityUrl(url, snapshotSite.origin)) {
       setError('noNavigation');
       return;
     }
@@ -203,13 +222,19 @@ export default function App() {
             {translate(notice)}
           </p>
         )}
-        {error && (
+        {shownError && (
           <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-            {translate(error)}
+            {translate(shownError)}
           </p>
         )}
         {(page === 'today' || page === 'courses') && (
           <>
+            {hasChrome && sitesState.sites.length === 0 && (
+              <section className="rounded-xl border border-blue-200 bg-white p-4 shadow-xs dark:border-blue-900 dark:bg-slate-900">
+                <SiteEnableForm {...feedback} />
+              </section>
+            )}
+            <SiteAlerts state={sitesState} {...feedback} />
             <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
                 {translate('currentCourse')}
@@ -217,6 +242,9 @@ export default function App() {
               <h2 className="mt-2 text-lg font-bold">
                 {snapshot ? (snapshot.courseName ?? translate('untitledCourse')) : translate('ready')}
               </h2>
+              {snapshotSite && (
+                <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">{snapshotSite.label}</p>
+              )}
               {snapshot ? (
                 <>
                   <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">
@@ -354,6 +382,11 @@ export default function App() {
                 ))}
               </div>
             </div>
+            {hasChrome && (
+              <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                <SitesSettings state={sitesState} {...feedback} />
+              </div>
+            )}
             <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
               <p className="text-xs font-semibold">{translate('clearData')}</p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('clearDataHint')}</p>

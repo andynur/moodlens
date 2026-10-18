@@ -1,7 +1,7 @@
 import { parseCourse } from './moodle/adapter';
 import type { IncomingMessage } from '../shared/types';
 
-// Only the allowlisted course page matches this content script in manifest.json.
+// Registered by the background only for course pages of sites the student enabled (D-002).
 function capture(): void {
   const snapshot = parseCourse(document, location.href);
   if (!snapshot) return;
