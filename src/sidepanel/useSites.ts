@@ -1,4 +1,15 @@
 import { useEffect, useState } from 'react';
+import { appearanceKey, isAppearancePrefs, type AppearancePrefs } from '../shared/appearance';
+import {
+  coursePrefsKey,
+  courseRecordsKey,
+  isCoursePrefsMap,
+  isCourseRecords,
+  withLastSnapshot,
+  type CoursePrefs,
+  type CoursePrefsMap,
+  type CourseRecords
+} from '../shared/courses';
 import { isSiteList, originPattern, snapshotKey } from '../shared/sites';
 import type { CourseSnapshot, EnableSiteResponse, OkResponse, Site } from '../shared/types';
 import { normalizeSiteOrigin } from '../shared/sites';
@@ -10,25 +21,57 @@ export interface SitesState {
   sites: Site[];
   /** Latest validated snapshot per site id. */
   snapshots: Record<string, CourseSnapshot>;
+  /** What's new records per site id, including the last viewed course. */
+  records: Record<string, CourseRecords>;
+  /** Moodle page appearance per site id (ML-018). */
+  appearance: Record<string, AppearancePrefs>;
+  /** Personalization per site id. */
+  prefs: Record<string, CoursePrefsMap>;
   /** Whether Chrome still grants host access per site id; the student can revoke it outside Moodlens. */
   access: Record<string, boolean>;
   failed: boolean;
 }
 
-const EMPTY: SitesState = { sites: [], snapshots: {}, access: {}, failed: false };
+const EMPTY: SitesState = {
+  sites: [],
+  snapshots: {},
+  records: {},
+  prefs: {},
+  appearance: {},
+  access: {},
+  failed: false
+};
 
 async function readState(): Promise<SitesState> {
   const stored = await chrome.storage.local.get('sites');
   const sites = isSiteList(stored.sites) ? stored.sites : [];
-  const values = sites.length > 0 ? await chrome.storage.local.get(sites.map((site) => snapshotKey(site.id))) : {};
+  const keys = sites.flatMap((site) => [
+    snapshotKey(site.id),
+    courseRecordsKey(site.id),
+    coursePrefsKey(site.id),
+    appearanceKey(site.id)
+  ]);
+  const values = keys.length > 0 ? await chrome.storage.local.get(keys) : {};
   const snapshots: Record<string, CourseSnapshot> = {};
+  const records: Record<string, CourseRecords> = {};
+  const prefs: Record<string, CoursePrefsMap> = {};
+  const appearance: Record<string, AppearancePrefs> = {};
   const access: Record<string, boolean> = {};
   for (const site of sites) {
     const value: unknown = values[snapshotKey(site.id)];
     if (isCourseSnapshot(value, site.origin)) snapshots[site.id] = value;
+    const siteRecords: unknown = values[courseRecordsKey(site.id)];
+    records[site.id] = withLastSnapshot(
+      isCourseRecords(siteRecords, site.origin) ? siteRecords : {},
+      snapshots[site.id] ?? null
+    );
+    const sitePrefs: unknown = values[coursePrefsKey(site.id)];
+    prefs[site.id] = isCoursePrefsMap(sitePrefs) ? sitePrefs : {};
+    const siteAppearance: unknown = values[appearanceKey(site.id)];
+    appearance[site.id] = isAppearancePrefs(siteAppearance) ? siteAppearance : {};
     access[site.id] = await chrome.permissions.contains({ origins: [originPattern(site.origin)] });
   }
-  return { sites, snapshots, access, failed: false };
+  return { sites, snapshots, records, prefs, appearance, access, failed: false };
 }
 
 /** Site registry, snapshots and access, kept current from storage and permission events. */
@@ -77,11 +120,15 @@ export async function enableSiteFromInput(input: string): Promise<EnableOutcome>
   return response?.ok && response.site ? { kind: 'enabled', site: response.site } : { kind: 'error' };
 }
 
-export async function sendSiteCommand(message: {
-  type: 'RENAME_SITE' | 'REMOVE_SITE';
-  siteId: string;
-  label?: string;
-}) {
+export async function sendSiteCommand(
+  message:
+    | { type: 'RENAME_SITE' | 'REMOVE_SITE'; siteId: string; label?: string }
+    | { type: 'MARK_COURSE_SEEN'; siteId: string; courseId: string }
+    | { type: 'SET_COURSE_PREFS'; siteId: string; courseId: string; prefs: CoursePrefs }
+    | { type: 'MOVE_COURSE'; siteId: string; courseId: string; direction: 'up' | 'down' }
+    | { type: 'IMPORT_BACKUP'; backup: unknown }
+    | { type: 'SET_APPEARANCE'; siteId: string; appearance: AppearancePrefs }
+) {
   const response = (await chrome.runtime.sendMessage(message).catch(() => null)) as OkResponse | null;
   return response?.ok === true;
 }

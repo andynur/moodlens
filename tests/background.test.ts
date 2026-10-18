@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createChromeStub } from './chrome-stub';
 import { parseCourse } from '../src/content/moodle/adapter';
@@ -184,5 +185,138 @@ describe('CLEAR_LOCAL_DATA', () => {
   it('reports failure when storage cannot be cleared', async () => {
     stub.chromeStub.storage.local.clear.mockImplementationOnce(() => Promise.reject(new Error('quota')));
     await expect(stub.send({ type: 'CLEAR_LOCAL_DATA' }, page)).resolves.toEqual({ ok: false });
+  });
+});
+
+describe('course records, prefs and backup', () => {
+  const siteId = 'moodle-a.example.edu';
+  const recordsKey = `site:${siteId}:snapshots`;
+  const prefsKey = `site:${siteId}:courses`;
+  async function capture(courseId = '5') {
+    return stub.send({ type: 'COURSE_SNAPSHOT', payload: snapshot(A, courseId) }, fromContent(A, courseId));
+  }
+
+  it("stores each captured course in the what's new records", async () => {
+    await enable(A);
+    await capture('5');
+    await capture('6');
+    expect(Object.keys(stub.local.get(recordsKey) as object).sort()).toEqual(['5', '6']);
+  });
+  it('MARK_COURSE_SEEN and SET_COURSE_PREFS accept only known courses from extension pages', async () => {
+    await enable(A);
+    await capture('5');
+    await expect(stub.send({ type: 'MARK_COURSE_SEEN', siteId, courseId: '5' }, page)).resolves.toEqual({ ok: true });
+    await expect(stub.send({ type: 'MARK_COURSE_SEEN', siteId, courseId: '9' }, page)).resolves.toEqual({ ok: false });
+    const prefs = { type: 'SET_COURSE_PREFS', siteId, courseId: '5', prefs: { pinned: true, nickname: ' Calc ' } };
+    await expect(stub.send(prefs, fromContent(A))).resolves.toEqual({ ok: false });
+    await expect(stub.send(prefs, page)).resolves.toEqual({ ok: true });
+    expect(stub.local.get(prefsKey)).toEqual({ '5': { pinned: true, nickname: 'Calc' } });
+    await expect(stub.send({ ...prefs, prefs: { color: 'neon' } }, page)).resolves.toEqual({ ok: false });
+    await expect(stub.send({ ...prefs, prefs: {} }, page)).resolves.toEqual({ ok: true });
+    expect(stub.local.get(prefsKey)).toEqual({});
+  });
+  it('MOVE_COURSE stores positions and keeps them when prefs change', async () => {
+    await enable(A);
+    await capture('5');
+    await capture('6');
+    await stub.send({ type: 'MOVE_COURSE', siteId, courseId: '5', direction: 'up' }, page);
+    expect(stub.local.get(prefsKey)).toEqual({ '5': { position: 0 }, '6': { position: 1 } });
+    await stub.send({ type: 'SET_COURSE_PREFS', siteId, courseId: '5', prefs: { hidden: true, position: 9 } }, page);
+    expect((stub.local.get(prefsKey) as Record<string, unknown>)['5']).toEqual({ hidden: true, position: 0 });
+  });
+  it('REMOVE_SITE deletes records and prefs too', async () => {
+    await enable(A);
+    await capture('5');
+    await stub.send({ type: 'SET_COURSE_PREFS', siteId, courseId: '5', prefs: { pinned: true } }, page);
+    await stub.send({ type: 'REMOVE_SITE', siteId }, page);
+    expect(stub.local.has(recordsKey)).toBe(false);
+    expect(stub.local.has(prefsKey)).toBe(false);
+  });
+  it('backup round-trip restores the same state and keeps access only for listed sites', async () => {
+    await enable(A);
+    await enable(B);
+    await capture('5');
+    stub.local.set('theme', 'dark');
+    const exported = (await stub.send({ type: 'EXPORT_BACKUP' }, page)) as { ok: boolean; backup: unknown };
+    expect(exported.ok).toBe(true);
+    const before = Object.fromEntries(stub.local);
+    await stub.send({ type: 'REMOVE_SITE', siteId: 'moodle-b.example.edu' }, page);
+    stub.granted.add('https://unrelated.example.edu/*');
+    stub.local.set('theme', 'light');
+    await expect(stub.send({ type: 'IMPORT_BACKUP', backup: exported.backup }, page)).resolves.toEqual({ ok: true });
+    expect(Object.fromEntries(stub.local)).toEqual({ ...before, schemaVersion: 2 });
+    expect([...stub.granted]).toEqual([`${A}/*`]);
+    expect([...stub.scripts.keys()]).toEqual(['moodlens-moodle-a.example.edu']);
+  });
+  it('rejects an invalid backup without touching data, and content-script exports', async () => {
+    await enable(A);
+    await expect(stub.send({ type: 'IMPORT_BACKUP', backup: { format: 'x' } }, page)).resolves.toEqual({ ok: false });
+    expect(stub.local.has('sites')).toBe(true);
+    await expect(stub.send({ type: 'EXPORT_BACKUP' }, fromContent(A))).resolves.toEqual({ ok: false });
+  });
+});
+
+describe('SET_APPEARANCE / GET_APPEARANCE (ML-018)', () => {
+  const siteId = 'moodle-a.example.edu';
+  const appearanceId = `moodlens-appearance-${siteId}`;
+  it('registers the appearance script only while an option is on, and updates open tabs', async () => {
+    await enable(A);
+    stub.state.activeTab = { id: 4, url: `${A}/my/` } as chrome.tabs.Tab;
+    stub.state.tabListening = true;
+    await expect(stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { dark: true } }, page)).resolves.toEqual({
+      ok: true
+    });
+    expect(stub.scripts.get(appearanceId)).toMatchObject({
+      matches: [`${A}/*`],
+      js: ['appearance.js'],
+      css: ['appearance.css'],
+      runAt: 'document_start'
+    });
+    expect(stub.tabMessages).toHaveBeenLastCalledWith(4, { type: 'APPEARANCE', appearance: { dark: true } });
+    await stub.send({ type: 'SET_APPEARANCE', siteId, appearance: {} }, page);
+    expect(stub.scripts.has(appearanceId)).toBe(false);
+    expect(stub.local.has(`site:${siteId}:appearance`)).toBe(false);
+    expect(stub.tabMessages).toHaveBeenLastCalledWith(4, { type: 'APPEARANCE', appearance: {} });
+  });
+  it('injects into open tabs that do not have the script yet', async () => {
+    await enable(A);
+    stub.state.activeTab = { id: 4, url: `${A}/my/` } as chrome.tabs.Tab;
+    stub.executeScript.mockClear();
+    await stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { largeText: true } }, page);
+    expect(stub.chromeStub.scripting.insertCSS).toHaveBeenCalledWith({
+      target: { tabId: 4 },
+      files: ['appearance.css']
+    });
+    expect(stub.executeScript).toHaveBeenCalledWith({ target: { tabId: 4 }, files: ['appearance.js'] });
+  });
+  it('rejects invalid options, unknown sites and content senders', async () => {
+    await enable(A);
+    await expect(stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { css: 'x' } }, page)).resolves.toEqual({
+      ok: false
+    });
+    await expect(stub.send({ type: 'SET_APPEARANCE', siteId: 'x.example', appearance: {} }, page)).resolves.toEqual({
+      ok: false
+    });
+    await expect(
+      stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { dark: true } }, fromContent(A))
+    ).resolves.toEqual({ ok: false });
+  });
+  it('answers GET_APPEARANCE only for registered origins', async () => {
+    await enable(A);
+    await stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { comfortableWidth: true } }, page);
+    await expect(stub.send({ type: 'GET_APPEARANCE' }, fromContent(A))).resolves.toEqual({
+      ok: true,
+      appearance: { comfortableWidth: true }
+    });
+    await expect(stub.send({ type: 'GET_APPEARANCE' }, fromContent(B))).resolves.toEqual({ ok: false, appearance: {} });
+  });
+  it('REMOVE_SITE resets open tabs and drops the appearance script', async () => {
+    await enable(A);
+    await stub.send({ type: 'SET_APPEARANCE', siteId, appearance: { dark: true } }, page);
+    stub.state.activeTab = { id: 4, url: `${A}/my/` } as chrome.tabs.Tab;
+    stub.state.tabListening = true;
+    await stub.send({ type: 'REMOVE_SITE', siteId }, page);
+    expect(stub.tabMessages).toHaveBeenLastCalledWith(4, { type: 'APPEARANCE', appearance: {} });
+    expect(stub.scripts.has(appearanceId)).toBe(false);
   });
 });

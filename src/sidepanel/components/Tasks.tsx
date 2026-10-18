@@ -32,7 +32,8 @@ function saveIcs(content: string): void {
   URL.revokeObjectURL(url);
 }
 
-export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) {
+/** `hidden` holds `<siteId>/<courseId>` keys of courses the student hid (PRD-009); they stay in storage. */
+export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Locale; hidden: ReadonlySet<string> }) {
   const datasets = useTaskData(sites);
   const [siteId, setSiteId] = useState('');
   const [courseKey, setCourseKey] = useState('');
@@ -41,7 +42,10 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState('');
   const [reminders, setReminders] = useState(DEFAULT_REMINDER_PREFS);
-  const all = useMemo(() => mergeTaskDatasets(Object.values(datasets)), [datasets]);
+  const all = useMemo(
+    () => mergeTaskDatasets(Object.values(datasets)).filter((task) => !hidden.has(`${task.siteId}/${task.courseId}`)),
+    [datasets, hidden]
+  );
   const shown = useMemo(() => {
     const filtered = filterTasks(all, {
       siteId: siteId || undefined,
@@ -50,7 +54,9 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
     });
     return courseKey ? filtered.filter((task) => `${task.siteId}:${task.courseId}` === courseKey) : filtered;
   }, [all, siteId, courseKey, kind, search]);
-  const courses = Object.values(datasets).flatMap((dataset) => dataset.courses);
+  const courses = Object.values(datasets)
+    .flatMap((dataset) => dataset.courses)
+    .filter((course) => !hidden.has(`${course.siteId}/${course.id}`));
   const courseName = new Map(courses.map((course) => [`${course.siteId}:${course.id}`, course.name]));
   const siteName = new Map(sites.map((site) => [site.id, site.label]));
   const datasetList = Object.values(datasets).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));

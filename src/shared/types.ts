@@ -79,7 +79,14 @@ export type IncomingMessage =
   | { type: 'ENABLE_SITE'; origin: string }
   | { type: 'RENAME_SITE'; siteId: string; label: string }
   | { type: 'REMOVE_SITE'; siteId: string }
-  | { type: 'CLEAR_LOCAL_DATA' };
+  | { type: 'CLEAR_LOCAL_DATA' }
+  | { type: 'MARK_COURSE_SEEN'; siteId: string; courseId: string }
+  | { type: 'SET_COURSE_PREFS'; siteId: string; courseId: string; prefs: unknown }
+  | { type: 'MOVE_COURSE'; siteId: string; courseId: string; direction: 'up' | 'down' }
+  | { type: 'EXPORT_BACKUP' }
+  | { type: 'IMPORT_BACKUP'; backup: unknown }
+  | { type: 'GET_APPEARANCE' }
+  | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;
 }
@@ -88,6 +95,10 @@ export interface TaskCaptureClaimResponse {
   due: boolean;
   siteId?: string;
   unsupported?: TaskAjaxCapability[];
+}
+export interface ExportBackupResponse {
+  ok: boolean;
+  backup: unknown;
 }
 export interface EnableSiteResponse {
   ok: boolean;

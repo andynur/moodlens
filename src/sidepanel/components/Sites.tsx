@@ -4,7 +4,7 @@ import type { TranslationKey } from '../../shared/i18n';
 import type { DetectionConfidence, Site } from '../../shared/types';
 import { activeTabOrigin, enableSiteFromInput, sendSiteCommand, type SitesState } from '../useSites';
 
-interface Feedback {
+export interface Feedback {
   translate: (key: TranslationKey) => string;
   onNotice: (key: TranslationKey) => void;
   onError: (key: TranslationKey) => void;

@@ -1,9 +1,13 @@
-import type { EnableSiteResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
+import type { EnableSiteResponse, ExportBackupResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
 import { claimRollingWindow } from '../shared/rateLimit';
-import { snapshotKey, taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from '../shared/sites';
+import { taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from '../shared/sites';
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
+import { appearanceFor, setAppearance } from './appearance';
+import { exportBackup, importBackup } from './backup';
+import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from './courses';
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
+import { deleteStudyDb } from './studyStore';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
 // Keep extension local/session storage inaccessible to lower-trust content scripts.
@@ -42,7 +46,7 @@ async function storeSnapshot(payload: unknown, sender: chrome.runtime.MessageSen
   if (!isCourseSnapshot(payload, site.origin) || payload.sourceUrl !== canonicalCourseUrl(sender.url, site.origin)) {
     return { ok: false };
   }
-  await chrome.storage.local.set({ [snapshotKey(site.id)]: payload });
+  await saveSnapshot(site, payload);
   return { ok: true };
 }
 
@@ -106,13 +110,21 @@ async function storeTaskDataset(payload: unknown, sender: chrome.runtime.Message
 async function clearAll(): Promise<OkResponse> {
   await revokeAllSites();
   await clearReminderAlarms();
-  await Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear()]);
+  await Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear(), deleteStudyDb()]);
   // Keep the cleared store on the current layout so the next start does not migrate it again.
   await migrateStorage(chrome.storage.local);
   return { ok: true };
 }
 
-type Task = () => Promise<OkResponse | EnableSiteResponse | TaskCaptureClaimResponse>;
+type Task = () => Promise<OkResponse | EnableSiteResponse | ExportBackupResponse | TaskCaptureClaimResponse>;
+
+// Tasks run one at a time: several read-modify-write the same per-site keys.
+let queue: Promise<unknown> = Promise.resolve();
+function serialized<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => undefined);
+  return run;
+}
 
 /** Picks the work for a message synchronously, so the listener knows whether it will respond. */
 function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null {
@@ -121,15 +133,22 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
   if (message.type === 'COURSE_SNAPSHOT') return () => storeSnapshot(message.payload, sender);
   if (message.type === 'TASK_CAPTURE_CLAIM') return () => claimTaskCapture(message.force, sender);
   if (message.type === 'TASK_DATASET') return () => storeTaskDataset(message.payload, sender);
+  if (message.type === 'GET_APPEARANCE') return () => appearanceFor(sender);
   const known = [
     'ENABLE_SITE',
     'RENAME_SITE',
     'REMOVE_SITE',
     'CLEAR_LOCAL_DATA',
+    'MARK_COURSE_SEEN',
+    'SET_COURSE_PREFS',
+    'MOVE_COURSE',
+    'EXPORT_BACKUP',
+    'IMPORT_BACKUP',
+    'SET_APPEARANCE',
     'SET_REMINDERS'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
-  // Everything below changes the registry or deletes data: trusted extension pages only.
+  // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
     case 'ENABLE_SITE':
@@ -142,6 +161,18 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
           if (ok) await syncReminders();
           return { ok };
         });
+    case 'MARK_COURSE_SEEN':
+      return () => markCourseSeen(message.siteId, message.courseId).then((ok) => ({ ok }));
+    case 'SET_COURSE_PREFS':
+      return () => setCoursePrefs(message.siteId, message.courseId, message.prefs).then((ok) => ({ ok }));
+    case 'MOVE_COURSE':
+      return () => moveCourseOrder(message.siteId, message.courseId, message.direction).then((ok) => ({ ok }));
+    case 'EXPORT_BACKUP':
+      return () => exportBackup().then((backup) => ({ ok: true, backup }));
+    case 'SET_APPEARANCE':
+      return () => setAppearance(message.siteId, message.appearance).then((ok) => ({ ok }));
+    case 'IMPORT_BACKUP':
+      return () => importBackup(message.backup).then((ok) => ({ ok }));
     case 'SET_REMINDERS':
       return () => setReminderPrefs(message.prefs).then((ok) => ({ ok }));
     default:
@@ -153,7 +184,7 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender, sendResponse: (value
   const task = route(raw, sender);
   if (!task) return false;
   void ready
-    .then(task)
+    .then(() => serialized(task))
     .then(sendResponse)
     .catch(() => sendResponse({ ok: false }));
   return true;

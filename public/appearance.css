@@ -1,0 +1,29 @@
+/* Moodlens appearance for Moodle pages (ML-018). Every rule is scoped to a class or attribute that
+   src/content/appearance.ts sets on <html>; without them this file changes nothing. */
+
+/* Dark mode: theme-independent inversion; media is inverted back so photos and video look normal. */
+html.moodlens-dark {
+  filter: invert(1) hue-rotate(180deg);
+  background: #fff;
+}
+html.moodlens-dark :is(img, picture, video, canvas, iframe, embed, object, [style*='background-image']) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Larger text: Moodle themes size text in rem, so scaling the root scales the page. */
+html.moodlens-large-text {
+  font-size: 112.5% !important;
+}
+
+/* Comfortable line width for reading text in the main region. */
+html.moodlens-width #region-main :is(p, li, dd, blockquote, .no-overflow) {
+  max-width: 72ch;
+}
+
+/* Reduced clutter: only blocks from the fixed list in src/shared/appearance.ts. */
+html[data-moodlens-hide~='online_users'] .block_online_users,
+html[data-moodlens-hide~='calendar_month'] .block_calendar_month,
+html[data-moodlens-hide~='recentlyaccesseditems'] .block_recentlyaccesseditems,
+html[data-moodlens-hide~='badges'] .block_badges {
+  display: none !important;
+}

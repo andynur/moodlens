@@ -1,6 +1,8 @@
 import { detectMoodle, isDetection } from '../content/moodle/detect';
 import { cleanLabel, isSiteList, MAX_SITES, normalizeSiteOrigin, originPattern, siteIdFor } from '../shared/sites';
 import type { Site } from '../shared/types';
+import { appearanceActive, appearanceKey, isAppearancePrefs } from '../shared/appearance';
+import { removeSiteStudyData } from './studyStore';
 
 const SITES_KEY = 'sites';
 const SCRIPT_PREFIX = 'moodlens-';
@@ -29,14 +31,37 @@ function scriptFor(site: Site): chrome.scripting.RegisteredContentScript {
   };
 }
 
+const APPEARANCE_PREFIX = `${SCRIPT_PREFIX}appearance-`;
+
+/** Appearance script (ML-018): early, so pages do not flash before the options apply. */
+function appearanceScriptFor(site: Site): chrome.scripting.RegisteredContentScript {
+  return {
+    id: `${APPEARANCE_PREFIX}${site.id}`,
+    matches: [`${site.origin}${ENABLED_ORIGIN_PATH}`],
+    js: ['appearance.js'],
+    css: ['appearance.css'],
+    runAt: 'document_start',
+    persistAcrossSessions: true
+  };
+}
+
+async function wantsAppearance(site: Site): Promise<boolean> {
+  const key = appearanceKey(site.id);
+  const value: unknown = (await chrome.storage.local.get(key))[key];
+  return isAppearancePrefs(value) && appearanceActive(value);
+}
+
 /**
- * Makes registered content scripts match the registry: one per site with granted access, nothing else.
+ * Makes registered content scripts match the registry: one per site with granted access, plus an
+ * appearance script for sites with an appearance option on, nothing else.
  * Runs on install, browser start and permission changes (the student can revoke access in Chrome).
  */
 export async function reconcileScripts(): Promise<void> {
   const wanted = new Map<string, chrome.scripting.RegisteredContentScript>();
   for (const site of await loadSites()) {
-    if (await hasAccess(site.origin)) wanted.set(scriptFor(site).id, scriptFor(site));
+    if (!(await hasAccess(site.origin))) continue;
+    wanted.set(scriptFor(site).id, scriptFor(site));
+    if (await wantsAppearance(site)) wanted.set(appearanceScriptFor(site).id, appearanceScriptFor(site));
   }
   const registered = await chrome.scripting.getRegisteredContentScripts();
   const current = (script: chrome.scripting.RegisteredContentScript) =>
@@ -85,6 +110,11 @@ export async function enableSite(input: unknown, now = new Date()): Promise<Site
   return site;
 }
 
+/** Open tabs of a site; needs only the site's host permission, not `tabs`. */
+export async function siteTabs(site: Site): Promise<chrome.tabs.Tab[]> {
+  return chrome.tabs.query({ url: `${site.origin}${ENABLED_ORIGIN_PATH}` }).catch(() => []);
+}
+
 export async function renameSite(siteId: unknown, input: unknown): Promise<boolean> {
   const label = cleanLabel(input);
   const sites = await loadSites();
@@ -96,10 +126,22 @@ export async function renameSite(siteId: unknown, input: unknown): Promise<boole
 }
 
 /** Removes a site: its registry entry, content script, host permission and every `site:<id>:` key. */
+/** Clears appearance classes in a site's open tabs; tabs without the appearance script ignore it. */
+export async function resetAppearanceTabs(site: Site): Promise<void> {
+  for (const tab of await siteTabs(site)) {
+    if (tab.id !== undefined)
+      await chrome.tabs.sendMessage(tab.id, { type: 'APPEARANCE', appearance: {} }).catch(() => undefined);
+  }
+}
+
 export async function removeSite(siteId: unknown): Promise<boolean> {
   const sites = await loadSites();
   const site = sites.find((item) => item.id === siteId);
   if (!site) return false;
+  // Before access is revoked: afterwards Chrome no longer lists the site's tabs.
+  await resetAppearanceTabs(site);
+  // Study data goes first: if IndexedDB fails, the site stays listed and the student can retry.
+  await removeSiteStudyData(site.id);
   await saveSites(sites.filter((item) => item.id !== site.id));
   const keys = Object.keys(await chrome.storage.local.get(null)).filter((key) => key.startsWith(`site:${site.id}:`));
   if (keys.length > 0) await chrome.storage.local.remove(keys);
@@ -110,6 +152,7 @@ export async function removeSite(siteId: unknown): Promise<boolean> {
 
 /** Revokes every granted origin and unregisters every Moodlens script; used by "Clear all local data". */
 export async function revokeAllSites(): Promise<void> {
+  for (const site of await loadSites()) await resetAppearanceTabs(site);
   const { origins = [] } = await chrome.permissions.getAll();
   if (origins.length > 0) await chrome.permissions.remove({ origins });
   const registered = await chrome.scripting.getRegisteredContentScripts();
