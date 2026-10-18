@@ -42,6 +42,10 @@ export function taskFetchKey(siteId: string): string {
   return `site:${siteId}:taskFetchAt`;
 }
 
+export function taskFetchRateKey(siteId: string): string {
+  return `site:${siteId}:taskFetchRate`;
+}
+
 export function isSite(input: unknown): input is Site {
   if (!input || typeof input !== 'object') return false;
   const site = input as Partial<Site>;

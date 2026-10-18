@@ -1,5 +1,6 @@
 import type { EnableSiteResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
-import { snapshotKey, taskDataKey, taskFetchKey } from '../shared/sites';
+import { claimRollingWindow } from '../shared/rateLimit';
+import { snapshotKey, taskDataKey, taskFetchKey, taskFetchRateKey } from '../shared/sites';
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
@@ -46,6 +47,9 @@ async function storeSnapshot(payload: unknown, sender: chrome.runtime.MessageSen
 }
 
 const TASK_FETCH_INTERVAL_MS = 15 * 60 * 1000;
+const TASK_FETCH_RATE_WINDOW_MS = 60 * 1000;
+// Each capture makes at most two allowlisted AJAX calls, preserving D-003's 10 calls/minute/site cap.
+const TASK_FETCH_RATE_MAX = 5;
 
 async function senderSite(sender: chrome.runtime.MessageSender) {
   if (!sender.tab || !sender.url) return null;
@@ -60,13 +64,17 @@ async function claimTaskCapture(
 ): Promise<TaskCaptureClaimResponse> {
   const site = await senderSite(sender);
   if (!site) return { ok: false, due: false };
-  const key = taskFetchKey(site.id);
-  const stored = await chrome.storage.local.get(key);
-  const previous = typeof stored[key] === 'string' ? Date.parse(stored[key] as string) : NaN;
+  const fetchKey = taskFetchKey(site.id);
+  const rateKey = taskFetchRateKey(site.id);
+  const stored = await chrome.storage.local.get([fetchKey, rateKey]);
+  const previous = typeof stored[fetchKey] === 'string' ? Date.parse(stored[fetchKey] as string) : NaN;
   const now = Date.now();
   const due = force === true || !Number.isFinite(previous) || now - previous >= TASK_FETCH_INTERVAL_MS;
-  if (due) await chrome.storage.local.set({ [key]: new Date(now).toISOString() });
-  return { ok: true, due, siteId: site.id };
+  if (!due) return { ok: true, due: false, siteId: site.id };
+  const rate = claimRollingWindow(stored[rateKey], now, TASK_FETCH_RATE_MAX, TASK_FETCH_RATE_WINDOW_MS);
+  if (!rate.allowed) return { ok: true, due: false, siteId: site.id };
+  await chrome.storage.local.set({ [fetchKey]: new Date(now).toISOString(), [rateKey]: rate.timestamps });
+  return { ok: true, due: true, siteId: site.id };
 }
 
 async function storeTaskDataset(payload: unknown, sender: chrome.runtime.MessageSender): Promise<OkResponse> {
@@ -111,7 +119,11 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     case 'RENAME_SITE':
       return () => renameSite(message.siteId, message.label).then((ok) => ({ ok }));
     case 'REMOVE_SITE':
-      return () => removeSite(message.siteId).then((ok) => ({ ok }));
+      return () =>
+        removeSite(message.siteId).then(async (ok) => {
+          if (ok) await syncReminders();
+          return { ok };
+        });
     case 'SET_REMINDERS':
       return () => setReminderPrefs(message.prefs).then((ok) => ({ ok }));
     default:
