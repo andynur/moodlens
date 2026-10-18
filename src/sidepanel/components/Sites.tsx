@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Globe, KeyRound, Pencil, Trash2 } from 'lucide-react';
+import { Globe, KeyRound, Pencil, Server, Trash2, TriangleAlert } from 'lucide-react';
 import type { TranslationKey } from '../../shared/i18n';
 import type { DetectionConfidence, Site } from '../../shared/types';
 import { activeTabOrigin, enableSiteFromInput, sendSiteCommand, type SitesState } from '../useSites';
+import { Alert, Badge, Button, CardTitle, Field, Hint, Input, type Tone } from '../ui';
 
 export interface Feedback {
   translate: (key: TranslationKey) => string;
@@ -15,6 +16,12 @@ const detectionLabel: Record<DetectionConfidence | 'unchecked', TranslationKey> 
   low: 'detectionLow',
   none: 'detectionNone',
   unchecked: 'detectionUnchecked'
+};
+const detectionTone: Record<DetectionConfidence | 'unchecked', Tone> = {
+  high: 'mint',
+  low: 'yellow',
+  none: 'rose',
+  unchecked: 'neutral'
 };
 
 /** Message shown after enabling; low and absent Moodle markers are warnings, not success. */
@@ -39,10 +46,6 @@ async function enable(input: string, feedback: Feedback): Promise<boolean> {
   return outcome.kind === 'enabled';
 }
 
-const buttonClass = 'inline-flex items-center gap-1 rounded-lg border p-2 text-xs font-semibold';
-const neutralButton = `${buttonClass} border-slate-300 dark:border-slate-700`;
-const dangerButton = `${buttonClass} border-red-300 text-red-700 dark:border-red-800 dark:text-red-400`;
-
 export function SiteEnableForm(props: Feedback & { compact?: boolean }) {
   const { translate } = props;
   const [address, setAddress] = useState('');
@@ -52,7 +55,7 @@ export function SiteEnableForm(props: Feedback & { compact?: boolean }) {
   }, []);
   return (
     <form
-      className="space-y-2"
+      className="space-y-3"
       onSubmit={(event) => {
         event.preventDefault();
         setBusy(true);
@@ -64,30 +67,26 @@ export function SiteEnableForm(props: Feedback & { compact?: boolean }) {
     >
       {!props.compact && (
         <>
-          <h2 className="text-base font-bold">{translate('enableSiteTitle')}</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{translate('enableSiteHint')}</p>
+          <CardTitle icon={Globe} tone="brand" level={2}>
+            {translate('enableSiteTitle')}
+          </CardTitle>
+          <Hint>{translate('enableSiteHint')}</Hint>
         </>
       )}
-      <label className="block text-xs font-semibold">
-        {translate('siteUrl')}
-        <input
+      <Field label={translate('siteUrl')}>
+        <Input
           type="url"
           inputMode="url"
           required
           value={address}
           onChange={(event) => setAddress(event.target.value)}
           placeholder="https://moodle.example.ac.id"
-          className="mt-1 block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-800"
         />
-      </label>
-      <button
-        type="submit"
-        disabled={busy}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-700 p-2 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      </Field>
+      <Button type="submit" variant="primary" size="md" disabled={busy} className="w-full justify-center">
         <Globe size={15} />
         {translate('enableSite')}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -100,22 +99,19 @@ export function SiteAlerts(props: Feedback & { state: SitesState }) {
   return (
     <>
       {alerts.map((site) => (
-        <section
-          key={site.id}
-          className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <Alert key={site.id} tone="warning" icon={TriangleAlert}>
           <p className="font-semibold">{site.label}</p>
-          <p className="mt-1">{translate(state.access[site.id] === false ? 'siteAccessOff' : 'siteNotDetected')}</p>
+          <p className="mt-0.5">{translate(state.access[site.id] === false ? 'siteAccessOff' : 'siteNotDetected')}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {state.access[site.id] === false && (
-              <button type="button" className={neutralButton} onClick={() => void enable(site.origin, props)}>
-                <KeyRound size={13} />
+              <Button onClick={() => void enable(site.origin, props)}>
+                <KeyRound size={14} />
                 {translate('grantAccess')}
-              </button>
+              </Button>
             )}
             <RemoveSiteButton site={site} {...props} />
           </div>
-        </section>
+        </Alert>
       ))}
     </>
   );
@@ -126,24 +122,24 @@ function RemoveSiteButton(props: Feedback & { site: Site }) {
   const [confirming, setConfirming] = useState(false);
   if (!confirming) {
     return (
-      <button type="button" className={dangerButton} onClick={() => setConfirming(true)}>
-        <Trash2 size={13} />
+      <Button variant="dangerOutline" onClick={() => setConfirming(true)}>
+        <Trash2 size={14} />
         {translate('removeSite')}
-      </button>
+      </Button>
     );
   }
   return (
     <div className="w-full space-y-2">
-      <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">
+      <p role="alert" className="text-xs font-semibold text-error-ink">
         {translate('removeSiteConfirm')}
       </p>
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" className={neutralButton} onClick={() => setConfirming(false)}>
+        <Button className="justify-center" onClick={() => setConfirming(false)}>
           {translate('cancel')}
-        </button>
-        <button
-          type="button"
-          className="rounded-lg bg-red-600 p-2 text-xs font-semibold text-white"
+        </Button>
+        <Button
+          variant="danger"
+          className="justify-center"
           onClick={() => {
             setConfirming(false);
             void sendSiteCommand({ type: 'REMOVE_SITE', siteId: site.id }).then((ok) =>
@@ -152,7 +148,7 @@ function RemoveSiteButton(props: Feedback & { site: Site }) {
           }}
         >
           {translate('removeSite')}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -162,8 +158,9 @@ function SiteRow(props: Feedback & { site: Site; access: boolean | undefined }) 
   const { translate, site } = props;
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(site.label);
+  const detection = site.detection ?? 'unchecked';
   return (
-    <li className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+    <li className="space-y-2 p-3">
       {editing ? (
         <form
           className="flex gap-2"
@@ -175,46 +172,44 @@ function SiteRow(props: Feedback & { site: Site; access: boolean | undefined }) 
             });
           }}
         >
-          <input
+          <Input
             aria-label={translate('siteName')}
             value={label}
             maxLength={60}
             required
             onChange={(event) => setLabel(event.target.value)}
-            className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+            className="flex-1"
           />
-          <button type="submit" className={neutralButton}>
+          <Button type="submit" size="md">
             {translate('save')}
-          </button>
+          </Button>
         </form>
       ) : (
-        <p className="break-words text-sm font-semibold">{site.label}</p>
+        <p className="text-sm font-medium break-words">{site.label}</p>
       )}
-      <p className="break-all text-xs text-slate-500 dark:text-slate-400">{site.origin}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        {translate(detectionLabel[site.detection ?? 'unchecked'])}
-        {site.versionHint ? ` · ${site.versionHint}` : ''}
-        {props.access === false ? ` · ${translate('siteAccessOff')}` : ''}
-      </p>
+      <p className="text-xs break-all text-ink-3">{site.origin}</p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge tone={detectionTone[detection]}>{translate(detectionLabel[detection])}</Badge>
+        {site.versionHint && <Badge>{site.versionHint}</Badge>}
+        {props.access === false && <Badge tone="rose">{translate('siteAccessOff')}</Badge>}
+      </div>
       <div className="flex flex-wrap gap-2">
         {!editing && (
-          <button
-            type="button"
-            className={neutralButton}
+          <Button
             onClick={() => {
               setLabel(site.label);
               setEditing(true);
             }}
           >
-            <Pencil size={13} />
+            <Pencil size={14} />
             {translate('rename')}
-          </button>
+          </Button>
         )}
         {props.access === false && (
-          <button type="button" className={neutralButton} onClick={() => void enable(site.origin, props)}>
-            <KeyRound size={13} />
+          <Button onClick={() => void enable(site.origin, props)}>
+            <KeyRound size={14} />
             {translate('grantAccess')}
-          </button>
+          </Button>
         )}
         <RemoveSiteButton {...props} />
       </div>
@@ -226,14 +221,14 @@ export function SitesSettings(props: Feedback & { state: SitesState }) {
   const { translate, state } = props;
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-xs font-semibold">{translate('sites')}</p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('sitesHint')}</p>
-      </div>
+      <CardTitle icon={Server} tone="brand">
+        {translate('sites')}
+      </CardTitle>
+      <Hint>{translate('sitesHint')}</Hint>
       {state.sites.length === 0 ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{translate('noSites')}</p>
+        <Hint faint>{translate('noSites')}</Hint>
       ) : (
-        <ul className="space-y-2">
+        <ul className="divide-y divide-line overflow-hidden rounded-lg border border-line">
           {state.sites.map((site) => (
             <SiteRow key={site.id} site={site} access={state.access[site.id]} {...props} />
           ))}

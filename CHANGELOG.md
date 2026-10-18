@@ -10,6 +10,15 @@
 
 - Background message tasks ran with the previous task's result as their first argument, because the serializing queue passed it on. A task that takes optional parameters (the study overview, the guard verdict, clear-all) could therefore get a stray value; tasks are now always called with no arguments.
 
+### Changed (UI)
+
+- Side panel redesigned on `DESIGN.md` (D-016) with an owned UI kit in `src/sidepanel/ui.tsx` and semantic light/dark tokens in `styles.css`; no new dependency. Sticky header with an EN/ID toggle, icon chips per card, grouped task and course lists, colored review ratings, detection badges, segmented theme picker and onboarding progress dots. User-chosen course colors are unchanged.
+
+### Fixed (UI)
+
+- Theme switches no longer fade controls from the old palette (transitions are paused while the `dark` class changes).
+- The Tasks page no longer crashes in the browser preview, where `window.chrome` exists without extension APIs.
+
 ### Changed (tooling)
 
 - `npm run check` runs gates in parallel with lint, format and typecheck caches, accepts gate names (`npm run check -- test lint`) and shows per-gate time; tests default to the `node` environment and DOM tests opt in to jsdom.

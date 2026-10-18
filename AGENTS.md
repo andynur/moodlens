@@ -22,6 +22,7 @@ Binding for every coding agent and model (Claude Code, Codex, Cursor, Copilot, G
 | UI strings | `docs/07_I18N.md` |
 | Tests | `docs/09_TEST_PLAN.md` |
 | Release | `docs/10_RELEASE_CHECKLIST.md` |
+| Side panel UI, styling | `DESIGN.md` (tokens only), `src/sidepanel/ui.tsx`, D-016 |
 | AI / BYOK / agent | `docs/05_BYOK_AGENT_DESIGN.md`, `docs/prd/PRD-004_AI_STUDY.md` |
 | "Why was X decided?" | `docs/14_DECISIONS.md` (accepted decisions are binding) |
 

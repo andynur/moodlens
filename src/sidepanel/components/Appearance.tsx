@@ -1,3 +1,4 @@
+import { Paintbrush } from 'lucide-react';
 import {
   APPEARANCE_FLAGS,
   HIDEABLE_BLOCKS,
@@ -8,6 +9,7 @@ import {
 import type { TranslationKey } from '../../shared/i18n';
 import type { Site } from '../../shared/types';
 import { sendSiteCommand, type SitesState } from '../useSites';
+import { CardTitle, Checkbox, Hint, SectionLabel } from '../ui';
 import type { Feedback } from './Sites';
 
 const flagLabel: Record<AppearanceFlag, TranslationKey> = {
@@ -31,46 +33,38 @@ function save(site: Site, appearance: AppearancePrefs, feedback: Feedback) {
 function SiteAppearance(props: Feedback & { site: Site; prefs: AppearancePrefs; disabled: boolean }) {
   const { translate, site, prefs } = props;
   const blocks = prefs.hideBlocks ?? [];
-  const check = 'h-4 w-4 accent-blue-700';
   return (
-    <fieldset
-      className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700"
-      disabled={props.disabled}
-    >
-      <legend className="px-1 text-sm font-semibold">{site.label}</legend>
+    <fieldset className="space-y-2 rounded-lg border border-line p-3" disabled={props.disabled}>
+      <legend className="px-1 text-sm font-medium">{site.label}</legend>
       {APPEARANCE_FLAGS.map((flag) => (
-        <label key={flag} className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            className={check}
-            checked={prefs[flag] === true}
-            onChange={(event) => save(site, { ...prefs, [flag]: event.target.checked || undefined }, props)}
-          />
-          {translate(flagLabel[flag])}
-        </label>
+        <Checkbox
+          key={flag}
+          className="text-xs"
+          checked={prefs[flag] === true}
+          onChange={(event) => save(site, { ...prefs, [flag]: event.target.checked || undefined }, props)}
+          label={translate(flagLabel[flag])}
+        />
       ))}
-      <p className="pt-1 text-xs font-semibold">{translate('appearanceHideBlocks')}</p>
+      <SectionLabel className="pt-1">{translate('appearanceHideBlocks')}</SectionLabel>
       {HIDEABLE_BLOCKS.map((block) => (
-        <label key={block} className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            className={check}
-            checked={blocks.includes(block)}
-            onChange={(event) =>
-              save(
-                site,
-                {
-                  ...prefs,
-                  hideBlocks: event.target.checked ? [...blocks, block] : blocks.filter((item) => item !== block)
-                },
-                props
-              )
-            }
-          />
-          {translate(blockLabel[block])}
-        </label>
+        <Checkbox
+          key={block}
+          className="text-xs"
+          checked={blocks.includes(block)}
+          onChange={(event) =>
+            save(
+              site,
+              {
+                ...prefs,
+                hideBlocks: event.target.checked ? [...blocks, block] : blocks.filter((item) => item !== block)
+              },
+              props
+            )
+          }
+          label={translate(blockLabel[block])}
+        />
       ))}
-      {props.disabled && <p className="text-xs text-slate-500 dark:text-slate-400">{translate('siteAccessOff')}</p>}
+      {props.disabled && <Hint faint>{translate('siteAccessOff')}</Hint>}
     </fieldset>
   );
 }
@@ -80,10 +74,12 @@ export function AppearanceSettings(props: Feedback & { state: SitesState }) {
   const { translate, state } = props;
   if (state.sites.length === 0) return null;
   return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold">{translate('appearanceTitle')}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{translate('appearanceHint')}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{translate('appearanceNotices')}</p>
+    <div className="space-y-3">
+      <CardTitle icon={Paintbrush} tone="peach">
+        {translate('appearanceTitle')}
+      </CardTitle>
+      <Hint>{translate('appearanceHint')}</Hint>
+      <Hint faint>{translate('appearanceNotices')}</Hint>
       {state.sites.map((site) => (
         <SiteAppearance
           key={site.id}

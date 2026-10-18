@@ -1,7 +1,8 @@
-import { ChevronDown, ChevronUp, Pin } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, Pin } from 'lucide-react';
 import { courseTitle, type CourseEntry } from '../courseEntries';
 import { sendSiteCommand } from '../useSites';
-import { card, ColorDot, smallButton } from './CourseDetail';
+import { Badge, Button, buttonClass, Card, cardClass, Hint } from '../ui';
+import { ColorDot } from './CourseDetail';
 import type { Feedback } from './Sites';
 
 function move(entry: CourseEntry, direction: 'up' | 'down', feedback: Feedback) {
@@ -13,60 +14,58 @@ function move(entry: CourseEntry, direction: 'up' | 'down', feedback: Feedback) 
 export function NewBadge(props: Pick<Feedback, 'translate'> & { count: number }) {
   if (props.count === 0) return null;
   return (
-    <span className="shrink-0 rounded-full bg-blue-700 px-2 py-0.5 text-[11px] font-bold text-white">
+    <Badge tone="solid">
       {props.count} <span className="sr-only">{props.translate('changesCount')}</span>
-    </span>
+    </Badge>
   );
 }
 
 function CourseRow(props: Feedback & { entry: CourseEntry; onSelect: (key: string) => void; showSite: boolean }) {
   const { translate, entry } = props;
   return (
-    <li className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+    <li className="flex items-center gap-1 border-b border-line py-1 pr-1 pl-3 last:border-b-0">
       <button
         type="button"
         onClick={() => props.onSelect(entry.key)}
-        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        className="group flex min-w-0 flex-1 items-center gap-2 py-2 text-left"
       >
         <ColorDot color={entry.prefs.color} />
         <span className="min-w-0 flex-1">
-          <span className="block break-words text-sm font-semibold">{courseTitle(entry, translate)}</span>
-          {props.showSite && (
-            <span className="block break-words text-xs text-slate-500 dark:text-slate-400">{entry.site.label}</span>
-          )}
+          <span className="block text-sm font-medium break-words group-hover:text-accent-ink">
+            {courseTitle(entry, translate)}
+          </span>
+          {props.showSite && <span className="block text-xs break-words text-ink-3">{entry.site.label}</span>}
         </span>
-        {entry.prefs.pinned && <Pin size={13} aria-label={translate('pinned')} className="shrink-0 text-blue-600" />}
+        {entry.prefs.pinned && <Pin size={13} aria-label={translate('pinned')} className="shrink-0 text-accent-ink" />}
         <NewBadge translate={translate} count={entry.changes.length} />
+        <ChevronRight size={15} aria-hidden="true" className="shrink-0 text-ink-3" />
       </button>
-      <div className="flex shrink-0 flex-col gap-1">
-        <button
-          type="button"
-          aria-label={translate('moveUp')}
-          className="rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
-          onClick={() => move(entry, 'up', props)}
-        >
+      <div className="flex shrink-0 flex-col">
+        <Button variant="ghost" size="icon" aria-label={translate('moveUp')} onClick={() => move(entry, 'up', props)}>
           <ChevronUp size={14} />
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           aria-label={translate('moveDown')}
-          className="rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
           onClick={() => move(entry, 'down', props)}
         >
           <ChevronDown size={14} />
-        </button>
+        </Button>
       </div>
     </li>
   );
 }
 
+const listClass = `overflow-hidden ${cardClass('default', false)}`;
+
 export function CourseList(props: Feedback & { entries: CourseEntry[]; onSelect: (key: string) => void }) {
   const { translate, entries } = props;
   if (entries.length === 0) {
     return (
-      <section className={card}>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{translate('noData')}</p>
-      </section>
+      <Card>
+        <Hint>{translate('noData')}</Hint>
+      </Card>
     );
   }
   const showSite = new Set(entries.map((entry) => entry.site.id)).size > 1;
@@ -74,18 +73,21 @@ export function CourseList(props: Feedback & { entries: CourseEntry[]; onSelect:
   const hidden = entries.filter((entry) => entry.prefs.hidden);
   return (
     <>
-      <ul className="space-y-2">
-        {visible.map((entry) => (
-          <CourseRow key={entry.key} entry={entry} showSite={showSite} {...props} />
-        ))}
-      </ul>
+      <h2 className="px-1 text-lg font-semibold">{translate('courses')}</h2>
+      {visible.length > 0 && (
+        <ul className={listClass}>
+          {visible.map((entry) => (
+            <CourseRow key={entry.key} entry={entry} showSite={showSite} {...props} />
+          ))}
+        </ul>
+      )}
       {hidden.length > 0 && (
-        <details className={card}>
-          <summary className={`${smallButton} cursor-pointer border-none p-0`}>
+        <details className={cardClass()}>
+          <summary className={buttonClass('ghost', 'sm', '-m-1')}>
             {translate('hiddenCourses')} ({hidden.length})
           </summary>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{translate('hiddenCoursesHint')}</p>
-          <ul className="mt-2 space-y-2">
+          <Hint className="mt-2">{translate('hiddenCoursesHint')}</Hint>
+          <ul className={`mt-2 overflow-hidden ${cardClass('flat', false)}`}>
             {hidden.map((entry) => (
               <CourseRow key={entry.key} entry={entry} showSite={showSite} {...props} />
             ))}

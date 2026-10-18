@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
-import { Download, Upload } from 'lucide-react';
+import { Archive, Download, Upload } from 'lucide-react';
 import { MAX_BACKUP_BYTES, parseBackupText, type BackupPreview } from '../../shared/backup';
 import type { ExportBackupResponse, Locale } from '../../shared/types';
 import { sendSiteCommand } from '../useSites';
-import { smallButton } from './CourseDetail';
+import { Button, CardTitle, Hint } from '../ui';
 import type { Feedback } from './Sites';
 
 async function download(feedback: Feedback) {
@@ -51,18 +51,20 @@ export function BackupSettings(props: Feedback & { locale: Locale }) {
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold">{translate('backup')}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{translate('backupHint')}</p>
+    <div className="space-y-3">
+      <CardTitle icon={Archive} tone="sky">
+        {translate('backup')}
+      </CardTitle>
+      <Hint>{translate('backupHint')}</Hint>
       <div className="flex flex-wrap gap-2">
-        <button type="button" className={smallButton} onClick={() => void download(props)}>
-          <Download size={13} />
+        <Button onClick={() => void download(props)}>
+          <Download size={14} />
           {translate('exportBackup')}
-        </button>
-        <button type="button" className={smallButton} onClick={() => input.current?.click()}>
-          <Upload size={13} />
+        </Button>
+        <Button onClick={() => input.current?.click()}>
+          <Upload size={14} />
           {translate('importBackup')}
-        </button>
+        </Button>
         <input
           ref={input}
           type="file"
@@ -73,26 +75,22 @@ export function BackupSettings(props: Feedback & { locale: Locale }) {
         />
       </div>
       {pending && (
-        <div className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+        <div className="space-y-2 rounded-lg border border-line bg-well p-3">
           <p className="text-xs">
             {translate('backupPreview')}{' '}
             {new Date(pending.preview.exportedAt).toLocaleString(props.locale === 'id' ? 'id-ID' : 'en-US')}:{' '}
             {pending.preview.sites} {translate('backupSites')}, {pending.preview.courses} {translate('backupCourses')}
           </p>
-          <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">
+          <p role="alert" className="text-xs font-semibold text-error-ink">
             {translate('backupConfirmQuestion')}
           </p>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" className={smallButton} onClick={() => setPending(null)}>
+            <Button className="justify-center" onClick={() => setPending(null)}>
               {translate('cancel')}
-            </button>
-            <button
-              type="button"
-              className="rounded-lg bg-red-600 p-2 text-xs font-semibold text-white"
-              onClick={() => void restore()}
-            >
+            </Button>
+            <Button variant="danger" className="justify-center" onClick={() => void restore()}>
               {translate('backupRestore')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

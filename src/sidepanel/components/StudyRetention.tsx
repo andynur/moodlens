@@ -7,7 +7,9 @@ import {
   type ReviewLogRetention
 } from '../../shared/cards';
 import type { TranslationKey } from '../../shared/i18n';
+import { History } from 'lucide-react';
 import { hasChrome } from '../useSites';
+import { CardTitle, Hint, Select } from '../ui';
 
 const LABELS: Record<ReviewLogRetention, TranslationKey> = {
   90: 'studyRetention90',
@@ -45,20 +47,22 @@ export function StudyRetentionSettings({
   }
 
   return (
-    <label className="block text-xs font-semibold">
-      {translate('studyRetention')}
-      <select
+    <div className="space-y-3">
+      <CardTitle icon={History} tone="mint">
+        {translate('studyRetention')}
+      </CardTitle>
+      <Select
+        aria-label={translate('studyRetention')}
         value={days}
         onChange={(event) => void save(normalizeRetention(Number(event.target.value)))}
-        className="mt-1 block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-800"
       >
         {REVIEW_LOG_RETENTION_DAYS.map((option) => (
           <option key={option} value={option}>
             {translate(LABELS[option])}
           </option>
         ))}
-      </select>
-      <p className="mt-1 font-normal text-slate-500 dark:text-slate-400">{translate('studyRetentionHint')}</p>
-    </label>
+      </Select>
+      <Hint>{translate('studyRetentionHint')}</Hint>
+    </div>
   );
 }

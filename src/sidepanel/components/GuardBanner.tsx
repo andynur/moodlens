@@ -2,6 +2,7 @@ import { ShieldAlert } from 'lucide-react';
 import type { GuardReason } from '../../content/moodle/guard';
 import type { TranslationKey } from '../../shared/i18n';
 import type { GuardView } from '../useGuard';
+import { Alert } from '../ui';
 
 const REASON_KEYS: Record<GuardReason, TranslationKey> = {
   'quiz-attempt': 'guardReasonQuizAttempt',
@@ -21,22 +22,16 @@ const REASON_KEYS: Record<GuardReason, TranslationKey> = {
 export function GuardBanner({ guard, translate }: { guard: GuardView; translate: (key: TranslationKey) => string }) {
   if (!guard.active) return null;
   return (
-    <section
-      role="status"
-      className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
-    >
-      <p className="flex items-center gap-2 font-semibold">
-        <ShieldAlert size={16} aria-hidden="true" />
-        {translate('guardPaused')}
-      </p>
+    <Alert tone="warning" icon={ShieldAlert} role="status">
+      <p className="font-semibold">{translate('guardPaused')}</p>
       {guard.reasons.length > 0 && (
-        <ul className="mt-2 list-disc space-y-1 pl-5">
+        <ul className="mt-1.5 list-disc space-y-1 pl-4">
           {guard.reasons.map((reason) => (
             <li key={reason}>{translate(REASON_KEYS[reason])}</li>
           ))}
         </ul>
       )}
-      <p className="mt-2">{translate('guardOpenTabs')}</p>
-    </section>
+      <p className="mt-1.5">{translate('guardOpenTabs')}</p>
+    </Alert>
   );
 }

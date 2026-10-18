@@ -6,10 +6,104 @@
 /* Dark mode follows the `dark` class set by App, not the media query. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Design tokens from DESIGN.md (D-016). Components use the semantic names (`bg-canvas`,
+ * `text-ink-2`, `border-line`); the `.dark` block below swaps their values, so components
+ * rarely need `dark:` classes. Brand 700 is `primary`, 800 is `primary-pressed`.
+ */
+@theme {
+  --color-brand-50: #f3f1fc;
+  --color-brand-200: #d9d2f7;
+  --color-brand-300: #c3b8f5;
+  --color-brand-400: #a596f0;
+  --color-brand-600: #6a5ae0;
+  --color-brand-700: #5645d4;
+  --color-brand-800: #4534b3;
+  --color-brand-900: #3a2a99;
+
+  --color-canvas: #ffffff;
+  --color-surface: #f6f5f4;
+  --color-well: #fafaf9;
+  --color-line: #e5e3df;
+  --color-line-strong: #c8c4be;
+  --color-ink: #1a1a1a;
+  --color-ink-2: #5d5b54;
+  --color-ink-3: #787671;
+
+  --color-accent-ink: #5645d4;
+  --color-accent-soft: #f3f1fc;
+
+  --color-success: #1aae39;
+  --color-success-ink: #137a2a;
+  --color-success-soft: #d9f3e1;
+  --color-warning: #dd5b00;
+  --color-warning-ink: #793400;
+  --color-warning-soft: #ffe8d4;
+  --color-error: #e03131;
+  --color-error-ink: #b52525;
+  --color-error-soft: #fde4e4;
+
+  --color-tint-peach: #ffe8d4;
+  --color-on-peach: #793400;
+  --color-tint-rose: #fde0ec;
+  --color-on-rose: #a02e6d;
+  --color-tint-mint: #d9f3e1;
+  --color-on-mint: #137a2a;
+  --color-tint-lavender: #e6e0f5;
+  --color-on-lavender: #391c57;
+  --color-tint-sky: #dcecfa;
+  --color-on-sky: #005bab;
+  --color-tint-yellow: #fef7d6;
+  --color-on-yellow: #6b5200;
+
+  --shadow-card: 0 1px 2px 0 rgb(15 15 15 / 0.04);
+  --shadow-raised: 0 4px 12px 0 rgb(15 15 15 / 0.08);
+}
+
+/* DESIGN.md lists no dark values; these keep its warm neutrals and the same contrast roles. */
+.dark {
+  color-scheme: dark;
+  --color-canvas: #202020;
+  --color-surface: #191919;
+  --color-well: #262626;
+  --color-line: #2f2f2f;
+  --color-line-strong: #454440;
+  --color-ink: #ecebe9;
+  --color-ink-2: #a4a097;
+  --color-ink-3: #8c8981;
+
+  --color-accent-ink: #b9adf5;
+  --color-accent-soft: #29224a;
+
+  --color-success-ink: #8fe0a6;
+  --color-success-soft: #16301e;
+  --color-warning-ink: #ffc08a;
+  --color-warning-soft: #3a2414;
+  --color-error-ink: #ff9b9b;
+  --color-error-soft: #3d1a1a;
+
+  --color-tint-peach: #3a2414;
+  --color-on-peach: #ffc896;
+  --color-tint-rose: #3a1a2a;
+  --color-on-rose: #ffb3d6;
+  --color-tint-mint: #16301e;
+  --color-on-mint: #8fe0a6;
+  --color-tint-lavender: #2a2245;
+  --color-on-lavender: #cfc2ff;
+  --color-tint-sky: #142a40;
+  --color-on-sky: #9ccaf5;
+  --color-tint-yellow: #352d12;
+  --color-on-yellow: #f5d75e;
+
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-raised: 0 4px 12px 0 rgb(0 0 0 / 0.4);
+}
+
 /* Keep the Tailwind 3 pointer cursor on buttons. */
 @layer base {
   button:not(:disabled),
-  [role='button']:not(:disabled) {
+  [role='button']:not(:disabled),
+  summary {
     cursor: pointer;
   }
 }
@@ -24,6 +118,7 @@
     'Segoe UI',
     sans-serif;
   font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
 }
 html,
 body,
@@ -33,9 +128,14 @@ body,
 }
 body {
   min-width: 300px;
+  background: var(--color-surface);
+  color: var(--color-ink);
 }
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid #2563eb;
+.theme-changing,
+.theme-changing * {
+  transition: none !important;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
   outline-offset: 2px;
 }

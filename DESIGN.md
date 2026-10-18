@@ -444,6 +444,18 @@ components:
     padding: "{spacing.xxs} 0"
 ---
 
+## Moodlens side panel mapping
+
+This file is a Notion design analysis; Moodlens uses its tokens, not its marketing layouts (D-016).
+
+- Tokens: `src/sidepanel/styles.css`. Components: `src/sidepanel/ui.tsx`. Use those, not raw Tailwind palette classes.
+- `primary` = `brand-700` (primary buttons, active states); `primary-pressed` = `brand-800`. Inline links use the same accent (`accent-ink`), not `link-blue`, to keep one accent in a narrow panel.
+- Neutrals: `canvas` (cards), `surface` (page), `well` (insets), `line` / `line-strong` (hairlines), `ink` / `ink-2` / `ink-3` (text).
+- Pastel `card-tint-*` colors become `tint-*` with `on-*` text, used for card icon chips and badges, not full card fills.
+- Radius: buttons and inputs `rounded-lg` (8px), cards `rounded-xl` (12px), badges and segmented pills `rounded-full` / `rounded-md`.
+- Dark mode: DESIGN.md has no dark values; `.dark` in `styles.css` defines them with the same roles.
+- Not used: navy hero band, display/heading-1 sizes, pricing, logo wall, footer grid, mockup shadows.
+
 ## Overview
 
 Notion presents itself as the all-in-one workspace through a confident, illustration-rich brand voice. The homepage opens with **"Meet the night shift."** rendered centered over a deep navy hero band ({colors.brand-navy}), decorated with brand-colored sticky-note dots and mesh wire illustrations scattered around the headline. The signature **purple pill primary CTA** ({colors.primary}) "Get Notion free" sits at the visual center, paired with an outlined "Request a demo" secondary. Below the buttons, a real Notion workspace UI mockup card (the "Ramp HQ" kanban board) breaks out of the hero band with a deep diffuse drop shadow.

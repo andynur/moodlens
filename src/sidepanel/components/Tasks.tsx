@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, ExternalLink, RefreshCw } from 'lucide-react';
+import { BellRing, Download, ExternalLink, RefreshCw, Search } from 'lucide-react';
 import { tasksToIcs } from '../../shared/ics';
 import {
   DEFAULT_REMINDER_PREFS,
@@ -18,10 +18,19 @@ import {
 import type { Locale, Site, TaskKind } from '../../shared/types';
 import { openTask } from '../openTask';
 import { taskKindText, taskText } from '../taskStrings';
+import { hasChrome } from '../useSites';
 import { useTaskData } from '../useTaskData';
+import { Alert, Badge, Button, Card, cardClass, CardTitle, Checkbox, cx, Hint, Input, Select, type Tone } from '../ui';
 
 const groups: TaskGroup[] = ['overdue', 'today', 'thisWeek', 'later', 'noDate'];
 const kinds: TaskKind[] = ['assign', 'quiz', 'attendance', 'forum', 'event', 'other'];
+const groupStyle: Record<TaskGroup, { tone: Tone; dueClass: string }> = {
+  overdue: { tone: 'rose', dueClass: 'text-error-ink' },
+  today: { tone: 'peach', dueClass: 'text-warning-ink' },
+  thisWeek: { tone: 'yellow', dueClass: 'text-ink' },
+  later: { tone: 'sky', dueClass: 'text-ink-2' },
+  noDate: { tone: 'neutral', dueClass: 'text-ink-2' }
+};
 
 function saveIcs(content: string): void {
   const url = URL.createObjectURL(new Blob([content], { type: 'text/calendar;charset=utf-8' }));
@@ -62,7 +71,7 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
   const datasetList = Object.values(datasets).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
 
   useEffect(() => {
-    if (typeof chrome === 'undefined') return;
+    if (!hasChrome) return;
     void chrome.storage.local.get(REMINDER_PREFS_KEY).then((stored) => {
       const prefs = normalizeReminderPrefs(stored[REMINDER_PREFS_KEY]);
       if (prefs) setReminders(prefs);
@@ -102,25 +111,19 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold">{taskText(locale, 'tasks')}</h2>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          className="inline-flex items-center gap-1 rounded-lg border p-2 text-xs font-semibold"
-        >
-          <RefreshCw size={13} /> {taskText(locale, 'refresh')}
-        </button>
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-2 px-1">
+        <h2 className="text-lg font-semibold">{taskText(locale, 'tasks')}</h2>
+        <Button onClick={() => void refresh()}>
+          <RefreshCw size={14} /> {taskText(locale, 'refresh')}
+        </Button>
       </div>
       {datasetList.length > 0 && (
-        <div className="space-y-1 text-xs text-slate-500">
+        <div className="space-y-0.5 px-1 text-[11px] text-ink-3">
           {datasetList.map((dataset) => (
             <p key={dataset.siteId}>
-              <span className="font-medium text-slate-600 dark:text-slate-300">
-                {siteName.get(dataset.siteId) ?? dataset.siteId}
-              </span>{' '}
-              · {taskText(locale, 'lastUpdated')}:{' '}
+              <span className="font-medium text-ink-2">{siteName.get(dataset.siteId) ?? dataset.siteId}</span> ·{' '}
+              {taskText(locale, 'lastUpdated')}:{' '}
               {new Date(dataset.capturedAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')} ·{' '}
               {taskText(locale, 'source')}: {dataset.source.toUpperCase()}
             </p>
@@ -128,26 +131,34 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
         </div>
       )}
       {message && (
-        <p role="status" className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
+        <Alert tone="warning" role="status">
           {message}
-        </p>
+        </Alert>
       )}
-      <input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder={taskText(locale, 'search')}
-        aria-label={taskText(locale, 'search')}
-        className="w-full rounded-lg border bg-white p-2 text-sm dark:bg-slate-900"
-      />
+      <div className="relative">
+        <Search
+          size={15}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3"
+        />
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={taskText(locale, 'search')}
+          aria-label={taskText(locale, 'search')}
+          leading
+        />
+      </div>
       <div className="grid grid-cols-3 gap-2">
-        <select
+        <Select
           value={siteId}
           onChange={(event) => {
             setSiteId(event.target.value);
             setCourseKey('');
           }}
           aria-label={taskText(locale, 'allSites')}
-          className="min-w-0 rounded-lg border bg-white p-2 text-xs dark:bg-slate-900"
+          compact
         >
           <option value="">{taskText(locale, 'allSites')}</option>
           {sites.map((site) => (
@@ -155,12 +166,12 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
               {site.label}
             </option>
           ))}
-        </select>
-        <select
+        </Select>
+        <Select
           value={courseKey}
           onChange={(event) => setCourseKey(event.target.value)}
           aria-label={taskText(locale, 'allCourses')}
-          className="min-w-0 rounded-lg border bg-white p-2 text-xs dark:bg-slate-900"
+          compact
         >
           <option value="">{taskText(locale, 'allCourses')}</option>
           {courses
@@ -170,12 +181,12 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
                 {course.name}
               </option>
             ))}
-        </select>
-        <select
+        </Select>
+        <Select
           value={kind}
           onChange={(event) => setKind(event.target.value as TaskKind | '')}
           aria-label={taskText(locale, 'allTypes')}
-          className="min-w-0 rounded-lg border bg-white p-2 text-xs dark:bg-slate-900"
+          compact
         >
           <option value="">{taskText(locale, 'allTypes')}</option>
           {kinds.map((value) => (
@@ -183,82 +194,78 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
               {taskKindText(locale, value)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="rounded-lg border p-2 text-xs"
-          onClick={() => setSelected(new Set(shown.map(taskIdentity)))}
-        >
+        <Button variant="ghost" onClick={() => setSelected(new Set(shown.map(taskIdentity)))}>
           {taskText(locale, 'selectAll')}
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 rounded-lg border p-2 text-xs"
-          onClick={() => exportTasks(true)}
-        >
-          <Download size={13} />
+        </Button>
+        <Button onClick={() => exportTasks(true)}>
+          <Download size={14} />
           {taskText(locale, 'exportSelected')}
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 rounded-lg border p-2 text-xs"
-          onClick={() => exportTasks(false)}
-        >
-          <Download size={13} />
+        </Button>
+        <Button onClick={() => exportTasks(false)}>
+          <Download size={14} />
           {taskText(locale, 'exportAll')}
-        </button>
+        </Button>
       </div>
-      <fieldset className="space-y-2 rounded-xl border bg-white p-3 dark:bg-slate-900">
-        <legend className="px-1 text-sm font-semibold">{taskText(locale, 'reminders')}</legend>
-        <p className="text-xs text-slate-500">{taskText(locale, 'remindersHint')}</p>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={reminders.enabled}
-            onChange={(event) => void saveReminders(event.target.checked)}
-          />
-          {taskText(locale, 'remindersOn')}
-        </label>
-        <div className="flex flex-wrap gap-3 text-xs">
+      <Card className="space-y-3">
+        <CardTitle icon={BellRing} tone="lavender">
+          {taskText(locale, 'reminders')}
+        </CardTitle>
+        <Hint>{taskText(locale, 'remindersHint')}</Hint>
+        <Checkbox
+          checked={reminders.enabled}
+          onChange={(event) => void saveReminders(event.target.checked)}
+          label={taskText(locale, 'remindersOn')}
+        />
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
           {REMINDER_LEADS.map((lead) => (
-            <label key={lead} className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                disabled={!reminders.enabled}
-                checked={reminders.leadMinutes.includes(lead)}
-                onChange={(event) => {
-                  const leads = event.target.checked
-                    ? [...reminders.leadMinutes, lead]
-                    : reminders.leadMinutes.filter((value) => value !== lead);
-                  if (leads.length > 0) void saveReminders(reminders.enabled, leads);
-                }}
-              />
-              {taskText(locale, lead === 60 ? 'reminder1h' : lead === 180 ? 'reminder3h' : 'reminder1d')}
-            </label>
+            <Checkbox
+              key={lead}
+              className="text-xs"
+              disabled={!reminders.enabled}
+              checked={reminders.leadMinutes.includes(lead)}
+              onChange={(event) => {
+                const leads = event.target.checked
+                  ? [...reminders.leadMinutes, lead]
+                  : reminders.leadMinutes.filter((value) => value !== lead);
+                if (leads.length > 0) void saveReminders(reminders.enabled, leads);
+              }}
+              label={taskText(locale, lead === 60 ? 'reminder1h' : lead === 180 ? 'reminder3h' : 'reminder1d')}
+            />
           ))}
         </div>
-      </fieldset>
+      </Card>
       {shown.length === 0 && (
-        <p className="rounded-xl bg-white p-4 text-sm text-slate-500 dark:bg-slate-900">
-          {taskText(locale, 'noTasks')}
-        </p>
+        <Card>
+          <Hint>{taskText(locale, 'noTasks')}</Hint>
+        </Card>
       )}
       {groups.map((group) => {
         const items = shown.filter((task) => taskGroup(task) === group);
         if (items.length === 0) return null;
         return (
           <div key={group} className="space-y-2">
-            <h3 className="text-sm font-semibold">{taskText(locale, group)}</h3>
-            {items.map((task) => {
-              const identity = taskIdentity(task);
-              const site = sites.find((item) => item.id === task.siteId);
-              return (
-                <article key={identity} className="rounded-xl border bg-white p-3 dark:bg-slate-900">
-                  <div className="flex gap-3">
+            <h3 className="flex items-center gap-2 px-1 text-sm font-semibold">
+              {taskText(locale, group)}
+              <Badge tone={groupStyle[group].tone}>{items.length}</Badge>
+            </h3>
+            <div className={`overflow-hidden ${cardClass('default', false)}`}>
+              {items.map((task) => {
+                const identity = taskIdentity(task);
+                const site = sites.find((item) => item.id === task.siteId);
+                return (
+                  <article
+                    key={identity}
+                    className={cx(
+                      'flex gap-3 border-b border-line p-3 last:border-b-0',
+                      selected.has(identity) && 'bg-accent-soft'
+                    )}
+                  >
                     <input
                       type="checkbox"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-brand-700"
                       checked={selected.has(identity)}
                       onChange={(event) =>
                         setSelected((current) => {
@@ -271,32 +278,32 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
                       aria-label={task.title}
                     />
                     <div className="min-w-0 flex-1">
-                      <h4 className="break-words text-sm font-semibold">{task.title}</h4>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <h4 className="text-sm font-medium break-words">{task.title}</h4>
+                      <p className="mt-0.5 text-xs text-ink-3">
                         {courseName.get(`${task.siteId}:${task.courseId}`) ?? task.courseId} ·{' '}
                         {siteName.get(task.siteId)} · {taskKindText(locale, task.kind)}
                       </p>
                       {task.dueAt && (
                         <time className="mt-1 block text-xs" dateTime={task.dueAt}>
-                          {formatRelativeDue(task.dueAt, locale)} ·{' '}
-                          {new Date(task.dueAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')}
+                          <span className={cx('font-medium', groupStyle[group].dueClass)}>
+                            {formatRelativeDue(task.dueAt, locale)}
+                          </span>{' '}
+                          <span className="text-ink-3">
+                            · {new Date(task.dueAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')}
+                          </span>
                         </time>
                       )}
                       {site && (
-                        <button
-                          type="button"
-                          onClick={() => openTask(task, site)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700"
-                        >
+                        <Button variant="link" className="mt-1.5 text-xs" onClick={() => openTask(task, site)}>
                           <ExternalLink size={12} />
                           {taskText(locale, 'openTask')}
-                        </button>
+                        </Button>
                       )}
                     </div>
-                  </div>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         );
       })}

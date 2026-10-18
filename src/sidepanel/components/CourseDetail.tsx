@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, CheckCircle2, CircleDashed, CircleHelp, ExternalLink, Lock, Pin } from 'lucide-react';
+import {
+  ArrowLeft,
+  Bell,
+  CheckCircle2,
+  CircleDashed,
+  CircleHelp,
+  ExternalLink,
+  Lock,
+  Palette,
+  Pin
+} from 'lucide-react';
 import { COURSE_COLORS, type CourseColor, type CoursePrefs } from '../../shared/courses';
 import type { ActivityChange } from '../../shared/diff';
 import type { TranslationKey } from '../../shared/i18n';
@@ -7,16 +17,13 @@ import type { ActivityType, CompletionStatus, Locale } from '../../shared/types'
 import { isActivityUrl } from '../../shared/validation';
 import { colorDot, colorLabel, courseTitle, openCourse, type CourseEntry } from '../courseEntries';
 import { hasChrome, sendSiteCommand } from '../useSites';
+import { Badge, Button, Card, CardTitle, cx, Hint, Input, SectionLabel, type Tone } from '../ui';
 import type { Feedback } from './Sites';
 
-export const card = 'rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900';
-export const smallButton =
-  'inline-flex items-center gap-1 rounded-lg border border-slate-300 p-2 text-xs font-semibold dark:border-slate-700';
-
 const completionStyle: Record<CompletionStatus, string> = {
-  complete: 'text-emerald-600 dark:text-emerald-400',
-  incomplete: 'text-amber-600 dark:text-amber-400',
-  unknown: 'text-slate-400 dark:text-slate-500'
+  complete: 'text-success-ink',
+  incomplete: 'text-warning-ink',
+  unknown: 'text-ink-3'
 };
 const typeLabel: Record<ActivityType, TranslationKey> = {
   resource: 'activityResource',
@@ -42,6 +49,12 @@ const changeLabel: Record<ActivityChange['kind'], TranslationKey> = {
   renamed: 'changeRenamed',
   completion: 'changeCompletion'
 };
+const changeTone: Record<ActivityChange['kind'], Tone> = {
+  added: 'mint',
+  removed: 'rose',
+  renamed: 'sky',
+  completion: 'lavender'
+};
 
 export function ColorDot({ color }: { color: CourseColor | undefined }) {
   if (!color) return null;
@@ -54,38 +67,39 @@ export function ChangeList(props: Feedback & { entry: CourseEntry }) {
   if (entry.changes.length === 0) return null;
   return (
     <div className="space-y-2">
-      <ul className="space-y-1 text-xs">
+      <ul className="space-y-1.5 text-xs">
         {entry.changes.map((change) => (
-          <li key={`${change.kind}-${change.activityId}`} className="break-words">
-            <span className="font-semibold">{translate(changeLabel[change.kind])}:</span> {change.title}
-            {change.kind === 'renamed' && (
-              <span className="text-slate-500 dark:text-slate-400">
-                {' '}
-                ({translate('changeRenamedFrom')} {change.previousTitle})
-              </span>
-            )}
-            {change.kind === 'completion' && (
-              <span className="text-slate-500 dark:text-slate-400">
-                {' '}
-                ({translate(completionLabel[change.previous])} → {translate(completionLabel[change.current])})
-              </span>
-            )}
+          <li key={`${change.kind}-${change.activityId}`} className="flex items-start gap-2 break-words">
+            <Badge tone={changeTone[change.kind]}>{translate(changeLabel[change.kind])}</Badge>
+            <span className="min-w-0 flex-1 pt-0.5">
+              {change.title}
+              {change.kind === 'renamed' && (
+                <span className="text-ink-2">
+                  {' '}
+                  ({translate('changeRenamedFrom')} {change.previousTitle})
+                </span>
+              )}
+              {change.kind === 'completion' && (
+                <span className="text-ink-2">
+                  {' '}
+                  ({translate(completionLabel[change.previous])} → {translate(completionLabel[change.current])})
+                </span>
+              )}
+            </span>
           </li>
         ))}
       </ul>
-      <button
-        type="button"
+      <Button
         title={translate('markSeenHint')}
-        className={smallButton}
         onClick={() =>
           void sendSiteCommand({ type: 'MARK_COURSE_SEEN', siteId: entry.site.id, courseId: entry.courseId }).then(
             (ok) => !ok && props.onError('siteActionError')
           )
         }
       >
-        <CheckCircle2 size={13} />
+        <CheckCircle2 size={14} />
         {translate('markSeen')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -103,29 +117,25 @@ function Personalize(props: Feedback & { entry: CourseEntry }) {
   const prefs = entry.prefs;
   const [nickname, setNickname] = useState(prefs.nickname ?? '');
   return (
-    <section className={`${card} space-y-3`}>
-      <div>
-        <h3 className="text-sm font-semibold">{translate('personalize')}</h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('personalizeHint')}</p>
-      </div>
+    <Card className="space-y-3">
+      <CardTitle icon={Palette} tone="rose">
+        {translate('personalize')}
+      </CardTitle>
+      <Hint>{translate('personalizeHint')}</Hint>
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
+        <Button
           aria-pressed={Boolean(prefs.pinned)}
-          className={smallButton}
           onClick={() => savePrefs(entry, { ...prefs, pinned: prefs.pinned ? undefined : true }, props)}
         >
-          <Pin size={13} />
+          <Pin size={14} />
           {translate(prefs.pinned ? 'unpin' : 'pin')}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           aria-pressed={Boolean(prefs.hidden)}
-          className={smallButton}
           onClick={() => savePrefs(entry, { ...prefs, hidden: prefs.hidden ? undefined : true }, props)}
         >
           {translate(prefs.hidden ? 'showCourse' : 'hideCourse')}
-        </button>
+        </Button>
       </div>
       <form
         className="flex gap-2"
@@ -134,45 +144,41 @@ function Personalize(props: Feedback & { entry: CourseEntry }) {
           savePrefs(entry, { ...prefs, nickname: nickname.trim() || undefined }, props);
         }}
       >
-        <input
+        <Input
           aria-label={translate('nickname')}
           placeholder={translate('nickname')}
           value={nickname}
           maxLength={60}
           onChange={(event) => setNickname(event.target.value)}
-          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+          className="flex-1"
         />
-        <button type="submit" className={smallButton}>
+        <Button type="submit" size="md">
           {translate('save')}
-        </button>
+        </Button>
       </form>
       <fieldset>
-        <legend className="text-xs font-semibold">{translate('colorTag')}</legend>
+        <legend>
+          <SectionLabel>{translate('colorTag')}</SectionLabel>
+        </legend>
         <div className="mt-2 flex flex-wrap gap-2">
-          <button
-            type="button"
-            aria-pressed={!prefs.color}
-            className={`${smallButton} ${!prefs.color ? 'border-blue-600' : ''}`}
-            onClick={() => savePrefs(entry, { ...prefs, color: undefined }, props)}
-          >
+          <Button aria-pressed={!prefs.color} onClick={() => savePrefs(entry, { ...prefs, color: undefined }, props)}>
             {translate('colorNone')}
-          </button>
+          </Button>
           {COURSE_COLORS.map((color) => (
-            <button
+            <Button
               key={color}
-              type="button"
               aria-pressed={prefs.color === color}
               aria-label={translate(colorLabel[color])}
               title={translate(colorLabel[color])}
-              className={`${smallButton} ${prefs.color === color ? 'border-blue-600 ring-2 ring-blue-600' : ''}`}
+              className={cx('w-8 justify-center', prefs.color === color && 'ring-2 ring-brand-600/30')}
               onClick={() => savePrefs(entry, { ...prefs, color }, props)}
             >
               <ColorDot color={color} />
-            </button>
+            </Button>
           ))}
         </div>
       </fieldset>
-    </section>
+    </Card>
   );
 }
 
@@ -191,114 +197,116 @@ export function CourseDetail(props: Feedback & { entry: CourseEntry; locale: Loc
     if (hasChrome) void chrome.tabs.create({ url });
     else window.open(url, '_blank', 'noopener,noreferrer');
   }
+  const stats: { key: CompletionStatus; value: number; className: string }[] = [
+    { key: 'complete', value: counts.complete, className: 'bg-success-soft text-success-ink' },
+    { key: 'incomplete', value: counts.incomplete, className: 'bg-warning-soft text-warning-ink' },
+    { key: 'unknown', value: counts.unknown, className: 'bg-well text-ink-2' }
+  ];
   return (
     <>
-      <button type="button" onClick={props.onBack} className={smallButton}>
-        <ArrowLeft size={13} />
+      <Button variant="ghost" className="-ml-2" onClick={props.onBack}>
+        <ArrowLeft size={14} />
         {translate('courses')}
-      </button>
-      <section className={card}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{site.label}</p>
-        <h2 className="mt-2 flex items-center gap-2 text-lg font-bold">
+      </Button>
+      <Card>
+        <SectionLabel tone="accent">{site.label}</SectionLabel>
+        <h2 className="mt-1.5 flex items-center gap-2 text-lg leading-snug font-semibold">
           <ColorDot color={entry.prefs.color} />
           <span className="min-w-0 break-words">{courseTitle(entry, translate)}</span>
         </h2>
         {entry.prefs.nickname && snapshot.courseName && (
-          <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">{snapshot.courseName}</p>
+          <p className="mt-1 text-xs break-words text-ink-2">{snapshot.courseName}</p>
         )}
-        <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs break-words text-ink-3">
           {translate('lastSeen')}: {new Date(snapshot.capturedAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')}
         </p>
-        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{translate('refreshHint')}</p>
-        <button
-          type="button"
+        <Hint className="mt-3">{translate('refreshHint')}</Hint>
+        <Button
+          variant="primary"
+          size="md"
+          className="mt-3 w-full justify-center"
           onClick={() => !openCourse(entry) && props.onError('noNavigation')}
-          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400"
         >
-          {translate('openCourse')} <ExternalLink size={12} />
-        </button>
-      </section>
+          {translate('openCourse')} <ExternalLink size={14} />
+        </Button>
+      </Card>
       {entry.changes.length > 0 && (
-        <section className={card}>
-          <h3 className="mb-2 text-sm font-semibold">{translate('whatsNew')}</h3>
+        <Card className="space-y-3">
+          <CardTitle icon={Bell} tone="lavender">
+            {translate('whatsNew')}
+          </CardTitle>
           <ChangeList {...props} />
-        </section>
+        </Card>
       )}
-      <section className={card}>
-        <h3 className="text-sm font-semibold">{translate('statusSummary')}</h3>
-        <p className="mt-2 text-sm font-bold">
-          {snapshot.activities.length} {translate('activities')}
-        </p>
-        <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-lg bg-emerald-50 p-2 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-            <strong className="block text-lg">{counts.complete}</strong>
-            {translate('completed')}
-          </div>
-          <div className="rounded-lg bg-amber-50 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-            <strong className="block text-lg">{counts.incomplete}</strong>
-            {translate('incomplete')}
-          </div>
-          <div className="rounded-lg bg-slate-100 p-2 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            <strong className="block text-lg">{counts.unknown}</strong>
-            {translate('unknown')}
-          </div>
+      <Card>
+        <CardTitle
+          actions={
+            <span className="text-xs text-ink-2">
+              {snapshot.activities.length} {translate('activities')}
+            </span>
+          }
+        >
+          {translate('statusSummary')}
+        </CardTitle>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[11px] font-medium">
+          {stats.map((stat) => (
+            <div key={stat.key} className={cx('rounded-lg p-2', stat.className)}>
+              <strong className="block text-xl leading-tight font-semibold">{stat.value}</strong>
+              {translate(completionLabel[stat.key])}
+            </div>
+          ))}
         </div>
-      </section>
+      </Card>
       <section className="space-y-2">
-        <h3 id="activities-heading" className="text-sm font-semibold">
+        <h3 id="activities-heading" className="px-1 text-sm font-semibold">
           {translate('activities')}
         </h3>
         {snapshot.activities.length === 0 && (
-          <p className="rounded-lg bg-white p-3 text-sm text-slate-500 dark:bg-slate-900">
-            {translate('emptyActivities')}
-          </p>
+          <Card>
+            <Hint>{translate('emptyActivities')}</Hint>
+          </Card>
         )}
         {/* Own scroll area, about one viewport tall, so long courses do not stretch the page. */}
         <div
           role="region"
           aria-labelledby="activities-heading"
           tabIndex={0}
-          className="max-h-[calc(100dvh-3rem)] space-y-2 overflow-y-auto overscroll-contain rounded-xl"
+          className="max-h-[calc(100dvh-3rem)] overflow-y-auto overscroll-contain rounded-xl border border-line bg-canvas shadow-card"
         >
           {snapshot.activities.map((activity) => (
             <article
               key={`${activity.type}-${activity.id}`}
-              className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+              className="flex items-start gap-3 border-b border-line p-3 last:border-b-0"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h4 className="break-words text-sm font-semibold">{activity.title}</h4>
-                  <p className="mt-1 text-xs capitalize text-slate-500 dark:text-slate-400">
-                    {translate(typeLabel[activity.type])}
+              <div className="min-w-0 flex-1">
+                <h4 className="text-sm font-medium break-words">{activity.title}</h4>
+                <p className="mt-0.5 text-xs text-ink-3">{translate(typeLabel[activity.type])}</p>
+                {activity.url === null ? (
+                  <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-ink-3">
+                    <Lock size={12} />
+                    {translate('restricted')}
                   </p>
-                </div>
-                <div
-                  className={`flex shrink-0 items-center gap-1 text-[11px] font-medium ${completionStyle[activity.completion]}`}
-                >
-                  {activity.completion === 'complete' ? (
-                    <CheckCircle2 size={14} />
-                  ) : activity.completion === 'incomplete' ? (
-                    <CircleDashed size={14} />
-                  ) : (
-                    <CircleHelp size={14} />
-                  )}
-                  {translate(completionLabel[activity.completion])}
-                </div>
+                ) : (
+                  <Button variant="link" className="mt-1.5 text-xs" onClick={() => openActivity(activity.url!)}>
+                    {translate('open')} <ExternalLink size={12} />
+                  </Button>
+                )}
               </div>
-              {activity.url === null ? (
-                <p className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                  <Lock size={12} />
-                  {translate('restricted')}
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openActivity(activity.url!)}
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400"
-                >
-                  {translate('open')} <ExternalLink size={12} />
-                </button>
-              )}
+              <div
+                className={cx(
+                  'flex shrink-0 items-center gap-1 text-[11px] font-medium',
+                  completionStyle[activity.completion]
+                )}
+              >
+                {activity.completion === 'complete' ? (
+                  <CheckCircle2 size={14} />
+                ) : activity.completion === 'incomplete' ? (
+                  <CircleDashed size={14} />
+                ) : (
+                  <CircleHelp size={14} />
+                )}
+                {translate(completionLabel[activity.completion])}
+              </div>
             </article>
           ))}
         </div>

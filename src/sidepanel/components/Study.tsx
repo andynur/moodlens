@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, Plus, Trash2, Upload } from 'lucide-react';
+import { BookCheck, Download, FolderPlus, Layers, Plus, Sparkles, Trash2, Upload } from 'lucide-react';
 import { importCards, MAX_IMPORT_BYTES, type PortableCard } from '../../shared/cards';
 import type { TranslationKey } from '../../shared/i18n';
 import { SRS_RATINGS, type SrsRating } from '../../shared/srs';
@@ -12,7 +12,7 @@ import type {
 } from '../../shared/types';
 import type { GuardView } from '../useGuard';
 import { hasChrome } from '../useSites';
-import { smallButton } from './CourseDetail';
+import { Alert, Button, Card, CardTitle, cx, Hint, Input, SectionLabel, Select, Textarea } from '../ui';
 import { useXpView, XpCard } from './Xp';
 import type { Feedback } from './Sites';
 
@@ -184,46 +184,75 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
     await reload();
   }
 
+  const ratingVariant: Record<SrsRating, string> = {
+    again: 'border-error/40 text-error-ink hover:bg-error-soft',
+    hard: 'border-warning/40 text-warning-ink hover:bg-warning-soft',
+    good: 'border-success/40 text-success-ink hover:bg-success-soft',
+    easy: 'border-brand-600/40 text-accent-ink hover:bg-accent-soft'
+  };
+
   return (
-    <div className="space-y-4">
-      <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="font-bold">{translate('flashcards')}</h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('flashcardsHint')}</p>
-      </section>
+    <div className="space-y-3">
+      <div className="px-1">
+        <h2 className="text-lg font-semibold">{translate('flashcards')}</h2>
+        <Hint className="mt-0.5">{translate('flashcardsHint')}</Hint>
+      </div>
 
       {xp && <XpCard view={xp} refreshed={() => setXpRefresh((count) => count + 1)} {...feedback} />}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="text-sm font-bold">{translate('reviewToday')}</h3>
+      <Card className="space-y-3">
+        <CardTitle
+          icon={BookCheck}
+          tone="mint"
+          actions={
+            card && (
+              <span className="text-xs text-ink-2 tabular-nums">
+                {queueAt + 1}/{overview.queue.length}
+              </span>
+            )
+          }
+        >
+          {translate('reviewToday')}
+        </CardTitle>
         {guard.active ? (
-          <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-200">{translate('guardPaused')}</p>
+          <Alert tone="warning">{translate('guardPaused')}</Alert>
         ) : !card ? (
-          <p className="mt-2 text-xs">
+          <Hint>
             {overview.queue.length > 0 ? translate('reviewFinished') : translate('reviewEmpty')}
             {overview.later > 0 && ` ${overview.later} ${translate('reviewLater')}.`}
-          </p>
+          </Hint>
         ) : (
-          <div className="mt-2 space-y-3">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {queueAt + 1}/{overview.queue.length} · {siteName(sites, card.siteId)}
+          <div className="space-y-3">
+            <SectionLabel>{siteName(sites, card.siteId)}</SectionLabel>
+            <p className="rounded-lg border border-line bg-well p-4 text-sm leading-relaxed whitespace-pre-wrap">
+              {card.front}
             </p>
-            <p className="rounded-lg bg-slate-50 p-3 text-sm whitespace-pre-wrap dark:bg-slate-800">{card.front}</p>
             {revealed ? (
               <>
-                <p className="rounded-lg bg-slate-50 p-3 text-sm whitespace-pre-wrap dark:bg-slate-800">{card.back}</p>
+                <p className="rounded-lg border border-brand-200 bg-accent-soft p-4 text-sm leading-relaxed whitespace-pre-wrap dark:border-brand-900">
+                  {card.back}
+                </p>
                 {card.sourceUrl && (
                   <a
                     href={card.sourceUrl}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="text-xs font-semibold text-blue-700 dark:text-blue-300"
+                    className="inline-block text-xs font-medium text-accent-ink hover:underline"
                   >
                     {translate('cardSource')}
                   </a>
                 )}
                 <div className="grid grid-cols-2 gap-2">
                   {SRS_RATINGS.map((rating) => (
-                    <button key={rating} type="button" className={smallButton} onClick={() => void rate(rating)}>
+                    <button
+                      key={rating}
+                      type="button"
+                      className={cx(
+                        'inline-flex min-h-9 items-center justify-center rounded-lg border bg-canvas px-3 text-sm font-medium transition-colors duration-150',
+                        ratingVariant[rating]
+                      )}
+                      onClick={() => void rate(rating)}
+                    >
                       {translate(RATING_LABELS[rating])} · {card.intervals[rating]}
                       {translate('daysShort')}
                     </button>
@@ -231,32 +260,29 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
                 </div>
               </>
             ) : (
-              <button
-                type="button"
-                className="w-full rounded-lg bg-blue-700 p-2 text-sm font-semibold text-white"
-                onClick={() => setRevealed(true)}
-              >
+              <Button variant="primary" size="md" className="w-full justify-center" onClick={() => setRevealed(true)}>
                 {translate('showAnswer')}
-              </button>
+              </Button>
             )}
           </div>
         )}
-      </section>
+      </Card>
 
       {overview.offer && !guard.active && (
-        <section className="space-y-2 rounded-xl border border-blue-200 bg-white p-4 dark:border-blue-900 dark:bg-slate-900">
-          <h3 className="text-sm font-bold">{translate('practiceOffer')}</h3>
+        <Card variant="accent" className="space-y-3">
+          <CardTitle icon={Sparkles} tone="brand">
+            {translate('practiceOffer')}
+          </CardTitle>
           <p className="text-xs">
             {overview.offer.count} {translate('questionsCount')} · {siteName(sites, overview.offer.siteId)}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{translate('practiceOfferHint')}</p>
+          <Hint>{translate('practiceOfferHint')}</Hint>
           {decks.some((deck) => deck.siteId === overview.offer?.siteId) ? (
             <>
-              <select
+              <Select
                 aria-label={translate('practiceSave')}
                 value={offerDeck || decks.find((deck) => deck.siteId === overview.offer?.siteId)?.id}
                 onChange={(event) => setOfferDeck(event.target.value)}
-                className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
               >
                 {decks
                   .filter((deck) => deck.siteId === overview.offer?.siteId)
@@ -265,59 +291,59 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
                       {deck.name}
                     </option>
                   ))}
-              </select>
-              <button type="button" className={smallButton} onClick={() => void saveMistakes()}>
-                <Plus size={13} />
+              </Select>
+              <Button variant="primary" onClick={() => void saveMistakes()}>
+                <Plus size={14} />
                 {translate('practiceSave')}
-              </button>
+              </Button>
             </>
           ) : (
-            <p className="text-xs">{translate('deckEmpty')}</p>
+            <Hint>{translate('deckEmpty')}</Hint>
           )}
-        </section>
+        </Card>
       )}
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="text-sm font-bold">{translate('decks')}</h3>
+      <Card className="space-y-4">
+        <CardTitle icon={Layers} tone="sky">
+          {translate('decks')}
+        </CardTitle>
         {decks.length === 0 ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400">{translate('deckEmpty')}</p>
+          <Hint>{translate('deckEmpty')}</Hint>
         ) : (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-line overflow-hidden rounded-lg border border-line">
             {decks.map((deck: StudyDeckView) => (
-              <li key={deck.id} className="rounded-lg border border-slate-200 p-2 text-xs dark:border-slate-700">
-                <div className="flex items-start gap-2">
+              <li key={deck.id} className="p-3 text-xs">
+                <div className="flex items-center gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{deck.name}</p>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      {siteName(sites, deck.siteId)} · {deck.cards} {translate('cardsCount')} · {deck.due}{' '}
-                      {translate('dueCount')}
+                    <p className="truncate text-sm font-medium">{deck.name}</p>
+                    <p className="mt-0.5 text-ink-3">
+                      {siteName(sites, deck.siteId)} · {deck.cards} {translate('cardsCount')} ·{' '}
+                      <span className={deck.due > 0 ? 'font-medium text-warning-ink' : ''}>
+                        {deck.due} {translate('dueCount')}
+                      </span>
                     </p>
                   </div>
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     aria-label={translate('deleteDeck')}
-                    className={smallButton}
                     onClick={() => setConfirmDelete(deck.id)}
                   >
-                    <Trash2 size={13} />
-                  </button>
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
                 {confirmDelete === deck.id && (
                   <div className="mt-2 space-y-2">
-                    <p role="alert" className="font-semibold text-red-700 dark:text-red-400">
+                    <p role="alert" className="font-semibold text-error-ink">
                       {translate('deleteDeckConfirm')}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
-                      <button type="button" className={smallButton} onClick={() => setConfirmDelete(null)}>
+                      <Button className="justify-center" onClick={() => setConfirmDelete(null)}>
                         {translate('cancel')}
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-lg bg-red-600 p-2 text-xs font-semibold text-white"
-                        onClick={() => void removeDeck(deck.id)}
-                      >
+                      </Button>
+                      <Button variant="danger" className="justify-center" onClick={() => void removeDeck(deck.id)}>
                         {translate('deleteDeck')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -326,91 +352,87 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
           </ul>
         )}
 
-        <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
-          <p className="text-xs font-semibold">{translate('newDeck')}</p>
+        <div className="space-y-2 border-t border-line pt-4">
+          <SectionLabel>{translate('newDeck')}</SectionLabel>
           {sites.length > 1 && (
-            <select
+            <Select
               aria-label={translate('newDeck')}
               value={deckSite || sites[0]?.id}
               onChange={(event) => setDeckSite(event.target.value)}
-              className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             >
               {sites.map((site) => (
                 <option key={site.id} value={site.id}>
                   {site.label}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
           <div className="flex gap-2">
-            <input
+            <Input
               value={deckName}
               onChange={(event) => setDeckName(event.target.value)}
               placeholder={translate('deckName')}
               aria-label={translate('deckName')}
-              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              className="flex-1"
             />
-            <button type="button" className={smallButton} onClick={() => void create()}>
-              <Plus size={13} />
+            <Button size="md" onClick={() => void create()}>
+              <FolderPlus size={14} />
               {translate('createDeck')}
-            </button>
+            </Button>
           </div>
         </div>
 
         {decks.length > 0 && (
-          <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
-            <p className="text-xs font-semibold">{translate('addCard')}</p>
-            <select
+          <div className="space-y-2 border-t border-line pt-4">
+            <SectionLabel>{translate('addCard')}</SectionLabel>
+            <Select
               aria-label={translate('decks')}
               value={cardDeck || decks[0]?.id}
               onChange={(event) => setCardDeck(event.target.value)}
-              className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             >
               {decks.map((deck) => (
                 <option key={deck.id} value={deck.id}>
                   {deck.name}
                 </option>
               ))}
-            </select>
-            <textarea
+            </Select>
+            <Textarea
               value={front}
               onChange={(event) => setFront(event.target.value)}
               placeholder={translate('cardFront')}
               aria-label={translate('cardFront')}
               rows={2}
-              className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
-            <textarea
+            <Textarea
               value={back}
               onChange={(event) => setBack(event.target.value)}
               placeholder={translate('cardBack')}
               aria-label={translate('cardBack')}
               rows={2}
-              className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
-            <button type="button" className={smallButton} onClick={() => void addCard()}>
-              <Plus size={13} />
+            <Button variant="primary" onClick={() => void addCard()}>
+              <Plus size={14} />
               {translate('addCard')}
-            </button>
+            </Button>
           </div>
         )}
 
-        <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
-          <p className="text-xs text-slate-500 dark:text-slate-400">{translate('importCardsHint')}</p>
+        <div className="space-y-2 border-t border-line pt-4">
+          <Hint>{translate('importCardsHint')}</Hint>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className={smallButton} onClick={() => void exportCards('json')}>
-              <Download size={13} />
+            <Button onClick={() => void exportCards('json')}>
+              <Download size={14} />
               {translate('exportCardsJson')}
-            </button>
-            <button type="button" className={smallButton} onClick={() => void exportCards('csv')}>
-              <Download size={13} />
+            </Button>
+            <Button onClick={() => void exportCards('csv')}>
+              <Download size={14} />
               {translate('exportCardsCsv')}
-            </button>
+            </Button>
             {decks.length > 0 && (
-              <button type="button" className={smallButton} onClick={() => fileInput.current?.click()}>
-                <Upload size={13} />
+              <Button onClick={() => fileInput.current?.click()}>
+                <Upload size={14} />
                 {translate('importCards')}
-              </button>
+              </Button>
             )}
             <input
               ref={fileInput}
@@ -422,7 +444,7 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
             />
           </div>
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  BookOpen,
+  CircleAlert,
+  CircleCheck,
   GraduationCap,
-  LayoutDashboard,
+  House,
+  Library,
+  ListChecks,
   Monitor,
   Moon,
   Settings2,
-  Sun,
   Sparkles,
-  Trash2
+  Sun,
+  Trash2,
+  TriangleAlert
 } from 'lucide-react';
 import type { OkResponse, Locale, Theme } from '../shared/types';
 import { t, type TranslationKey } from '../shared/i18n';
@@ -30,6 +34,7 @@ import { useTaskData } from './useTaskData';
 import { mergeTaskDatasets } from '../shared/tasks';
 import { hiddenCourseKeys } from '../shared/courses';
 import { taskText } from './taskStrings';
+import { Alert, Button, Card, cx, Hint, SectionLabel, Segmented, Select } from './ui';
 
 type Page = 'today' | 'tasks' | 'courses' | 'study' | 'settings';
 const themeOptions: { key: Theme; icon: typeof Sun }[] = [
@@ -101,8 +106,13 @@ export default function App() {
   };
 
   useEffect(() => {
-    document.documentElement.lang = locale;
-    document.documentElement.classList.toggle('dark', theme === 'dark' || (theme === 'system' && systemDark));
+    const root = document.documentElement;
+    root.lang = locale;
+    // Swap the theme without color transitions, so controls do not fade from the old palette.
+    root.classList.add('theme-changing');
+    root.classList.toggle('dark', theme === 'dark' || (theme === 'system' && systemDark));
+    void root.offsetHeight;
+    root.classList.remove('theme-changing');
   }, [locale, theme, systemDark]);
 
   function saveLocale(next: Locale) {
@@ -141,88 +151,87 @@ export default function App() {
     setSelected(key);
     setPage('courses');
   }
-  const navigation: { key: Page; icon: typeof LayoutDashboard; label: TranslationKey | 'tasks' }[] = [
-    { key: 'today', icon: LayoutDashboard, label: 'today' },
-    { key: 'tasks', icon: BookOpen, label: 'tasks' },
-    { key: 'courses', icon: BookOpen, label: 'courses' },
+  const navigation: { key: Page; icon: typeof House; label: TranslationKey | 'tasks' }[] = [
+    { key: 'today', icon: House, label: 'today' },
+    { key: 'tasks', icon: ListChecks, label: 'tasks' },
+    { key: 'courses', icon: Library, label: 'courses' },
     { key: 'study', icon: Sparkles, label: 'study' },
     { key: 'settings', icon: Settings2, label: 'settings' }
   ];
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
-      <header className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-700 text-white">
-            <GraduationCap size={22} />
+    <div className="flex min-h-screen flex-col bg-surface text-ink">
+      <header className="sticky top-0 z-10 border-b border-line bg-canvas">
+        <div className="flex items-center gap-3 px-4 pt-3 pb-2">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-white shadow-card">
+            <GraduationCap size={20} aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-base font-bold">{translate('appName')}</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{translate('tagline')}</p>
+            <h1 className="truncate text-[15px] leading-tight font-semibold">{translate('appName')}</h1>
+            <p className="truncate text-[11px] text-ink-3">{translate('tagline')}</p>
           </div>
-          <select
-            aria-label={translate('language')}
+          <Segmented
+            label={translate('language')}
             value={locale}
-            onChange={(e) => saveLocale(e.target.value as Locale)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800"
-          >
-            <option value="en">EN</option>
-            <option value="id">ID</option>
-          </select>
+            onChange={saveLocale}
+            className="w-[5.5rem] shrink-0"
+            options={[
+              { value: 'en', label: 'EN', ariaLabel: 'English' },
+              { value: 'id', label: 'ID', ariaLabel: 'Bahasa Indonesia' }
+            ]}
+          />
         </div>
+        {!onboarding && (
+          <nav aria-label={translate('navigation')} className="grid grid-cols-5 gap-1 px-2 pb-2">
+            {navigation.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                aria-current={page === item.key ? 'page' : undefined}
+                onClick={() => {
+                  setPage(item.key);
+                  if (item.key === 'courses') setSelected(null);
+                }}
+                className={cx(
+                  'flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] font-medium transition-colors duration-150',
+                  page === item.key ? 'bg-accent-soft text-accent-ink' : 'text-ink-3 hover:bg-well hover:text-ink'
+                )}
+              >
+                <item.icon size={17} aria-hidden="true" />
+                <span className="max-w-full truncate">
+                  {item.label === 'tasks' ? taskText(locale, 'tasks') : translate(item.label)}
+                </span>
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
-      {!onboarding && (
-        <nav
-          aria-label={translate('navigation')}
-          className="grid grid-cols-5 gap-1 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-800 dark:bg-slate-900"
-        >
-          {navigation.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => {
-                setPage(item.key);
-                if (item.key === 'courses') setSelected(null);
-              }}
-              className={`flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-2 text-[11px] ${page === item.key ? 'bg-blue-50 font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-slate-500 dark:text-slate-300'}`}
-            >
-              <item.icon size={17} />
-              <span className="truncate">
-                {item.label === 'tasks' ? taskText(locale, 'tasks') : translate(item.label)}
-              </span>
-            </button>
-          ))}
-        </nav>
-      )}
-      <main className="space-y-4 px-4 py-5">
+      <main className="flex-1 space-y-3 px-4 py-4">
         {onboarding ? (
           <Onboarding translate={translate} onDone={finishOnboarding} />
         ) : (
           <>
             {!hasChrome && (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <Alert tone="warning" icon={TriangleAlert}>
                 {translate('preview')}
-              </p>
+              </Alert>
             )}
             {notice && (
-              <p
-                role="status"
-                className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800"
-              >
+              <Alert tone="success" icon={CircleCheck} role="status">
                 {translate(notice)}
-              </p>
+              </Alert>
             )}
             {shownError && (
-              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+              <Alert tone="error" icon={CircleAlert} role="alert">
                 {translate(shownError)}
-              </p>
+              </Alert>
             )}
             <GuardBanner guard={guard} translate={translate} />
             {(page === 'today' || page === 'courses') && (
               <>
                 {hasChrome && sitesState.sites.length === 0 && (
-                  <section className="rounded-xl border border-blue-200 bg-white p-4 shadow-xs dark:border-blue-900 dark:bg-slate-900">
+                  <Card variant="accent">
                     <SiteEnableForm {...feedback} />
-                  </section>
+                  </Card>
                 )}
                 <SiteAlerts state={sitesState} {...feedback} />
                 {page === 'today' && (
@@ -247,64 +256,62 @@ export default function App() {
                   ) : (
                     <CourseList entries={entries} onSelect={selectCourse} {...feedback} />
                   ))}
-                <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{translate('limitations')}</p>
+                <Hint faint className="px-1">
+                  {translate('limitations')}
+                </Hint>
               </>
             )}
             {page === 'tasks' && <TasksView sites={sitesState.sites} locale={locale} hidden={hiddenCourses} />}
             {page === 'study' && (
               <>
                 <StudyPage sites={sitesState.sites} guard={guard} {...feedback} />
-                <p className="text-xs text-slate-500 dark:text-slate-400">{translate('studyPrivacy')}</p>
+                <Hint faint className="px-1">
+                  {translate('studyPrivacy')}
+                </Hint>
               </>
             )}
             {page === 'settings' && (
-              <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                <h2 className="font-bold">{translate('settings')}</h2>
-                <label className="block text-xs font-semibold">
-                  {translate('language')}
-                  <select
+              <>
+                <h2 className="px-1 text-lg font-semibold">{translate('settings')}</h2>
+                <Card className="space-y-4">
+                  <SectionLabel>{translate('language')}</SectionLabel>
+                  <Select
+                    aria-label={translate('language')}
                     value={locale}
                     onChange={(e) => saveLocale(e.target.value as Locale)}
-                    className="mt-1 block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   >
                     <option value="en">English</option>
                     <option value="id">Bahasa Indonesia</option>
-                  </select>
-                </label>
-                <div>
-                  <p className="text-xs font-semibold">{translate('theme')}</p>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {themeOptions.map((option) => (
-                      <button
-                        key={option.key}
-                        type="button"
-                        aria-pressed={theme === option.key}
-                        onClick={() => saveTheme(option.key)}
-                        className={`flex items-center justify-center gap-2 rounded-lg border p-2 text-sm ${theme === option.key ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-slate-300 dark:border-slate-700'}`}
-                      >
-                        <option.icon size={15} />
-                        {translate(option.key)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  </Select>
+                  <SectionLabel>{translate('theme')}</SectionLabel>
+                  <Segmented
+                    label={translate('theme')}
+                    value={theme}
+                    onChange={saveTheme}
+                    options={themeOptions.map((option) => ({
+                      value: option.key,
+                      icon: option.icon,
+                      label: translate(option.key)
+                    }))}
+                  />
+                </Card>
                 {hasChrome && (
-                  <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                  <Card>
                     <SitesSettings state={sitesState} {...feedback} />
-                  </div>
+                  </Card>
                 )}
                 {hasChrome && sitesState.sites.length > 0 && (
-                  <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                  <Card>
                     <AppearanceSettings state={sitesState} {...feedback} />
-                  </div>
+                  </Card>
                 )}
                 {hasChrome && (
-                  <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                  <Card>
                     <StudyRetentionSettings {...feedback} />
-                  </div>
+                  </Card>
                 )}
                 {hasChrome && (
-                  <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                  <Card>
                     <BackupSettings
                       locale={locale}
                       {...feedback}
@@ -314,55 +321,51 @@ export default function App() {
                         setRestored((count) => count + 1);
                       }}
                     />
-                  </div>
+                  </Card>
                 )}
-                <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
-                  <p className="text-xs font-semibold">{translate('clearData')}</p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('clearDataHint')}</p>
+                <Card variant="danger" className="space-y-2">
+                  <SectionLabel tone="danger">{translate('clearData')}</SectionLabel>
+                  <Hint>{translate('clearDataHint')}</Hint>
                   {confirmingClear ? (
-                    <div className="mt-2 space-y-2">
-                      <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">
+                    <div className="space-y-2">
+                      <p role="alert" className="text-xs font-semibold text-error-ink">
                         {translate('clearDataConfirmQuestion')}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingClear(false)}
-                          className="rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-700"
-                        >
+                        <Button size="md" className="justify-center" onClick={() => setConfirmingClear(false)}>
                           {translate('cancel')}
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="md"
+                          className="justify-center"
                           onClick={() => void clearLocalData()}
-                          className="rounded-lg bg-red-600 p-2 text-sm font-semibold text-white"
                         >
                           {translate('clearDataConfirm')}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <button
-                      type="button"
+                    <Button
+                      variant="dangerOutline"
                       onClick={() => {
                         setNotice(null);
                         setConfirmingClear(true);
                       }}
-                      className="mt-2 inline-flex items-center gap-2 rounded-lg border border-red-300 p-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:text-red-400"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={14} />
                       {translate('clearData')}
-                    </button>
+                    </Button>
                   )}
-                </div>
-              </section>
+                </Card>
+              </>
             )}
           </>
         )}
       </main>
-      <footer className="border-t border-slate-200 px-4 py-4 text-center text-[11px] text-slate-400 dark:border-slate-800">
+      <footer className="px-4 pt-2 pb-5 text-center text-[11px] leading-relaxed text-ink-3">
         <p>{translate('unofficial')}</p>
-        <p className="mt-1">
+        <p>
           {translate('copyright')} · v{__APP_VERSION__}
         </p>
       </footer>
