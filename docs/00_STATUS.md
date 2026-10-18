@@ -12,12 +12,13 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - MIT `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue and PR templates added; README rewritten for contributors.
 - Node pinned to 24.15+ (`.nvmrc`, `engines`); npm kept as sole package manager, stray `bun.lock` removed.
 - Owner reported manual QA 1–8 passed on SiberMu with unpacked `dist/` (2026-10-18). Live course with 100 activities showed all `unknown`; fixtures show SiberMu renders completion markup on few activities, so likely correct, but unconfirmed.
+- Live bug: SiberMu course showed all activities `unknown` although the page shows Done/To do. Parser maps the live `manual:undo` markup to `complete` (new test), so the suspect is recapture timing; content script now caps the debounce at 3 s and recaptures on bfcache restore and tab visible. Parser also falls back to the course index drawer icons (`data-value` 1/2 complete). Verified live by owner: course 5264 shows 3 completed, 75 not completed, 24 unknown (2026-10-18).
 - Manifest description updated by owner (126 chars, disclaimer kept).
 - Breaking for local dev data: stored snapshots without `restricted` fail validation; revisit the course page to refresh.
 
 ## Next task
 
-Owner captures one SiberMu course with **completed** activities (`tests/fixtures/README.md`); agent adds the fixture and a `complete` mapping test, then v0.2 exit review and start v0.3 (`docs/08_ROADMAP.md`).
+Owner saves one sanitized SiberMu course fixture with completed activities (`tests/fixtures/README.md`) so `complete` is covered by fixture tests, not only live checks. Then v0.2 exit review and start v0.3 (`docs/08_ROADMAP.md`).
 
 ## Blockers / waiting on owner
 

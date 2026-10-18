@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCourse, parseCompletion } from '../src/content/moodle/adapter';
+import { parseCourse, parseCompletion, parseCourseIndexCompletion } from '../src/content/moodle/adapter';
 import { isActivityUrl, isCourseSnapshot, isCourseUrl } from '../src/shared/validation';
 
 const URL = 'https://solusi.sibermu.ac.id/course/view.php?id=42';
@@ -104,5 +104,28 @@ describe('Moodle course adapter', () => {
       html(`<h1>Course</h1><li class="activity"><a href="https://solusi.sibermu.ac.id/mod/resource/view.php?id=11">
       <span class="instancename">Reading <span class="accesshide"> File</span></span></a></li>`);
     expect(parseCourse(doc, URL)?.activities[0]?.title).toBe('Reading');
+  });
+  it('maps the live SiberMu manual:undo button inside activity-information to complete', () => {
+    // Shape observed on solusi.sibermu.ac.id on 2026-10-18 (names replaced).
+    const doc = html(`<ul><li class="activity activity-wrapper url modtype_url" data-for="cmitem" data-id="1">
+      <div class="activity-item focus-control" data-region="activity-card"><div class="activity-grid">
+      <div class="activity-instance d-flex flex-column activity-name-area"><a href="https://solusi.sibermu.ac.id/mod/url/view.php?id=1" class="aalink stretched-link"><span class="instancename">Video<span class="accesshide"> URL</span></span></a></div>
+      <div class="activity-completion align-self-start ms-sm-2"><div data-region="activity-information" class="activity-information"><div data-region="completion-info">
+      <button class="btn btn-success btn-sm text-nowrap" data-action="toggle-manual-completion" data-toggletype="manual:undo" title="Video is marked as done. Press to undo.">Done</button>
+      </div></div></div></div></div></li></ul>`);
+    expect(parseCourse(doc, URL)?.activities.map((a) => a.completion)).toEqual(['complete']);
+  });
+  it('falls back to course index completion icons when the activity has no readable badge', () => {
+    const doc = html(`<ul>
+      <li class="activity modtype_url" data-id="1"><a href="https://solusi.sibermu.ac.id/mod/url/view.php?id=1">One</a></li>
+      <li class="activity modtype_forum" data-id="2"><a href="https://solusi.sibermu.ac.id/mod/forum/view.php?id=2">Two</a></li>
+      <li class="activity modtype_page" data-id="3"><a href="https://solusi.sibermu.ac.id/mod/page/view.php?id=3">Three</a></li>
+    </ul>
+    <ul class="courseindex-sectioncontent">
+      <li class="courseindex-item" data-for="cm" data-id="1"><span class="completioninfo completion_complete" data-for="cm_completion" data-value="1"></span></li>
+      <li class="courseindex-item" data-for="cm" data-id="2"><span class="completioninfo completion_incomplete" data-for="cm_completion" data-value="0"></span></li>
+    </ul>`);
+    expect(parseCourse(doc, URL)?.activities.map((a) => a.completion)).toEqual(['complete', 'incomplete', 'unknown']);
+    expect(parseCourseIndexCompletion(doc, '1"],x[data-id="2')).toBe('unknown');
   });
 });

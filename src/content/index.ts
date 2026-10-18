@@ -11,21 +11,43 @@ function capture(): void {
   });
 }
 
+// Debounce DOM bursts, but cap the wait: pages with constant mutations (lazy video, session timers)
+// would otherwise reset the timer forever and keep a stale first capture.
+const QUIET_MS = 600;
+const MAX_WAIT_MS = 3000;
 let queued: number | undefined;
+let firstQueuedAt: number | undefined;
 function scheduleCapture(): void {
+  const now = Date.now();
+  firstQueuedAt ??= now;
   if (queued !== undefined) window.clearTimeout(queued);
+  const delay = Math.max(0, Math.min(QUIET_MS, firstQueuedAt + MAX_WAIT_MS - now));
   queued = window.setTimeout(() => {
     queued = undefined;
+    firstQueuedAt = undefined;
     capture();
-  }, 600);
+  }, delay);
 }
 
 capture();
+// A page restored from the back/forward cache does not rerun this script; recapture so
+// completion changed on an activity page shows up after going back.
+window.addEventListener('pageshow', (event) => {
+  if (!event.persisted) return;
+  observe();
+  scheduleCapture();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') scheduleCapture();
+});
 const observer = new MutationObserver(scheduleCapture);
 // Observe a narrow subtree when possible, as Moodle themes vary.
-observer.observe(document.querySelector('#page-content') ?? document.body, {
-  subtree: true,
-  childList: true,
-  characterData: true
-});
-window.addEventListener('pagehide', () => observer.disconnect(), { once: true });
+function observe(): void {
+  observer.observe(document.querySelector('#page-content') ?? document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+}
+observe();
+window.addEventListener('pagehide', () => observer.disconnect());

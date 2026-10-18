@@ -6,8 +6,11 @@ const COURSE_HEADING = '.page-header-headings h1, #page-header h1, h1';
 const ACTIVITY_CONTAINER = '.activity-item, li.activity';
 const MODULE_LINK = 'a[href*="/mod/"][href*="/view.php"]';
 const COMPLETION_CONTAINER = '.activity-completion, [data-region="completion-info"], [data-region="completion"]';
-// Verified on SiberMu fixtures (manual:mark-done only); manual:undo follows Moodle 4.x core, unverified on SiberMu.
+// Verified on SiberMu: manual:mark-done in fixtures; manual:undo in live markup (2026-10-18), not yet in a fixture.
 const MANUAL_TOGGLE = 'button[data-action="toggle-manual-completion"][data-toggletype]';
+// Verified live on SiberMu (theme_remui, 2026-10-18): the course index drawer marks completion per module.
+// Rendered by Moodle JS, so it may be absent on the first capture.
+const COURSE_INDEX_COMPLETION = '[data-for="cm_completion"]';
 const ACCESSHIDE = '.accesshide';
 // Verified on SiberMu fixtures: locked activities render `.instancename` without a link.
 const INSTANCE_NAME = '.instancename';
@@ -100,6 +103,18 @@ export function parseCompletion(container: Element): CompletionStatus {
   return 'unknown';
 }
 
+// Course index fallback. Moodle values: 0 incomplete, 1 complete, 2 complete pass, 3 complete fail.
+export function parseCourseIndexCompletion(doc: Document, moduleId: string): CompletionStatus {
+  if (!/^\d+$/.test(moduleId)) return 'unknown';
+  const icon = doc.querySelector(`[data-for="cm"][data-id="${moduleId}"] ${COURSE_INDEX_COMPLETION}`);
+  if (!icon) return 'unknown';
+  const value = icon.getAttribute('data-value');
+  if (value === '1' || value === '2' || icon.classList.contains('completion_complete')) return 'complete';
+  if (value === '3' || icon.classList.contains('completion_incomplete') || icon.classList.contains('completion_fail'))
+    return 'incomplete';
+  return 'unknown';
+}
+
 export function parseCourse(doc: Document, urlString: string, now = new Date()): CourseSnapshot | null {
   if (!isCourseUrl(urlString)) return null;
   const url = new URL(urlString);
@@ -144,6 +159,9 @@ export function parseCourse(doc: Document, urlString: string, now = new Date()):
       restricted: false,
       completion: parseCompletion(container)
     });
+  }
+  for (const activity of activities) {
+    if (activity.completion === 'unknown') activity.completion = parseCourseIndexCompletion(doc, activity.id);
   }
   return { courseId, courseName, sourceUrl: canonicalCourseUrl(urlString)!, capturedAt: now.toISOString(), activities };
 }

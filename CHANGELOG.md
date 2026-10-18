@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Parser: when an activity has no readable completion badge, read the course index drawer icon (`[data-for="cm_completion"]`, verified live on SiberMu).
+- Content script: DOM-change recapture now has a 3 s maximum wait, so pages with constant mutations no longer keep a stale first snapshot; recapture on back/forward-cache restore and when the tab becomes visible.
 - Typecheck: vitest upgraded to 3.2 so it shares vite 6 with the build; `courseId` narrowing in `isCourseSnapshot`.
 - Parser: `manual:undo` and "Mark as not done" map to `complete`, "To do" to `incomplete`; `.accesshide` suffixes removed from titles; missing course heading stored as `null` and localized in the UI.
 - Side panel shows a dedicated storage-load error instead of the navigation error.
