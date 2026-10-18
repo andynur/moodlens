@@ -16,11 +16,13 @@ import { AppearanceSettings } from './components/Appearance';
 import { BackupSettings } from './components/Backup';
 import { Onboarding, ONBOARDED_KEY } from './components/Onboarding';
 import { CourseDetail } from './components/CourseDetail';
+import { GuardBanner } from './components/GuardBanner';
 import { CourseList } from './components/Courses';
 import { SiteAlerts, SiteEnableForm, SitesSettings } from './components/Sites';
 import { TasksView } from './components/Tasks';
 import { Today } from './components/Today';
 import { courseEntries } from './courseEntries';
+import { useGuard } from './useGuard';
 import { hasChrome, useSites } from './useSites';
 import { useTaskData } from './useTaskData';
 import { mergeTaskDatasets } from '../shared/tasks';
@@ -55,6 +57,7 @@ export default function App() {
   const systemDark = useSystemDark();
   const [page, setPage] = useState<Page>('today');
   const sitesState = useSites();
+  const guard = useGuard();
   const [error, setError] = useState<TranslationKey | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [notice, setNotice] = useState<TranslationKey | null>(null);
@@ -211,6 +214,7 @@ export default function App() {
                 {translate(shownError)}
               </p>
             )}
+            <GuardBanner guard={guard} translate={translate} />
             {(page === 'today' || page === 'courses') && (
               <>
                 {hasChrome && sitesState.sites.length === 0 && (
@@ -249,7 +253,7 @@ export default function App() {
               <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
                 <Sparkles className="text-blue-600" />
                 <h2 className="mt-3 text-lg font-bold">{translate('study')}</h2>
-                <p className="mt-2 text-sm">{translate('studyPlanned')}</p>
+                <p className="mt-2 text-sm">{guard.active ? translate('guardPaused') : translate('studyPlanned')}</p>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{translate('studyPrivacy')}</p>
               </section>
             )}

@@ -86,6 +86,8 @@ export type IncomingMessage =
   | { type: 'EXPORT_BACKUP' }
   | { type: 'IMPORT_BACKUP'; backup: unknown }
   | { type: 'GET_APPEARANCE' }
+  | { type: 'GUARD_STATE'; payload: unknown }
+  | { type: 'GET_GUARD' }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;
@@ -99,6 +101,12 @@ export interface TaskCaptureClaimResponse {
 export interface ExportBackupResponse {
   ok: boolean;
   backup: unknown;
+}
+/** Fail-closed assessment verdict for every open tab of every registered site (ML-022). */
+export interface GuardStatusResponse {
+  ok: boolean;
+  active: boolean;
+  reasons: string[];
 }
 export interface EnableSiteResponse {
   ok: boolean;

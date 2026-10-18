@@ -76,24 +76,50 @@ function isAssignEditing(root: Document, url: URL): boolean {
   );
 }
 
+/** Reasons that follow from the address alone, so the background can judge a tab it cannot read. */
+function pathReasons(url: URL): GuardReason[] {
+  const path = url.pathname;
+  const reasons: GuardReason[] = [];
+  if (QUIZ_ATTEMPT_PATH.test(path)) reasons.push('quiz-attempt');
+  if (ASSIGN_VIEW_PATH.test(path) && url.searchParams.get('action') === 'editsubmission') {
+    reasons.push('assign-editing');
+  }
+  // Every lesson and H5P page counts as an attempt state until fixtures show otherwise.
+  if (path.includes('/mod/lesson/')) reasons.push('lesson');
+  if (path.includes('/mod/h5pactivity/')) reasons.push('h5p-activity');
+  return reasons;
+}
+
 export function evaluateGuard(root: Document, href: string, userAgent: string = navigator.userAgent): GuardState {
   try {
     const url = new URL(href);
     const path = url.pathname;
-    const reasons: GuardReason[] = [];
     const isReview = QUIZ_REVIEW_PATH.test(path);
+    const reasons = pathReasons(url);
 
-    if (QUIZ_ATTEMPT_PATH.test(path)) reasons.push('quiz-attempt');
     if (isReview && !hasFinishedReviewEvidence(root)) reasons.push('quiz-review-unfinished');
     if (root.querySelector(TIMER_SELECTOR)) reasons.push('timer');
     if (SEB_USER_AGENT.test(userAgent)) reasons.push('safe-exam-browser');
-    if (isAssignEditing(root, url)) reasons.push('assign-editing');
-    // Every lesson and H5P page counts as an attempt state until fixtures show otherwise.
-    if (path.includes('/mod/lesson/')) reasons.push('lesson');
-    if (path.includes('/mod/h5pactivity/')) reasons.push('h5p-activity');
+    if (isAssignEditing(root, url) && !reasons.includes('assign-editing')) reasons.push('assign-editing');
 
     const active = reasons.length > 0;
     return { active, reasons, practiceCaptureAllowed: isReview && !active };
+  } catch {
+    return { ...ACTIVE_ON_ERROR, reasons: [...ACTIVE_ON_ERROR.reasons] };
+  }
+}
+
+/**
+ * Guard state for a tab whose DOM the background cannot read: the address decides. A quiz review page
+ * counts as unfinished here, because only the page itself can prove a finished attempt (D-009).
+ */
+export function guardFromUrl(href: string): GuardState {
+  try {
+    const url = new URL(href);
+    const reasons = pathReasons(url);
+    if (QUIZ_REVIEW_PATH.test(url.pathname)) reasons.push('quiz-review-unfinished');
+    const unique = [...new Set(reasons)];
+    return { active: unique.length > 0, reasons: unique, practiceCaptureAllowed: false };
   } catch {
     return { ...ACTIVE_ON_ERROR, reasons: [...ACTIVE_ON_ERROR.reasons] };
   }

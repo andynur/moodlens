@@ -10,6 +10,10 @@
 
 - `npm run check` runs gates in parallel with lint, format and typecheck caches, accepts gate names (`npm run check -- test lint`) and shows per-gate time; tests default to the `node` environment and DOM tests opt in to jsdom.
 
+### Added (v0.6, practice and motivation)
+
+- Assessment guard wiring (ML-022): the content script evaluates every page of an enabled site and reports only the verdict; the background keeps reports in session storage, judges a tab without a matching report by its address alone, and answers the side panel with one fail-closed state. The panel shows a localized "Study help is paused" banner naming each reason, and task capture is skipped while the guard is active. DOM markers stay unverified until a quiz fixture exists.
+
 ### Added (v0.6 groundwork, practice and motivation)
 
 - Quiz review mistake capture (ML-020): guarded parser for finished review pages and private `quiz-review` cards that never export (D-009); selectors unverified.

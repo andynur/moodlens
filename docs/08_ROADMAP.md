@@ -80,8 +80,8 @@ Goal: accurate deadlines without fragile scraping.
 
 ## v0.6 — Practice and motivation
 
-- [~] Assessment guard first (ML-022): fail-closed detection of attempt pages and timed/locked states. Rules and validator done (`src/content/moodle/guard.ts`); wiring, banner and quiz fixtures pending.
-- [~] IndexedDB store design and retention settings. D-014 design, `src/background/studyStore.ts` and retention rules done; wiring into site removal/clear-all and a retention control in Settings pending.
+- [~] Assessment guard first (ML-022): fail-closed detection of attempt pages and timed/locked states. Rules, validator, content-script reporting, background verdict (`src/background/guard.ts`) and the paused banner done; quiz attempt/review fixtures pending, so every DOM marker stays unverified.
+- [~] IndexedDB store design and retention settings. D-014 design, `src/background/studyStore.ts`, retention rules and wiring into site removal, clear-all and backup import done; a retention control in Settings pending.
 - [~] Flashcards: user-authored decks, FSRS-style scheduling, daily review (ML-019). Scheduler (PRD-010 AC 4) and CSV/JSON import/export done; IndexedDB store and review UI pending.
 - [~] Save mistakes from closed quiz review pages into private decks (ML-020, D-009). Guarded capture and private card builder done (PRD-010 AC 2); review fixture, save button and store wiring pending.
 - [~] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules done (`src/shared/xp.ts`, PRD-010 AC 5); storage and UI pending.

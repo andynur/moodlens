@@ -38,6 +38,8 @@ export function createChromeStub() {
   const state = {
     listener: undefined as Listener | undefined,
     activeTab: undefined as chrome.tabs.Tab | undefined,
+    /** Open tabs for `tabs.query`; `activeTab` is used when this list is empty. */
+    tabs: [] as chrome.tabs.Tab[],
     tabListening: false,
     detection: { isMoodle: true, confidence: 'high', versionHint: '4.x' } as unknown
   };
@@ -96,7 +98,13 @@ export function createChromeStub() {
       insertCSS: vi.fn(() => Promise.resolve())
     },
     tabs: {
-      query: () => Promise.resolve(state.activeTab ? [state.activeTab] : []),
+      query: (info: { url?: string } = {}) => {
+        const open = state.tabs.length > 0 ? state.tabs : state.activeTab ? [state.activeTab] : [];
+        if (!info.url) return Promise.resolve(open);
+        // Chrome match patterns; the stub only needs the `<origin>/*` form the extension uses.
+        const prefix = info.url.replace(/\*$/, '');
+        return Promise.resolve(open.filter((tab) => (tab.url ?? '').startsWith(prefix)));
+      },
       sendMessage: tabMessages
     }
   };
@@ -111,6 +119,7 @@ export function createChromeStub() {
     scripts.clear();
     alarms.clear();
     state.activeTab = undefined;
+    state.tabs = [];
     state.tabListening = false;
     state.detection = { isMoodle: true, confidence: 'high', versionHint: '4.x' };
     vi.clearAllMocks();

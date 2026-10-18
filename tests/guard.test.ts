@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { evaluateGuard, guardFromReport, isGuardState } from '../src/content/moodle/guard';
+import { evaluateGuard, guardFromReport, guardFromUrl, isGuardState } from '../src/content/moodle/guard';
 
 const ORIGIN = 'https://moodle.example.edu';
 const CHROME_UA = 'Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/140.0 Safari/537.36';
@@ -153,5 +153,32 @@ describe('guard state validation', () => {
       practiceCaptureAllowed: false
     });
     expect(guardFromReport({ active: false, reasons: ['timer'], practiceCaptureAllowed: true }).active).toBe(true);
+  });
+});
+
+describe('guardFromUrl (background side, no DOM)', () => {
+  it('pauses on attempt, review, lesson, H5P and assignment editing addresses', () => {
+    for (const path of [
+      '/mod/quiz/attempt.php?attempt=4',
+      '/mod/quiz/summary.php?attempt=4',
+      '/mod/lesson/view.php?id=3',
+      '/mod/h5pactivity/view.php?id=3',
+      '/mod/assign/view.php?id=3&action=editsubmission'
+    ]) {
+      expect(guardFromUrl(`${ORIGIN}${path}`).active).toBe(true);
+    }
+    expect(guardFromUrl(`${ORIGIN}/mod/quiz/review.php?attempt=4`).reasons).toEqual(['quiz-review-unfinished']);
+  });
+  it('allows ordinary pages but never practice capture, which needs the page itself', () => {
+    const state = guardFromUrl(`${ORIGIN}/course/view.php?id=5`);
+    expect(state).toEqual({ active: false, reasons: [], practiceCaptureAllowed: false });
+    expect(guardFromUrl(`${ORIGIN}/mod/quiz/review.php?attempt=4`).practiceCaptureAllowed).toBe(false);
+  });
+  it('is active on an address it cannot parse', () => {
+    expect(guardFromUrl('not a url')).toEqual({
+      active: true,
+      reasons: ['parse-error'],
+      practiceCaptureAllowed: false
+    });
   });
 });

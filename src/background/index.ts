@@ -4,6 +4,7 @@ import { taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from 
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
 import { appearanceFor, setAppearance } from './appearance';
 import { exportBackup, importBackup } from './backup';
+import { clearGuardReports, guardStatus, reportGuard } from './guard';
 import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from './courses';
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
@@ -110,7 +111,12 @@ async function storeTaskDataset(payload: unknown, sender: chrome.runtime.Message
 async function clearAll(): Promise<OkResponse> {
   await revokeAllSites();
   await clearReminderAlarms();
-  await Promise.all([chrome.storage.local.clear(), chrome.storage.session.clear(), deleteStudyDb()]);
+  await Promise.all([
+    chrome.storage.local.clear(),
+    chrome.storage.session.clear(),
+    clearGuardReports(),
+    deleteStudyDb()
+  ]);
   // Keep the cleared store on the current layout so the next start does not migrate it again.
   await migrateStorage(chrome.storage.local);
   return { ok: true };
@@ -134,6 +140,7 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
   if (message.type === 'TASK_CAPTURE_CLAIM') return () => claimTaskCapture(message.force, sender);
   if (message.type === 'TASK_DATASET') return () => storeTaskDataset(message.payload, sender);
   if (message.type === 'GET_APPEARANCE') return () => appearanceFor(sender);
+  if (message.type === 'GUARD_STATE') return () => reportGuard(message.payload, sender);
   const known = [
     'ENABLE_SITE',
     'RENAME_SITE',
@@ -145,12 +152,15 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'EXPORT_BACKUP',
     'IMPORT_BACKUP',
     'SET_APPEARANCE',
-    'SET_REMINDERS'
+    'SET_REMINDERS',
+    'GET_GUARD'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
+    case 'GET_GUARD':
+      return guardStatus;
     case 'ENABLE_SITE':
       return () => enableSite(message.origin).then((site) => ({ ok: site !== null, site }));
     case 'RENAME_SITE':

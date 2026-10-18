@@ -133,6 +133,8 @@ Block AI, practice capture and answer-related UI when any is true:
 
 Allow practice capture only on `/mod/quiz/review.php` with finished-state evidence (D-009).
 
+Wiring: the content script reports the state to the background (`GUARD_STATE`) on load, on DOM bursts and when the tab becomes visible, and skips its own AJAX reads while the guard is active. The background (`src/background/guard.ts`) keeps reports in session storage only, keyed by tab id, and answers `GET_GUARD` with one verdict for all open tabs of all registered sites. A tab with no matching report is judged from its address alone (`guardFromUrl`), where `/mod/quiz/review.php` always counts as unfinished, so an unreachable page can never unlock study help.
+
 Mistake capture (ML-020, `quiz-review.ts`, selectors **unverified**, no review fixture): runs only when the guard allows it. Takes `.que` blocks with class `incorrect`, `partiallycorrect` or `notanswered`; question from `.qtext`, answer from `.outcome .rightanswer` with the EN/ID "correct answer is" label removed. Images, media, scripts and `.accesshide` text are dropped. Questions without a shown answer are skipped. Keeps `cmid`, never the attempt id. Max 200 questions per page.
 
 ## 5. Appearance (v0.5) — `src/content/appearance.ts`, `public/appearance.css`
