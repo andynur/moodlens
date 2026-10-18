@@ -6,12 +6,17 @@
 
 - Timeline capture asked for `limitnum: 500`, which Moodle rejects ("Limit must be between 1 and 50 (inclusive)"); the error marked the capability unsupported for 24 hours and forced DOM fallback. The request now uses the documented maximum of 50 (`TIMELINE_LIMIT`), verified against a live Moodle 4.x site.
 
+### Fixed
+
+- Background message tasks ran with the previous task's result as their first argument, because the serializing queue passed it on. A task that takes optional parameters (the study overview, the guard verdict, clear-all) could therefore get a stray value; tasks are now always called with no arguments.
+
 ### Changed (tooling)
 
 - `npm run check` runs gates in parallel with lint, format and typecheck caches, accepts gate names (`npm run check -- test lint`) and shows per-gate time; tests default to the `node` environment and DOM tests opt in to jsdom.
 
 ### Added (v0.6, practice and motivation)
 
+- Save mistakes from closed quiz reviews (ML-020, D-009): a finished review page reports only how many wrong questions it holds; the panel offers to save them into a deck of that site, and the question text is read from the page at that moment, never stored in between. Cards keep the course module id as their source link, never the attempt id, and the guard is evaluated again before the page answers. Review selectors remain unverified.
 - Flashcards in the side panel (ML-019): a background study service is the only way to the study store, and the Study page lists decks with card and due counts, creates and deletes decks, adds cards by hand, imports JSON/CSV and exports student-authored cards only (D-009). Review shows one card at a time with the interval each of the four ratings would give, and the queue is due cards first, then at most 20 new cards per site per day. Review is hidden while the assessment guard is active.
 - Review-log retention control (D-014): Settings offers 90 days, 1 year or 2 years (default 1 year); saving prunes older review logs of every site at once, the browser prunes again on start, and the choice is part of the backup allowlist.
 - Assessment guard wiring (ML-022): the content script evaluates every page of an enabled site and reports only the verdict; the background keeps reports in session storage, judges a tab without a matching report by its address alone, and answers the side panel with one fail-closed state. The panel shows a localized "Study help is paused" banner naming each reason, and task capture is skipped while the guard is active. DOM markers stay unverified until a quiz fixture exists.

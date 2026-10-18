@@ -1,5 +1,6 @@
 import { parseCourse } from './moodle/adapter';
 import { evaluateGuard } from './moodle/guard';
+import { captureReviewMistakes } from './moodle/quiz-review';
 import { captureTaskDataset } from './moodle/task-capture';
 import type { IncomingMessage, TaskCaptureClaimResponse } from '../shared/types';
 
@@ -26,6 +27,18 @@ function reportGuard(): boolean {
     });
   }
   return state.active;
+}
+
+/**
+ * Tells the panel that this finished review page holds wrong questions (ML-020). Only the count is
+ * sent; the question text stays on the page until the student presses Save.
+ */
+function offerPractice(): void {
+  const capture = captureReviewMistakes(document, location.href);
+  if (!capture || capture.mistakes.length === 0) return;
+  chrome.runtime.sendMessage({ type: 'PRACTICE_OFFER', count: capture.mistakes.length }).catch(() => {
+    // Extension may be reloading. Avoid emitting sensitive logs.
+  });
 }
 
 async function captureTasks(force = false): Promise<void> {
@@ -71,18 +84,29 @@ function scheduleCapture(): void {
 }
 
 reportGuard();
+offerPractice();
 capture();
 void captureTasks();
-chrome.runtime.onMessage.addListener((message: unknown) => {
-  if (message && typeof message === 'object' && (message as { type?: unknown }).type === 'REFRESH_TASKS') {
-    void captureTasks(true);
+chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse: (value: unknown) => void) => {
+  const type = message && typeof message === 'object' ? (message as { type?: unknown }).type : undefined;
+  if (type === 'REFRESH_TASKS') void captureTasks(true);
+  // The guard is evaluated again here, so a page that locked again saves nothing (ML-022).
+  if (type === 'CAPTURE_QUIZ_MISTAKES') {
+    const capture = captureReviewMistakes(document, location.href);
+    sendResponse(
+      capture
+        ? { ok: true, mistakes: capture.mistakes, ...(capture.cmid ? { cmid: capture.cmid } : {}) }
+        : { ok: false }
+    );
   }
+  return false;
 });
 // A page restored from the back/forward cache does not rerun this script; recapture so
 // completion changed on an activity page shows up after going back.
 window.addEventListener('pageshow', (event) => {
   if (!event.persisted) return;
   observe();
+  offerPractice();
   scheduleCapture();
 });
 document.addEventListener('visibilitychange', () => {

@@ -43,6 +43,7 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [offerDeck, setOfferDeck] = useState('');
   const [queueAt, setQueueAt] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -117,6 +118,16 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
     }
     setRevealed(false);
     setQueueAt((index) => index + 1);
+  }
+
+  async function saveMistakes() {
+    const siteDecks = decks.filter((item) => item.siteId === overview.offer?.siteId);
+    const deck = siteDecks.find((item) => item.id === (offerDeck || siteDecks[0]?.id));
+    if (!deck || !overview.offer) return;
+    const result = await send<{ ok: boolean }>({ type: 'STUDY_SAVE_MISTAKES', deckId: deck.id }, { ok: false });
+    if (result.ok) feedback.onNotice('practiceSaved');
+    else feedback.onError('practiceSaveError');
+    await reload();
   }
 
   async function exportCards(format: 'json' | 'csv') {
@@ -220,6 +231,40 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
           </div>
         )}
       </section>
+
+      {overview.offer && !guard.active && (
+        <section className="space-y-2 rounded-xl border border-blue-200 bg-white p-4 dark:border-blue-900 dark:bg-slate-900">
+          <h3 className="text-sm font-bold">{translate('practiceOffer')}</h3>
+          <p className="text-xs">
+            {overview.offer.count} {translate('questionsCount')} · {siteName(sites, overview.offer.siteId)}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{translate('practiceOfferHint')}</p>
+          {decks.some((deck) => deck.siteId === overview.offer?.siteId) ? (
+            <>
+              <select
+                aria-label={translate('practiceSave')}
+                value={offerDeck || decks.find((deck) => deck.siteId === overview.offer?.siteId)?.id}
+                onChange={(event) => setOfferDeck(event.target.value)}
+                className="block w-full rounded-lg border border-slate-200 bg-white p-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              >
+                {decks
+                  .filter((deck) => deck.siteId === overview.offer?.siteId)
+                  .map((deck) => (
+                    <option key={deck.id} value={deck.id}>
+                      {deck.name}
+                    </option>
+                  ))}
+              </select>
+              <button type="button" className={smallButton} onClick={() => void saveMistakes()}>
+                <Plus size={13} />
+                {translate('practiceSave')}
+              </button>
+            </>
+          ) : (
+            <p className="text-xs">{translate('deckEmpty')}</p>
+          )}
+        </section>
+      )}
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
         <h3 className="text-sm font-bold">{translate('decks')}</h3>

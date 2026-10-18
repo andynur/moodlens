@@ -27,6 +27,7 @@ import type {
   StudyExportResponse,
   StudyOverviewResponse
 } from '../shared/types';
+import { practiceOffer } from './practice';
 import { loadSites } from './sites';
 import { deleteDeck, getCard, listCards, listDecks, openStudyDb, putCards, putDeck, recordReview } from './studyStore';
 
@@ -78,8 +79,9 @@ export async function studyOverview(
   zone = timeZone()
 ): Promise<StudyOverviewResponse> {
   const sites = await loadSites();
-  if (sites.length === 0) return { ...EMPTY_OVERVIEW, ok: true };
-  return withDb(factory, { ...EMPTY_OVERVIEW, ok: true }, async (db) => {
+  const offer = sites.length > 0 ? await practiceOffer() : null;
+  if (sites.length === 0) return { ...EMPTY_OVERVIEW, ok: true, offer: null };
+  return withDb<StudyOverviewResponse>(factory, { ...EMPTY_OVERVIEW, ok: true, offer }, async (db) => {
     const decks: StudyDeckView[] = [];
     const queue: StudyCardView[] = [];
     let later = 0;
@@ -102,7 +104,7 @@ export async function studyOverview(
       }
     }
     decks.sort((a, b) => a.name.localeCompare(b.name));
-    return { ok: true, decks, queue, later };
+    return { ok: true, decks, queue, later, offer };
   });
 }
 

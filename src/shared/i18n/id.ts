@@ -135,6 +135,13 @@ export const id = {
   cardsImported: 'Kartu diimpor.',
   cardsImportInvalid: 'Berkas itu tidak dapat dibaca sebagai kartu Moodlens.',
   exportCardsEmpty: 'Tidak ada kartu buatan sendiri untuk diekspor.',
+  practiceOffer: 'Jawaban salah di halaman ulasan yang terbuka',
+  practiceOfferHint:
+    'Kartu yang disimpan tetap privat: tidak pernah diekspor, dicadangkan, atau dikirim ke mana pun (D-009).',
+  practiceSave: 'Simpan ke dek',
+  practiceSaved: 'Jawaban salah disimpan ke dek.',
+  practiceSaveError: 'Tidak ada yang disimpan. Buka lagi halaman ulasan yang sudah selesai lalu coba sekali lagi.',
+  questionsCount: 'pertanyaan',
   dueSoon: 'Segera tenggat',
   dueSoonEmpty:
     'Tidak ada tenggat dalam 7 hari ke depan. Buka halaman Moodle yang aktif lalu muat ulang Tugas untuk memuat tenggat.',

@@ -97,6 +97,8 @@ export type IncomingMessage =
   | { type: 'STUDY_ADD_CARDS'; siteId: string; deckId: string; cards: unknown }
   | { type: 'STUDY_REVIEW'; cardId: string; rating: unknown }
   | { type: 'STUDY_EXPORT_CARDS'; format: 'json' | 'csv' }
+  | { type: 'PRACTICE_OFFER'; count: unknown }
+  | { type: 'STUDY_SAVE_MISTAKES'; deckId: string }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;
@@ -137,10 +139,17 @@ export interface StudyCardView {
   origin: CardOrigin;
   intervals: Record<SrsRating, number>;
 }
+/** Wrong questions a finished quiz review page holds right now (ML-020); no question text. */
+export interface PracticeOffer {
+  siteId: string;
+  count: number;
+}
 export interface StudyOverviewResponse {
   ok: boolean;
   decks: StudyDeckView[];
   queue: StudyCardView[];
+  /** Null unless a finished review page of a registered site is open. */
+  offer?: PracticeOffer | null;
   /** Cards that exist but are not due today, for the "nothing to review" message. */
   later: number;
 }

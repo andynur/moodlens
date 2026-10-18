@@ -9,6 +9,7 @@ import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from '.
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
 import { pruneAllReviewLogs, setReviewLogRetention } from './retention';
+import { clearPracticeOffer, recordPracticeOffer, saveQuizMistakes } from './practice';
 import { addCards, createDeck, exportCards, removeDeck, reviewFlashcard, studyOverview } from './study';
 import { deleteStudyDb } from './studyStore';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
@@ -118,6 +119,7 @@ async function clearAll(): Promise<OkResponse> {
     chrome.storage.local.clear(),
     chrome.storage.session.clear(),
     clearGuardReports(),
+    clearPracticeOffer(),
     deleteStudyDb()
   ]);
   // Keep the cleared store on the current layout so the next start does not migrate it again.
@@ -130,7 +132,11 @@ type Task = () => Promise<OkResponse | EnableSiteResponse | ExportBackupResponse
 // Tasks run one at a time: several read-modify-write the same per-site keys.
 let queue: Promise<unknown> = Promise.resolve();
 function serialized<T>(task: () => Promise<T>): Promise<T> {
-  const run = queue.then(task, task);
+  // Call with no arguments: a settled value from the previous task must never become a parameter.
+  const run = queue.then(
+    () => task(),
+    () => task()
+  );
   queue = run.catch(() => undefined);
   return run;
 }
@@ -144,6 +150,7 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
   if (message.type === 'TASK_DATASET') return () => storeTaskDataset(message.payload, sender);
   if (message.type === 'GET_APPEARANCE') return () => appearanceFor(sender);
   if (message.type === 'GUARD_STATE') return () => reportGuard(message.payload, sender);
+  if (message.type === 'PRACTICE_OFFER') return () => recordPracticeOffer({ count: message.count }, sender);
   const known = [
     'ENABLE_SITE',
     'RENAME_SITE',
@@ -163,14 +170,15 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'STUDY_DELETE_DECK',
     'STUDY_ADD_CARDS',
     'STUDY_REVIEW',
-    'STUDY_EXPORT_CARDS'
+    'STUDY_EXPORT_CARDS',
+    'STUDY_SAVE_MISTAKES'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
     case 'STUDY_OVERVIEW':
-      return studyOverview;
+      return () => studyOverview();
     case 'STUDY_CREATE_DECK':
       return () => createDeck({ siteId: message.siteId, name: message.name, courseId: message.courseId });
     case 'STUDY_DELETE_DECK':
@@ -179,12 +187,14 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
       return () => addCards({ siteId: message.siteId, deckId: message.deckId, cards: message.cards });
     case 'STUDY_REVIEW':
       return () => reviewFlashcard({ cardId: message.cardId, rating: message.rating });
+    case 'STUDY_SAVE_MISTAKES':
+      return () => saveQuizMistakes({ deckId: message.deckId });
     case 'STUDY_EXPORT_CARDS':
       return () => exportCards(message.format);
     case 'SET_STUDY_RETENTION':
       return () => setReviewLogRetention(message.days).then((days) => ({ ok: true, days }));
     case 'GET_GUARD':
-      return guardStatus;
+      return () => guardStatus();
     case 'ENABLE_SITE':
       return () => enableSite(message.origin).then((site) => ({ ok: site !== null, site }));
     case 'RENAME_SITE':
@@ -210,7 +220,7 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     case 'SET_REMINDERS':
       return () => setReminderPrefs(message.prefs).then((ok) => ({ ok }));
     default:
-      return clearAll;
+      return () => clearAll();
   }
 }
 

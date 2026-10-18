@@ -83,7 +83,7 @@ Goal: accurate deadlines without fragile scraping.
 - [~] Assessment guard first (ML-022): fail-closed detection of attempt pages and timed/locked states. Rules, validator, content-script reporting, background verdict (`src/background/guard.ts`) and the paused banner done; quiz attempt/review fixtures pending, so every DOM marker stays unverified.
 - [x] IndexedDB store design and retention settings. D-014 design, `src/background/studyStore.ts`, retention rules, wiring into site removal, clear-all and backup import, and the Settings retention control (90 days / 1 year / 2 years, pruned on save and on browser start) done.
 - [x] Flashcards: user-authored decks, FSRS-style scheduling, daily review (ML-019). Scheduler (PRD-010 AC 4), CSV/JSON import/export, background study service (`src/background/study.ts`) and the Study page with decks, card entry, review ratings and import/export done; store paths checked in Chrome, no automated IndexedDB coverage.
-- [~] Save mistakes from closed quiz review pages into private decks (ML-020, D-009). Guarded capture and private card builder done (PRD-010 AC 2); review fixture, save button and store wiring pending.
+- [~] Save mistakes from closed quiz review pages into private decks (ML-020, D-009). Guarded capture, private card builder (PRD-010 AC 2), offer plumbing (`src/background/practice.ts`) and the Study page save button done; a sanitized review fixture is still missing, so the selectors stay unverified and the save path is untested against real Moodle markup.
 - [~] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules done (`src/shared/xp.ts`, PRD-010 AC 5); storage and UI pending.
 - [ ] P2: focus timer and per-activity notes (ML-026).
 

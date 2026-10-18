@@ -33,7 +33,8 @@ describe('study service (ML-019)', () => {
       ok: true,
       decks: [],
       queue: [],
-      later: 0
+      later: 0,
+      offer: null
     });
   });
 
