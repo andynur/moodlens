@@ -20,6 +20,28 @@ export interface CourseSnapshot {
   capturedAt: string;
   activities: MoodleActivity[];
 }
+export interface Course {
+  siteId: string;
+  id: string;
+  name: string;
+  shortName?: string;
+  visible: boolean;
+  progress?: number;
+}
+export type TaskKind = 'assign' | 'quiz' | 'attendance' | 'forum' | 'event' | 'other';
+export type TaskStatus = 'open' | 'overdue' | 'done' | 'unknown';
+export type TaskSource = 'ajax' | 'dom';
+export interface MoodleTask {
+  siteId: string;
+  courseId: string;
+  activityId?: string;
+  kind: TaskKind;
+  title: string;
+  dueAt?: string;
+  url: string;
+  status: TaskStatus;
+  source: TaskSource;
+}
 /** `system` follows `prefers-color-scheme` until the student picks light or dark. */
 export type Theme = 'light' | 'dark' | 'system';
 export type Locale = 'en' | 'id';
