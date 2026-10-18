@@ -12,6 +12,7 @@
 
 ### Added
 
+- Side panel: activity list scrolls inside its own area (at most one viewport tall), so long courses no longer stretch the whole panel.
 - Roadmap v0.5: candidate item for Moodle appearance theme presets (ML-018), pending a PRD-009 update.
 - MIT `LICENSE` (D-012), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), GitHub issue forms and pull request template.
 - Theme option "System" (default): follows `prefers-color-scheme` until the student picks light or dark; clearing data returns to it (PRD-001 AC 5).

@@ -252,53 +252,63 @@ export default function App() {
                   </div>
                 </section>
                 <section className="space-y-2">
-                  <h3 className="text-sm font-semibold">{translate('activities')}</h3>
+                  <h3 id="activities-heading" className="text-sm font-semibold">
+                    {translate('activities')}
+                  </h3>
                   {snapshot.activities.length === 0 && (
                     <p className="rounded-lg bg-white p-3 text-sm text-slate-500 dark:bg-slate-900">
                       {translate('emptyActivities')}
                     </p>
                   )}
-                  {snapshot.activities.map((activity) => (
-                    <article
-                      key={`${activity.type}-${activity.id}`}
-                      className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <h4 className="break-words text-sm font-semibold">{activity.title}</h4>
-                          <p className="mt-1 text-xs capitalize text-slate-500 dark:text-slate-400">
-                            {translate(typeLabel[activity.type])}
+                  {/* Own scroll area, about one viewport tall, so long courses do not stretch the page. */}
+                  <div
+                    role="region"
+                    aria-labelledby="activities-heading"
+                    tabIndex={0}
+                    className="max-h-[calc(100dvh-3rem)] space-y-2 overflow-y-auto overscroll-contain rounded-xl"
+                  >
+                    {snapshot.activities.map((activity) => (
+                      <article
+                        key={`${activity.type}-${activity.id}`}
+                        className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h4 className="break-words text-sm font-semibold">{activity.title}</h4>
+                            <p className="mt-1 text-xs capitalize text-slate-500 dark:text-slate-400">
+                              {translate(typeLabel[activity.type])}
+                            </p>
+                          </div>
+                          <div
+                            className={`flex shrink-0 items-center gap-1 text-[11px] font-medium ${completionStyle[activity.completion]}`}
+                          >
+                            {activity.completion === 'complete' ? (
+                              <CheckCircle2 size={14} />
+                            ) : activity.completion === 'incomplete' ? (
+                              <CircleDashed size={14} />
+                            ) : (
+                              <CircleHelp size={14} />
+                            )}
+                            {translate(completionLabel[activity.completion])}
+                          </div>
+                        </div>
+                        {activity.url === null ? (
+                          <p className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                            <Lock size={12} />
+                            {translate('restricted')}
                           </p>
-                        </div>
-                        <div
-                          className={`flex shrink-0 items-center gap-1 text-[11px] font-medium ${completionStyle[activity.completion]}`}
-                        >
-                          {activity.completion === 'complete' ? (
-                            <CheckCircle2 size={14} />
-                          ) : activity.completion === 'incomplete' ? (
-                            <CircleDashed size={14} />
-                          ) : (
-                            <CircleHelp size={14} />
-                          )}
-                          {translate(completionLabel[activity.completion])}
-                        </div>
-                      </div>
-                      {activity.url === null ? (
-                        <p className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                          <Lock size={12} />
-                          {translate('restricted')}
-                        </p>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => openActivity(activity.url!)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400"
-                        >
-                          {translate('open')} <ExternalLink size={12} />
-                        </button>
-                      )}
-                    </article>
-                  ))}
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openActivity(activity.url!)}
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400"
+                          >
+                            {translate('open')} <ExternalLink size={12} />
+                          </button>
+                        )}
+                      </article>
+                    ))}
+                  </div>
                 </section>
               </>
             )}
