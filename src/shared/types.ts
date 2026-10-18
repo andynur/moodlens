@@ -73,6 +73,7 @@ export type IncomingMessage =
   | { type: 'COURSE_SNAPSHOT'; payload: CourseSnapshot }
   | { type: 'TASK_CAPTURE_CLAIM'; force?: boolean }
   | { type: 'TASK_DATASET'; payload: TaskDataset }
+  | { type: 'SET_REMINDERS'; prefs: unknown }
   | { type: 'ENABLE_SITE'; origin: string }
   | { type: 'RENAME_SITE'; siteId: string; label: string }
   | { type: 'REMOVE_SITE'; siteId: string }

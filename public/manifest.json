@@ -10,7 +10,8 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": ["storage", "sidePanel", "scripting"],
+  "permissions": ["storage", "sidePanel", "scripting", "alarms"],
+  "optional_permissions": ["notifications"],
   "host_permissions": [],
   "optional_host_permissions": ["https://*/*"],
   "background": {

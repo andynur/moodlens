@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Download, ExternalLink, RefreshCw } from 'lucide-react';
 import { tasksToIcs } from '../../shared/ics';
+import {
+  DEFAULT_REMINDER_PREFS,
+  normalizeReminderPrefs,
+  REMINDER_LEADS,
+  REMINDER_PREFS_KEY
+} from '../../shared/reminders';
 import { filterTasks, mergeTaskDatasets, taskGroup, taskIdentity, type TaskGroup } from '../../shared/tasks';
 import type { Locale, Site, TaskKind } from '../../shared/types';
 import { isTaskUrl } from '../../shared/validation';
@@ -27,6 +33,7 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState('');
+  const [reminders, setReminders] = useState(DEFAULT_REMINDER_PREFS);
   const all = useMemo(() => mergeTaskDatasets(Object.values(datasets)), [datasets]);
   const shown = useMemo(() => {
     const filtered = filterTasks(all, {
@@ -40,6 +47,27 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
   const courseName = new Map(courses.map((course) => [`${course.siteId}:${course.id}`, course.name]));
   const siteName = new Map(sites.map((site) => [site.id, site.label]));
   const latest = Object.values(datasets).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
+
+  useEffect(() => {
+    if (typeof chrome === 'undefined') return;
+    void chrome.storage.local.get(REMINDER_PREFS_KEY).then((stored) => {
+      const prefs = normalizeReminderPrefs(stored[REMINDER_PREFS_KEY]);
+      if (prefs) setReminders(prefs);
+    });
+  }, []);
+
+  async function saveReminders(enabled: boolean, leadMinutes = reminders.leadMinutes) {
+    if (enabled) {
+      const granted = await chrome.permissions.request({ permissions: ['notifications'] }).catch(() => false);
+      if (!granted) return setMessage(taskText(locale, 'reminderDenied'));
+    }
+    const next = { enabled, leadMinutes };
+    const response = (await chrome.runtime.sendMessage({ type: 'SET_REMINDERS', prefs: next }).catch(() => null)) as {
+      ok?: boolean;
+    } | null;
+    if (response?.ok) setReminders(next);
+    if (!enabled) void chrome.permissions.remove({ permissions: ['notifications'] });
+  }
 
   function exportTasks(selectedOnly: boolean) {
     const candidates = selectedOnly ? shown.filter((task) => selected.has(taskIdentity(task))) : shown;
@@ -162,6 +190,36 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
           {taskText(locale, 'exportAll')}
         </button>
       </div>
+      <fieldset className="space-y-2 rounded-xl border bg-white p-3 dark:bg-slate-900">
+        <legend className="px-1 text-sm font-semibold">{taskText(locale, 'reminders')}</legend>
+        <p className="text-xs text-slate-500">{taskText(locale, 'remindersHint')}</p>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={reminders.enabled}
+            onChange={(event) => void saveReminders(event.target.checked)}
+          />
+          {taskText(locale, 'remindersOn')}
+        </label>
+        <div className="flex flex-wrap gap-3 text-xs">
+          {REMINDER_LEADS.map((lead) => (
+            <label key={lead} className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                disabled={!reminders.enabled}
+                checked={reminders.leadMinutes.includes(lead)}
+                onChange={(event) => {
+                  const leads = event.target.checked
+                    ? [...reminders.leadMinutes, lead]
+                    : reminders.leadMinutes.filter((value) => value !== lead);
+                  if (leads.length > 0) void saveReminders(reminders.enabled, leads);
+                }}
+              />
+              {taskText(locale, lead === 60 ? 'reminder1h' : lead === 180 ? 'reminder3h' : 'reminder1d')}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       {shown.length === 0 && (
         <p className="rounded-xl bg-white p-4 text-sm text-slate-500 dark:bg-slate-900">
           {taskText(locale, 'noTasks')}

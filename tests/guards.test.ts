@@ -35,8 +35,9 @@ describe('manifest guard', () => {
     }
   });
   it('matches the approved permission snapshot', () => {
-    expect(manifest.permissions).toEqual(['storage', 'sidePanel', 'scripting']);
-    expect(manifest.optional_permissions ?? []).toEqual([]);
+    // PRD-008: alarms are local; notifications remain optional and are requested only on opt-in.
+    expect(manifest.permissions).toEqual(['storage', 'sidePanel', 'scripting', 'alarms']);
+    expect(manifest.optional_permissions ?? []).toEqual(['notifications']);
     // D-002: zero host access at install; one HTTPS origin is requested at runtime on a user click.
     expect(manifest.host_permissions ?? []).toEqual([]);
     expect(manifest.optional_host_permissions).toEqual(['https://*/*']);

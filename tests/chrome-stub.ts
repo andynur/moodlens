@@ -34,6 +34,7 @@ export function createChromeStub() {
   const local = new Map<string, unknown>();
   const granted = new Set<string>();
   const scripts = new Map<string, Script>();
+  const alarms = new Map<string, chrome.alarms.Alarm>();
   const state = {
     listener: undefined as Listener | undefined,
     activeTab: undefined as chrome.tabs.Tab | undefined,
@@ -54,11 +55,22 @@ export function createChromeStub() {
       }
     },
     sidePanel: { setPanelBehavior: () => Promise.resolve() },
+    alarms: {
+      onAlarm: { addListener: () => undefined },
+      getAll: () => Promise.resolve([...alarms.values()]),
+      create: vi.fn((name: string, info: chrome.alarms.AlarmCreateInfo) => {
+        alarms.set(name, { name, scheduledTime: info.when ?? Date.now(), persistAcrossSessions: true });
+        return Promise.resolve();
+      }),
+      clear: vi.fn((name: string) => Promise.resolve(alarms.delete(name)))
+    },
+    notifications: { create: vi.fn(() => Promise.resolve('notification')) },
     storage: { local: area(local), session: area(new Map()) },
     permissions: {
       onAdded: { addListener: () => undefined },
       onRemoved: { addListener: () => undefined },
-      contains: ({ origins = [] }: { origins?: string[] }) => Promise.resolve(origins.every((o) => granted.has(o))),
+      contains: ({ origins = [] }: { origins?: string[]; permissions?: string[] }) =>
+        Promise.resolve(origins.every((o) => granted.has(o))),
       remove: vi.fn(({ origins = [] }: { origins?: string[] }) => {
         for (const origin of origins) granted.delete(origin);
         return Promise.resolve(true);
@@ -88,6 +100,7 @@ export function createChromeStub() {
     local.clear();
     granted.clear();
     scripts.clear();
+    alarms.clear();
     state.activeTab = undefined;
     state.detection = { isMoodle: true, confidence: 'high', versionHint: '4.x' };
     vi.clearAllMocks();
