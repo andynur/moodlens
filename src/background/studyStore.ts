@@ -87,6 +87,12 @@ export function listCards(db: IDBDatabase, siteId: string): Promise<Flashcard[]>
   return listForSite(db, CARDS, siteId, isFlashcard);
 }
 
+/** One card by id, or null when it is missing or fails validation. */
+export async function getCard(db: IDBDatabase, cardId: string): Promise<Flashcard | null> {
+  const row: unknown = await promised(db.transaction(CARDS).objectStore(CARDS).get(cardId));
+  return isFlashcard(row) ? row : null;
+}
+
 /** Adds or replaces a deck. Refuses invalid records and new decks past the per-site cap. */
 export async function putDeck(db: IDBDatabase, deck: Deck): Promise<boolean> {
   if (!isDeck(deck)) return false;

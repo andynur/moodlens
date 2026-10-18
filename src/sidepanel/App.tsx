@@ -17,6 +17,7 @@ import { BackupSettings } from './components/Backup';
 import { Onboarding, ONBOARDED_KEY } from './components/Onboarding';
 import { CourseDetail } from './components/CourseDetail';
 import { GuardBanner } from './components/GuardBanner';
+import { StudyPage } from './components/Study';
 import { StudyRetentionSettings } from './components/StudyRetention';
 import { CourseList } from './components/Courses';
 import { SiteAlerts, SiteEnableForm, SitesSettings } from './components/Sites';
@@ -251,12 +252,10 @@ export default function App() {
             )}
             {page === 'tasks' && <TasksView sites={sitesState.sites} locale={locale} hidden={hiddenCourses} />}
             {page === 'study' && (
-              <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <Sparkles className="text-blue-600" />
-                <h2 className="mt-3 text-lg font-bold">{translate('study')}</h2>
-                <p className="mt-2 text-sm">{guard.active ? translate('guardPaused') : translate('studyPlanned')}</p>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{translate('studyPrivacy')}</p>
-              </section>
+              <>
+                <StudyPage sites={sitesState.sites} guard={guard} {...feedback} />
+                <p className="text-xs text-slate-500 dark:text-slate-400">{translate('studyPrivacy')}</p>
+              </>
             )}
             {page === 'settings' && (
               <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">

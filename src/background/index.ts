@@ -9,6 +9,7 @@ import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from '.
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
 import { pruneAllReviewLogs, setReviewLogRetention } from './retention';
+import { addCards, createDeck, exportCards, removeDeck, reviewFlashcard, studyOverview } from './study';
 import { deleteStudyDb } from './studyStore';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
@@ -156,12 +157,30 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'SET_APPEARANCE',
     'SET_REMINDERS',
     'GET_GUARD',
-    'SET_STUDY_RETENTION'
+    'SET_STUDY_RETENTION',
+    'STUDY_OVERVIEW',
+    'STUDY_CREATE_DECK',
+    'STUDY_DELETE_DECK',
+    'STUDY_ADD_CARDS',
+    'STUDY_REVIEW',
+    'STUDY_EXPORT_CARDS'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
+    case 'STUDY_OVERVIEW':
+      return studyOverview;
+    case 'STUDY_CREATE_DECK':
+      return () => createDeck({ siteId: message.siteId, name: message.name, courseId: message.courseId });
+    case 'STUDY_DELETE_DECK':
+      return () => removeDeck(message.deckId);
+    case 'STUDY_ADD_CARDS':
+      return () => addCards({ siteId: message.siteId, deckId: message.deckId, cards: message.cards });
+    case 'STUDY_REVIEW':
+      return () => reviewFlashcard({ cardId: message.cardId, rating: message.rating });
+    case 'STUDY_EXPORT_CARDS':
+      return () => exportCards(message.format);
     case 'SET_STUDY_RETENTION':
       return () => setReviewLogRetention(message.days).then((days) => ({ ok: true, days }));
     case 'GET_GUARD':

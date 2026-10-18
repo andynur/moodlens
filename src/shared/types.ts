@@ -1,3 +1,5 @@
+import type { CardOrigin } from './cards';
+import type { SrsRating } from './srs';
 export type ActivityType =
   'resource' | 'page' | 'url' | 'attendance' | 'quiz' | 'forum' | 'assign' | 'folder' | 'book' | 'feedback' | 'unknown';
 export type CompletionStatus = 'complete' | 'incomplete' | 'unknown';
@@ -89,6 +91,12 @@ export type IncomingMessage =
   | { type: 'GUARD_STATE'; payload: unknown }
   | { type: 'GET_GUARD' }
   | { type: 'SET_STUDY_RETENTION'; days: unknown }
+  | { type: 'STUDY_OVERVIEW' }
+  | { type: 'STUDY_CREATE_DECK'; siteId: string; name: string; courseId?: string }
+  | { type: 'STUDY_DELETE_DECK'; deckId: string }
+  | { type: 'STUDY_ADD_CARDS'; siteId: string; deckId: string; cards: unknown }
+  | { type: 'STUDY_REVIEW'; cardId: string; rating: unknown }
+  | { type: 'STUDY_EXPORT_CARDS'; format: 'json' | 'csv' }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;
@@ -108,6 +116,38 @@ export interface GuardStatusResponse {
   ok: boolean;
   active: boolean;
   reasons: string[];
+}
+/** Deck summary for the Study page (ML-019). */
+export interface StudyDeckView {
+  id: string;
+  siteId: string;
+  name: string;
+  courseId?: string;
+  cards: number;
+  due: number;
+}
+/** One card in the review queue, with the interval each rating would give today. */
+export interface StudyCardView {
+  id: string;
+  siteId: string;
+  deckId: string;
+  front: string;
+  back: string;
+  sourceUrl?: string;
+  origin: CardOrigin;
+  intervals: Record<SrsRating, number>;
+}
+export interface StudyOverviewResponse {
+  ok: boolean;
+  decks: StudyDeckView[];
+  queue: StudyCardView[];
+  /** Cards that exist but are not due today, for the "nothing to review" message. */
+  later: number;
+}
+export interface StudyExportResponse {
+  ok: boolean;
+  text: string;
+  cards: number;
 }
 export interface EnableSiteResponse {
   ok: boolean;

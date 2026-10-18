@@ -12,6 +12,7 @@
 
 ### Added (v0.6, practice and motivation)
 
+- Flashcards in the side panel (ML-019): a background study service is the only way to the study store, and the Study page lists decks with card and due counts, creates and deletes decks, adds cards by hand, imports JSON/CSV and exports student-authored cards only (D-009). Review shows one card at a time with the interval each of the four ratings would give, and the queue is due cards first, then at most 20 new cards per site per day. Review is hidden while the assessment guard is active.
 - Review-log retention control (D-014): Settings offers 90 days, 1 year or 2 years (default 1 year); saving prunes older review logs of every site at once, the browser prunes again on start, and the choice is part of the backup allowlist.
 - Assessment guard wiring (ML-022): the content script evaluates every page of an enabled site and reports only the verdict; the background keeps reports in session storage, judges a tab without a matching report by its address alone, and answers the side panel with one fail-closed state. The panel shows a localized "Study help is paused" banner naming each reason, and task capture is skipped while the guard is active. DOM markers stay unverified until a quiz fixture exists.
 

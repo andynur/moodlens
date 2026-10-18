@@ -7,8 +7,7 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Last done
 
-- v0.2 gate met locally (CI pending push). v0.3 core done (D-002, D-013): runtime per-origin access, site registry, detection, schema v2 migration, Sites UI; details in `CHANGELOG.md`.
-- Owner-requested v0.5 work (2026-10-19): ML-017 wired (records, badge, list, Mark as seen), ML-016 (pin/hide/nickname/color/order), Today widgets (due soon from v0.4 tasks, what's new, pinned, progress; layout stored), Courses list + detail, ML-023 backup, ML-018 appearance (D-015). Not done: streak widget (v0.6 XP), theme presets (needs PRD-009 update). Tasks view excludes hidden courses.
+- v0.3 core done (D-002, D-013): runtime per-origin access, site registry, detection, schema v2 migration, Sites UI. Owner-requested v0.5 work (2026-10-19): ML-017 wired (records, badge, list, Mark as seen), ML-016 (pin/hide/nickname/color/order), Today widgets (due soon from v0.4 tasks, what's new, pinned, progress; layout stored), Courses list + detail, ML-023 backup, ML-018 appearance (D-015). Not done: streak widget (v0.6 XP), theme presets (needs PRD-009 update). Tasks view excludes hidden courses.
 - v0.6 groundwork (pure logic, not wired): ML-021 XP rules (`src/shared/xp.ts`, rules table in PRD-010), ML-019 FSRS-5 scheduler matching ts-fsrs 4.7.1 (`src/shared/srs.ts`, AC 4) and card CSV/JSON import/export without quiz-derived cards (`src/shared/cards.ts`, AC 3); day helpers in `src/shared/days.ts`. EN/ID strings `guardPaused`, `xpLabel` added.
 - v0.6 IndexedDB study store (D-014): `src/background/studyStore.ts` (decks, cards, review logs, per-site caps, delete by site, log retention 90/365/730 days) plus record validators in `src/shared/cards.ts`. IndexedDB paths exercised in Chrome on 2026-10-19 (still no automated test double); wired to `removeSite`, clear-all and backup import.
 - v0.6 ML-020 capture: `src/content/moodle/quiz-review.ts` returns wrong questions only when the guard allows it (AC 2 tested), `newQuizReviewCard` builds never-exported cards. Selectors unverified, no review fixture; not wired.
@@ -22,6 +21,8 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - v0.6 ML-022 wiring (2026-10-19): content script reports the guard verdict (`GUARD_STATE`) and skips its own AJAX reads while active; `src/background/guard.ts` keeps reports in session storage per tab, judges unreported tabs by address (`guardFromUrl`) and answers `GET_GUARD`; side panel shows the paused banner with reasons EN/ID (`tests/guard-wiring.test.ts`, 10 tests). DOM markers still unverified: no quiz fixture.
 
 - v0.6 retention control (2026-10-19): `src/background/retention.ts` stores the student's choice (`studyRetention`: 90/365/730, default 365), prunes every site's review logs on save and on browser start, and the value joins the backup allowlist; Settings control in `src/sidepanel/components/StudyRetention.tsx` EN/ID (`tests/retention.test.ts`).
+
+- v0.6 ML-019 flashcards (2026-10-19): `src/background/study.ts` (overview, create/delete deck, add cards, review, export) routed through the background; `src/sidepanel/components/Study.tsx` deck list, card entry, 4-rating review and JSON/CSV import/export EN/ID. `tests/study.test.ts` covers the validation and trust decisions; the IndexedDB paths were run in Chrome (17 checks: create deck, add 2 cards, queue and intervals, review `good` -> due 2026-10-22, repeat review refused, export JSON/CSV counts, deck removal) because the project has no IndexedDB test double.
 
 ## Next task
 

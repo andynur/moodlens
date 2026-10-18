@@ -31,8 +31,8 @@ export function StudyRetentionSettings({
     void chrome.storage.local
       .get(STUDY_RETENTION_KEY)
       .then((values) => setDays(normalizeRetention(values[STUDY_RETENTION_KEY])))
-      .catch(() => onError('storageError'));
-    // The control is read once; only this view changes it.
+      .catch(() => undefined);
+    // Read once per mount; a read that fails leaves the default shown, and saving still works.
   }, []);
 
   async function save(next: ReviewLogRetention) {
