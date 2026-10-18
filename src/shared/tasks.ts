@@ -1,4 +1,4 @@
-import type { MoodleTask, TaskDataset, TaskKind } from './types';
+import type { Locale, MoodleTask, TaskDataset, TaskKind } from './types';
 
 export type TaskGroup = 'overdue' | 'today' | 'thisWeek' | 'later' | 'noDate';
 
@@ -7,6 +7,23 @@ export interface TaskFilters {
   courseId?: string;
   kind?: TaskKind;
   search?: string;
+}
+
+export function formatRelativeDue(dueAt: string, locale: Locale, now = new Date()): string | null {
+  const due = new Date(dueAt);
+  if (!Number.isFinite(due.valueOf())) return null;
+  const differenceMs = due.valueOf() - now.valueOf();
+  const absoluteMs = Math.abs(differenceMs);
+  const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
+    absoluteMs < 90 * 60_000
+      ? [60_000, 'minute']
+      : absoluteMs < 22 * 3_600_000
+        ? [3_600_000, 'hour']
+        : [86_400_000, 'day'];
+  return new Intl.RelativeTimeFormat(locale === 'id' ? 'id-ID' : 'en-US', { numeric: 'auto' }).format(
+    Math.round(differenceMs / divisor),
+    unit
+  );
 }
 
 function dateParts(date: Date, timeZone: string): [number, number, number] {

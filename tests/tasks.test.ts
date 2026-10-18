@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MoodleTask } from '../src/shared/types';
-import { filterTasks, taskGroup } from '../src/shared/tasks';
+import { filterTasks, formatRelativeDue, taskGroup } from '../src/shared/tasks';
 
 const task = (dueAt?: string, status: MoodleTask['status'] = 'open'): MoodleTask => ({
   siteId: 'site',
@@ -25,5 +25,12 @@ describe('task grouping and filters', () => {
   it('filters by exact dimensions and normalized title search', () => {
     const tasks = [task('2027-01-01T00:00:00Z'), { ...task(), siteId: 'other', kind: 'assign' as const }];
     expect(filterTasks(tasks, { siteId: 'site', courseId: '1', kind: 'quiz', search: ' final  ' })).toHaveLength(1);
+  });
+
+  it('formats relative due times in both supported locales', () => {
+    const now = new Date('2026-10-19T10:00:00Z');
+    expect(formatRelativeDue('2026-10-19T12:00:00Z', 'en', now)).toBe('in 2 hours');
+    expect(formatRelativeDue('2026-10-18T10:00:00Z', 'id', now)).toBe('kemarin');
+    expect(formatRelativeDue('not-a-date', 'en', now)).toBeNull();
   });
 });

@@ -7,7 +7,14 @@ import {
   REMINDER_LEADS,
   REMINDER_PREFS_KEY
 } from '../../shared/reminders';
-import { filterTasks, mergeTaskDatasets, taskGroup, taskIdentity, type TaskGroup } from '../../shared/tasks';
+import {
+  filterTasks,
+  formatRelativeDue,
+  mergeTaskDatasets,
+  taskGroup,
+  taskIdentity,
+  type TaskGroup
+} from '../../shared/tasks';
 import type { Locale, Site, TaskKind } from '../../shared/types';
 import { isTaskUrl } from '../../shared/validation';
 import { taskKindText, taskText } from '../taskStrings';
@@ -46,7 +53,7 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
   const courses = Object.values(datasets).flatMap((dataset) => dataset.courses);
   const courseName = new Map(courses.map((course) => [`${course.siteId}:${course.id}`, course.name]));
   const siteName = new Map(sites.map((site) => [site.id, site.label]));
-  const latest = Object.values(datasets).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
+  const datasetList = Object.values(datasets).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
 
   useEffect(() => {
     if (typeof chrome === 'undefined') return;
@@ -100,12 +107,19 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
           <RefreshCw size={13} /> {taskText(locale, 'refresh')}
         </button>
       </div>
-      {latest && (
-        <p className="text-xs text-slate-500">
-          {taskText(locale, 'lastUpdated')}:{' '}
-          {new Date(latest.capturedAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')} ·{' '}
-          {taskText(locale, 'source')}: {latest.source.toUpperCase()}
-        </p>
+      {datasetList.length > 0 && (
+        <div className="space-y-1 text-xs text-slate-500">
+          {datasetList.map((dataset) => (
+            <p key={dataset.siteId}>
+              <span className="font-medium text-slate-600 dark:text-slate-300">
+                {siteName.get(dataset.siteId) ?? dataset.siteId}
+              </span>{' '}
+              · {taskText(locale, 'lastUpdated')}:{' '}
+              {new Date(dataset.capturedAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')} ·{' '}
+              {taskText(locale, 'source')}: {dataset.source.toUpperCase()}
+            </p>
+          ))}
+        </div>
       )}
       {message && (
         <p role="status" className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
@@ -258,6 +272,7 @@ export function TasksView({ sites, locale }: { sites: Site[]; locale: Locale }) 
                       </p>
                       {task.dueAt && (
                         <time className="mt-1 block text-xs" dateTime={task.dueAt}>
+                          {formatRelativeDue(task.dueAt, locale)} ·{' '}
                           {new Date(task.dueAt).toLocaleString(locale === 'id' ? 'id-ID' : 'en-US')}
                         </time>
                       )}
