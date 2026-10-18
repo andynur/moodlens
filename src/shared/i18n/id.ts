@@ -91,6 +91,13 @@ export const id = {
   guardReasonUnknown: 'Satu halaman Moodle tidak dapat diperiksa, jadi Moodlens menganggapnya asesmen.',
   guardOpenTabs: 'Tutup atau tinggalkan halaman itu, lalu banner ini hilang.',
   xpLabel: 'XP Moodlens — bukan nilai Moodle',
+  studyRetention: 'Simpan riwayat ulangan',
+  studyRetentionHint:
+    'Catatan ulangan kartu yang lebih lama dari ini dihapus di perangkat Anda. Kartu dan dek tetap ada.',
+  studyRetention90: '90 hari',
+  studyRetention365: '1 tahun',
+  studyRetention730: '2 tahun',
+  studyRetentionSaved: 'Pengaturan riwayat ulangan disimpan.',
   dueSoon: 'Segera tenggat',
   dueSoonEmpty:
     'Tidak ada tenggat dalam 7 hari ke depan. Buka halaman Moodle yang aktif lalu muat ulang Tugas untuk memuat tenggat.',

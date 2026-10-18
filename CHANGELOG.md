@@ -12,6 +12,7 @@
 
 ### Added (v0.6, practice and motivation)
 
+- Review-log retention control (D-014): Settings offers 90 days, 1 year or 2 years (default 1 year); saving prunes older review logs of every site at once, the browser prunes again on start, and the choice is part of the backup allowlist.
 - Assessment guard wiring (ML-022): the content script evaluates every page of an enabled site and reports only the verdict; the background keeps reports in session storage, judges a tab without a matching report by its address alone, and answers the side panel with one fail-closed state. The panel shows a localized "Study help is paused" banner naming each reason, and task capture is skipped while the guard is active. DOM markers stay unverified until a quiz fixture exists.
 
 ### Added (v0.6 groundwork, practice and motivation)

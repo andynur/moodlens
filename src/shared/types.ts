@@ -88,6 +88,7 @@ export type IncomingMessage =
   | { type: 'GET_APPEARANCE' }
   | { type: 'GUARD_STATE'; payload: unknown }
   | { type: 'GET_GUARD' }
+  | { type: 'SET_STUDY_RETENTION'; days: unknown }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;

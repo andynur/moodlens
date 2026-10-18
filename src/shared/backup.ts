@@ -1,4 +1,5 @@
 import { appearanceKey, isAppearancePrefs } from './appearance';
+import { isReviewLogRetention, STUDY_RETENTION_KEY } from './cards';
 import { coursePrefsKey, courseRecordsKey, isCoursePrefsMap, isCourseRecords } from './courses';
 import { DASHBOARD_KEY, isDashboardLayout } from './dashboard';
 import { isSiteList, snapshotKey } from './sites';
@@ -29,7 +30,8 @@ const GLOBAL_KEYS: Record<string, (value: unknown) => boolean> = {
   locale: (value) => value === 'en' || value === 'id',
   onboarded: (value) => value === true,
   theme: (value) => value === 'light' || value === 'dark' || value === 'system',
-  [DASHBOARD_KEY]: isDashboardLayout
+  [DASHBOARD_KEY]: isDashboardLayout,
+  [STUDY_RETENTION_KEY]: isReviewLogRetention
 };
 
 function siteKeys(site: Site): Record<string, (value: unknown) => boolean> {

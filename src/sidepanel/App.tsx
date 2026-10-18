@@ -17,6 +17,7 @@ import { BackupSettings } from './components/Backup';
 import { Onboarding, ONBOARDED_KEY } from './components/Onboarding';
 import { CourseDetail } from './components/CourseDetail';
 import { GuardBanner } from './components/GuardBanner';
+import { StudyRetentionSettings } from './components/StudyRetention';
 import { CourseList } from './components/Courses';
 import { SiteAlerts, SiteEnableForm, SitesSettings } from './components/Sites';
 import { TasksView } from './components/Tasks';
@@ -296,6 +297,11 @@ export default function App() {
                 {hasChrome && sitesState.sites.length > 0 && (
                   <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
                     <AppearanceSettings state={sitesState} {...feedback} />
+                  </div>
+                )}
+                {hasChrome && (
+                  <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <StudyRetentionSettings {...feedback} />
                   </div>
                 )}
                 {hasChrome && (

@@ -8,6 +8,7 @@ import { clearGuardReports, guardStatus, reportGuard } from './guard';
 import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from './courses';
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
+import { pruneAllReviewLogs, setReviewLogRetention } from './retention';
 import { deleteStudyDb } from './studyStore';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
@@ -22,6 +23,7 @@ const reconcile = () =>
     .then(async () => {
       await reconcileScripts();
       await syncReminders();
+      await pruneAllReviewLogs();
     })
     .catch(() => undefined);
 
@@ -153,12 +155,15 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'IMPORT_BACKUP',
     'SET_APPEARANCE',
     'SET_REMINDERS',
-    'GET_GUARD'
+    'GET_GUARD',
+    'SET_STUDY_RETENTION'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
+    case 'SET_STUDY_RETENTION':
+      return () => setReviewLogRetention(message.days).then((days) => ({ ok: true, days }));
     case 'GET_GUARD':
       return guardStatus;
     case 'ENABLE_SITE':

@@ -339,10 +339,15 @@ export const REVIEW_LOG_RETENTION_DAYS = [90, 365, 730] as const;
 export type ReviewLogRetention = (typeof REVIEW_LOG_RETENTION_DAYS)[number];
 export const DEFAULT_REVIEW_LOG_RETENTION: ReviewLogRetention = 365;
 
+/** Storage key of the student's review-log retention choice (D-014). */
+export const STUDY_RETENTION_KEY = 'studyRetention';
+
+export function isReviewLogRetention(input: unknown): input is ReviewLogRetention {
+  return REVIEW_LOG_RETENTION_DAYS.includes(input as ReviewLogRetention);
+}
+
 export function normalizeRetention(input: unknown): ReviewLogRetention {
-  return REVIEW_LOG_RETENTION_DAYS.includes(input as ReviewLogRetention)
-    ? (input as ReviewLogRetention)
-    : DEFAULT_REVIEW_LOG_RETENTION;
+  return isReviewLogRetention(input) ? input : DEFAULT_REVIEW_LOG_RETENTION;
 }
 
 /** ISO timestamp before which review logs are pruned. */
