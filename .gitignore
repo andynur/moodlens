@@ -11,3 +11,9 @@ coverage/
 # Raw LMS captures contain personal data. Sanitize into tests/fixtures/ instead.
 docs/moodle_courses/
 *_raw.html
+
+# npm is the only package manager (see README). Other lockfiles must not land.
+bun.lock
+bun.lockb
+yarn.lock
+pnpm-lock.yaml

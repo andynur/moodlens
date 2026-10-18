@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Moodlens",
   "short_name": "Moodlens",
-  "description": "All in One Moodle AI Agent for Student. Independent EN/ID study companion; not affiliated with Moodle Pty Ltd.",
+  "description": "All in One Moodle AI Agent for Student. Free, local-first and independent study companion; not affiliated with Moodle Pty Ltd.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon-16.png",

@@ -71,7 +71,7 @@ Moodlens is not yet on the Chrome Web Store. To try it, build it from source.
 
 ### Requirements
 
-- Node.js 24 (the version CI uses) and npm
+- Node.js 24.15 or later (`.nvmrc`; CI uses the same file) and npm. npm is the only supported package manager.
 - Chrome or another Chromium browser, version 116 or later
 - Your own account on a supported Moodle site
 

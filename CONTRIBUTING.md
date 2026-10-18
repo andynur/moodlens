@@ -26,7 +26,7 @@ Pull requests that break these rules are closed, even when the code is good.
 
 ## Development setup
 
-Requirements: Node.js 24, npm, and Chrome 116 or later.
+Requirements: Node.js 24.15 or later (`nvm use` reads `.nvmrc`), npm, and Chrome 116 or later. Use npm only; do not commit other lockfiles.
 
 ```bash
 git clone https://github.com/andynur/moodlens.git

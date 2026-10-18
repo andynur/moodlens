@@ -23,10 +23,12 @@
 - Dependency upgrade pass: React 19, lucide-react 1, Tailwind 4 (`@tailwindcss/vite`, CSS config, class-based `dark` variant; `tailwind.config.js`, PostCSS and autoprefixer removed), Vite 8, Vitest 5, `@vitejs/plugin-react` 6, `@types/chrome` 0.3, `@types/node` 24 (matches CI), jsdom 30, esbuild 0.28, TypeScript 5.9 (TS 6/7 deferred: typescript-eslint supports < 6.1).
 - i18n split into `src/shared/i18n/en.ts` and `id.ts` (`satisfies Record<TranslationKey, string>`).
 - `package.json` is the single version source for the manifest and side panel footer.
+- Manifest description: "Free, local-first and independent study companion" replaces the EN/ID wording; disclaimer kept.
 - README rewritten for public contributors: badges, status table, requirements, install, scripts, project structure, contributing checklist, vulnerability reporting, license status.
 
 ### Tooling
 
+- Node.js pinned: `.nvmrc` (24), `engines.node >=24.15` (jsdom 30 requirement); CI reads `.nvmrc`. npm is the only package manager; other lockfiles are gitignored.
 - ESLint 10 (flat config, typescript-eslint, react-hooks) and Prettier 3 (`npm run lint`, `format`, `format:check`); `npm run check` now runs lint and format gates. Tree reformatted once with Prettier.
 - `npm run check` summary runner, `npm run fixture:sanitize` with tests, `.claude/settings.json` permission allowlist.
 
