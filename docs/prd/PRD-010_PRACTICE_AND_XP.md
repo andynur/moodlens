@@ -24,12 +24,15 @@ As an exam preparer, I practice and review my own mistakes with spaced repetitio
 - Student-authored cards; import/export of user-authored cards as CSV/JSON.
 - Spaced repetition scheduling (FSRS-style); daily review queue; ratings Again/Hard/Good/Easy.
 - Data in IndexedDB per site.
+- Scheduler (`src/shared/srs.ts`): FSRS-5 default weights, day-based scheduling (no learning steps, no fuzz), requested retention 0.7–0.97 (default 0.9). Reference: ts-fsrs 4.7.1 with `enable_short_term: false, enable_fuzz: false`. Queue: due cards by due day, then up to 20 new cards.
+- Import/export (`src/shared/cards.ts`): JSON `{ format: "moodlens-cards", version: 1 }` or CSV `deck,front,back,source`. Exports only student-authored cards, without scheduling. Imports are size-limited, https-only sources, and always start fresh as student cards. CSV cells that start with `= + - @` get a leading quote against spreadsheet formulas.
 
 ### Practice from closed reviews (ML-020)
 
 - On `/mod/quiz/review.php` with finished-attempt evidence, offer "Save questions I got wrong to a deck".
 - Save question text and the correct answer **only as shown on the review page**. Strip images or store local references only.
 - Quiz-derived cards are flagged; excluded from export and backup; never synced or shared (D-009).
+- Capture logic: `src/content/moodle/quiz-review.ts` (rules in `docs/04_MOODLE_ADAPTER.md` §4) and `newQuizReviewCard` in `src/shared/cards.ts`; tests in `tests/quiz-review.test.ts` (AC 2).
 
 ### Local XP (ML-021)
 
@@ -38,6 +41,22 @@ As an exam preparer, I practice and review my own mistakes with spaced repetitio
 - Daily cap to discourage farming.
 - Levels, daily streak with one "freeze" per week, weekly goal set by the student.
 - Clearly labeled "Moodlens XP — not your Moodle grade".
+
+#### XP rules (implemented in `src/shared/xp.ts`, tested in `tests/xp.test.ts`)
+
+| Event | XP |
+|---|---|
+| Card reviewed | 2 |
+| Review session completed | 10 |
+| Practice session completed | 15 |
+| Focus session completed | 10 |
+| Task opened ≥ 3 days before due (once per task) | 10 |
+
+- Daily cap: 150 XP per local day; the last event is cut to the remainder. A capped event still counts for the streak.
+- Days follow the student's IANA time zone; weeks start Monday.
+- Streak: +1 per consecutive local day with a study event. One missed day is bridged by the weekly freeze (one per week of the missed day); two or more missed days reset it to 1.
+- Levels: total XP to reach level n is `50 × n × (n − 1)` (100, 300, 600, 1000, …).
+- Weekly goal: whole number 0–5000 set by the student; 0 means no goal. Daily totals kept for 14 days.
 
 ### Focus and notes (ML-026, P2)
 
