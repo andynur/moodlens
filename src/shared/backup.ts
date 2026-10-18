@@ -3,6 +3,7 @@ import { isReviewLogRetention, STUDY_RETENTION_KEY } from './cards';
 import { coursePrefsKey, courseRecordsKey, isCoursePrefsMap, isCourseRecords } from './courses';
 import { DASHBOARD_KEY, isDashboardLayout } from './dashboard';
 import { isSiteList, snapshotKey } from './sites';
+import { isXpState } from './xp';
 import type { Site } from './types';
 import { isCourseSnapshot } from './validation';
 
@@ -31,7 +32,8 @@ const GLOBAL_KEYS: Record<string, (value: unknown) => boolean> = {
   onboarded: (value) => value === true,
   theme: (value) => value === 'light' || value === 'dark' || value === 'system',
   [DASHBOARD_KEY]: isDashboardLayout,
-  [STUDY_RETENTION_KEY]: isReviewLogRetention
+  [STUDY_RETENTION_KEY]: isReviewLogRetention,
+  xp: isXpState
 };
 
 function siteKeys(site: Site): Record<string, (value: unknown) => boolean> {

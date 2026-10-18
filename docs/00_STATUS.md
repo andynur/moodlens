@@ -2,7 +2,7 @@
 
 Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old entries; history lives in git and `CHANGELOG.md`.
 
-**Current release:** v0.4 — Data layer and tasks (`docs/08_ROADMAP.md`, `docs/prd/PRD-008_TASKS_AND_DEADLINES.md`).
+**Current release:** v0.6 — Practice and motivation (`docs/08_ROADMAP.md`, `docs/prd/PRD-010_PRACTICE_AND_XP.md`). v0.4 and v0.5 are code-complete; their open items are owner QA (below).
 **Last updated:** 2026-10-19.
 
 ## Last done
@@ -15,15 +15,11 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - Live SiberMu evidence (2026-10-19, owner-authorized browser session, `/my/`): detection `high` + hint `4.x`. **Bug found and fixed:** `captureTaskDataset` sent `limitnum: 500`, which `core_calendar_get_action_events_by_timesort` rejects with `Limit must be between 1 and 50 (inclusive)`; the error envelope read as `unsupported`, so tasks were cached unsupported for 24 hours and the site fell back to DOM for good. Now `TIMELINE_LIMIT = 50` with a regression test in `tests/task-capture.test.ts`. At that limit the live call returns 30 events (resource 18, quiz 8, feedback 2, forum 1, assign 1); `core_course_get_enrolled_courses_by_timeline_classification` with `limit: 200` works (4 courses). No `mod_attendance` event in the whole timeline, so ML-005 stays Blocked. The dashboard itself calls only `theme_remui_get_myoverviewcourses` and `theme_remui_get_msg_contact_list_count` (Edwiser RemUI), not `core_calendar_get_action_events_by_timesort` — the earlier note saying it does was wrong.
 - Agent QA v0.5/v0.6 (2026-10-19, only the parts that needed a browser): ML-018 appearance verified live on SiberMu `/my/` with the installed build — `moodlens-width` gives `max-width: 726.75px` in `#region-main`, `moodlens-large-text` 16px to 18px, `moodlens-dark` applies the inversion filter, `data-moodlens-hide="online_users"` hides `.block_online_users`, and removing the classes restores the original computed styles and root attributes exactly. `calendar_month`, `recentlyaccesseditems` and `badges` are absent on that dashboard, so those selectors stay unverified. D-014 study store exercised against real Chrome IndexedDB (esbuild bundle on localhost): open/upgrade, `putDeck`/`putCards` validation and site check, `recordReview` card+log pair and mismatch refusal, `deleteDeck` (cards and its logs), `deleteSiteStudyData` and `deleteStudyDb` all behave as specified, and `pruneReviewLogs` at 365 days keeps only the in-window log and leaves the other site untouched. v0.6 logic-only work (guard, XP, FSRS, card import/export) was skipped: unit tests already cover it.
 - QA findings (not fixed): Today "Due soon", "Pinned" and "Course progress" show the course name without the site label (`src/sidepanel/components/Today.tsx:88,130,155`), so two sites with the same course name are indistinguishable; the Courses list does show the site. `chrome://extensions` cannot be driven by the browser tool, so unpacked-load QA stays with the owner.
-
 - v0.6 ML-022 wiring (2026-10-19): content script reports the guard verdict (`GUARD_STATE`) and skips its own AJAX reads while active; `src/background/guard.ts` keeps reports in session storage per tab, judges unreported tabs by address (`guardFromUrl`) and answers `GET_GUARD`; side panel shows the paused banner with reasons EN/ID (`tests/guard-wiring.test.ts`, 10 tests). DOM markers still unverified: no quiz fixture.
-
 - v0.6 retention control (2026-10-19): `src/background/retention.ts` stores the student's choice (`studyRetention`: 90/365/730, default 365), prunes every site's review logs on save and on browser start, and the value joins the backup allowlist; Settings control in `src/sidepanel/components/StudyRetention.tsx` EN/ID (`tests/retention.test.ts`).
-
 - v0.6 ML-019 flashcards (2026-10-19): `src/background/study.ts` (overview, create/delete deck, add cards, review, export) routed through the background; `src/sidepanel/components/Study.tsx` deck list, card entry, 4-rating review and JSON/CSV import/export EN/ID. `tests/study.test.ts` covers the validation and trust decisions; the IndexedDB paths were run in Chrome (17 checks: create deck, add 2 cards, queue and intervals, review `good` -> due 2026-10-22, repeat review refused, export JSON/CSV counts, deck removal) because the project has no IndexedDB test double.
-
 - v0.6 ML-020 wiring (2026-10-19): review page reports only a count (`PRACTICE_OFFER`); `src/background/practice.ts` keeps the offer in session storage, drops it when the tab navigates away, asks the page for the mistakes only on Save, and writes `quiz-review` cards whose source link is the cmid, never the attempt id (`tests/practice.test.ts`). Also fixed: the background task queue passed the previous task's result as the next task's first argument.
-
+- v0.6 ML-021 XP wired (2026-10-19): `src/background/xp.ts` stores the state under `xp` (validated by `isXpState`, part of the backup allowlist) and awards card reviews, finished review sessions and tasks opened at least 3 days early (`src/sidepanel/openTask.ts`); Study page XP card (level bar, today, streak, longest, weekly goal) and the Today `streak` widget, EN/ID (`tests/xp-store.test.ts`).
 ## Next task
 
 0. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
@@ -34,7 +30,6 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 ## Blockers / waiting on owner
 
 - Authenticated access to 3 Moodle sites for the v0.4 exit gate; push `main` so CI runs.
-
 ## Known failing checks
 
 - None locally. Unverified (needs an authenticated Moodle session or Chrome internals, both out of agent reach): live Moodle AJAX availability/results, 3-site deadline parity, live `service.php` network trace, unpacked load in `chrome://extensions`, browser-restart reminder delivery, `notifications` permission prompt, ICS import in Google/Apple Calendar.

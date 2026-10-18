@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink, Flame, SlidersHorizontal } from 'lucide-react';
 import {
   DASHBOARD_KEY,
   dueSoon,
@@ -14,9 +14,11 @@ import { formatRelativeDue } from '../../shared/tasks';
 import type { Locale, MoodleTask, Site } from '../../shared/types';
 import { isTaskUrl } from '../../shared/validation';
 import { courseTitle, openCourse, type CourseEntry } from '../courseEntries';
+import { openTask } from '../openTask';
 import { hasChrome } from '../useSites';
 import { card, ChangeList, ColorDot, smallButton } from './CourseDetail';
 import { NewBadge } from './Courses';
+import { useXpView } from './Xp';
 import type { Feedback } from './Sites';
 
 type WidgetProps = Feedback & {
@@ -31,8 +33,29 @@ const widgetTitle: Record<WidgetId, TranslationKey> = {
   dueSoon: 'dueSoon',
   whatsNew: 'whatsNew',
   pinned: 'pinnedCourses',
-  progress: 'courseProgress'
+  progress: 'courseProgress',
+  streak: 'streak'
 };
+
+/** XP streak and this week's XP (ML-021); the Study page holds the full card. */
+function Streak({ translate }: WidgetProps) {
+  const xp = useXpView(0);
+  if (!xp) return <p className="text-xs text-slate-500 dark:text-slate-400">{translate('streakEmpty')}</p>;
+  return (
+    <div className="space-y-1 text-xs">
+      <p className="flex items-center gap-2 text-sm font-semibold">
+        <Flame size={15} className="text-amber-600" />
+        {xp.streak} {translate('streakDays')}
+      </p>
+      <p className="text-slate-500 dark:text-slate-400">
+        {translate('xpLevel')} {xp.level} · {xp.totalXp} {translate('xpTotal')} · {translate('xpWeekProgress')}{' '}
+        {xp.weeklyEarned}
+        {xp.weeklyGoal > 0 ? `/${xp.weeklyGoal}` : ''}
+      </p>
+      <p className="text-slate-500 dark:text-slate-400">{translate('xpLabel')}</p>
+    </div>
+  );
+}
 
 /** Widget layout kept in `chrome.storage.local`, like language and theme. */
 function useLayout(): [DashboardLayout, (next: DashboardLayout) => void] {
@@ -95,7 +118,7 @@ function DueSoon(props: WidgetProps) {
                 aria-label={translate('open')}
                 title={translate('open')}
                 className="shrink-0 rounded p-1 text-blue-700 hover:bg-slate-100 dark:text-blue-400 dark:hover:bg-slate-800"
-                onClick={() => (hasChrome ? void chrome.tabs.create({ url: task.url }) : undefined)}
+                onClick={() => openTask(task, site)}
               >
                 <ExternalLink size={14} />
               </button>
@@ -191,7 +214,8 @@ const widgets: Record<WidgetId, (props: WidgetProps) => React.ReactNode> = {
   dueSoon: DueSoon,
   whatsNew: WhatsNew,
   pinned: Pinned,
-  progress: Progress
+  progress: Progress,
+  streak: Streak
 };
 
 /** Today dashboard (ML-004) from cached data only; hidden courses are left out. */

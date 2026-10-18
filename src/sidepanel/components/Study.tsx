@@ -13,6 +13,7 @@ import type {
 import type { GuardView } from '../useGuard';
 import { hasChrome } from '../useSites';
 import { smallButton } from './CourseDetail';
+import { useXpView, XpCard } from './Xp';
 import type { Feedback } from './Sites';
 
 const RATING_LABELS: Record<SrsRating, TranslationKey> = {
@@ -44,9 +45,11 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
   const [back, setBack] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [offerDeck, setOfferDeck] = useState('');
+  const [xpRefresh, setXpRefresh] = useState(0);
   const [queueAt, setQueueAt] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const xp = useXpView(xpRefresh);
 
   const apply = (next: StudyOverviewResponse) => {
     setOverview(next);
@@ -63,7 +66,6 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
       live = false;
     };
     // Loaded once per mount; every change reloads through `reload`.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const decks = overview.decks;
@@ -117,7 +119,14 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
       return;
     }
     setRevealed(false);
-    setQueueAt((index) => index + 1);
+    const next = queueAt + 1;
+    setQueueAt(next);
+    setXpRefresh((count) => count + 1);
+    // The whole queue is done: the session itself earns XP once (ML-021).
+    if (next >= overview.queue.length) {
+      await send<{ ok: boolean }>({ type: 'STUDY_SESSION_DONE' }, { ok: false });
+      setXpRefresh((count) => count + 1);
+    }
   }
 
   async function saveMistakes() {
@@ -181,6 +190,8 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
         <h2 className="font-bold">{translate('flashcards')}</h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('flashcardsHint')}</p>
       </section>
+
+      {xp && <XpCard view={xp} refreshed={() => setXpRefresh((count) => count + 1)} {...feedback} />}
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
         <h3 className="text-sm font-bold">{translate('reviewToday')}</h3>

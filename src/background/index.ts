@@ -11,6 +11,7 @@ import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminde
 import { pruneAllReviewLogs, setReviewLogRetention } from './retention';
 import { clearPracticeOffer, recordPracticeOffer, saveQuizMistakes } from './practice';
 import { addCards, createDeck, exportCards, removeDeck, reviewFlashcard, studyOverview } from './study';
+import { awardStudyXp, recordTaskOpened, saveWeeklyGoal, xpView } from './xp';
 import { deleteStudyDb } from './studyStore';
 import { enableSite, loadSites, reconcileScripts, removeSite, renameSite, revokeAllSites } from './sites';
 
@@ -171,7 +172,11 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'STUDY_ADD_CARDS',
     'STUDY_REVIEW',
     'STUDY_EXPORT_CARDS',
-    'STUDY_SAVE_MISTAKES'
+    'STUDY_SAVE_MISTAKES',
+    'STUDY_SESSION_DONE',
+    'XP_STATE',
+    'SET_WEEKLY_GOAL',
+    'TASK_OPENED'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
@@ -187,6 +192,14 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
       return () => addCards({ siteId: message.siteId, deckId: message.deckId, cards: message.cards });
     case 'STUDY_REVIEW':
       return () => reviewFlashcard({ cardId: message.cardId, rating: message.rating });
+    case 'STUDY_SESSION_DONE':
+      return () => awardStudyXp({ kind: 'review-session-completed' });
+    case 'XP_STATE':
+      return () => xpView();
+    case 'SET_WEEKLY_GOAL':
+      return () => saveWeeklyGoal(message.goal);
+    case 'TASK_OPENED':
+      return () => recordTaskOpened({ taskId: message.taskId, dueAt: message.dueAt });
     case 'STUDY_SAVE_MISTAKES':
       return () => saveQuizMistakes({ deckId: message.deckId });
     case 'STUDY_EXPORT_CARDS':

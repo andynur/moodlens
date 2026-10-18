@@ -142,18 +142,23 @@ describe('course personalization (ML-016)', () => {
 
 describe('dashboard layout (ML-004)', () => {
   it('normalizes stored layouts', () => {
-    expect(normalizeLayout(null)).toEqual({ order: ['dueSoon', 'whatsNew', 'pinned', 'progress'], hidden: [] });
+    expect(normalizeLayout(null)).toEqual({
+      order: ['dueSoon', 'whatsNew', 'pinned', 'progress', 'streak'],
+      hidden: []
+    });
+    // A layout saved before the streak widget existed stays valid and gains it at the end.
     expect(normalizeLayout({ order: ['progress', 'bogus', 'progress'], hidden: ['pinned', 'x'] })).toEqual({
-      order: ['progress', 'dueSoon', 'whatsNew', 'pinned'],
+      order: ['progress', 'dueSoon', 'whatsNew', 'pinned', 'streak'],
       hidden: ['pinned']
     });
     expect(isDashboardLayout({ order: ['progress'], hidden: [] })).toBe(true);
     expect(isDashboardLayout({ order: ['progress', 'progress'], hidden: [] })).toBe(false);
-    expect(isDashboardLayout({ order: ['streak'], hidden: [] })).toBe(false);
+    expect(isDashboardLayout({ order: ['streak'], hidden: [] })).toBe(true);
+    expect(isDashboardLayout({ order: ['focus'], hidden: [] })).toBe(false);
   });
   it('moves and toggles widgets', () => {
     const layout = normalizeLayout(null);
-    expect(moveWidget(layout, 'progress', 'up').order).toEqual(['dueSoon', 'whatsNew', 'progress', 'pinned']);
+    expect(moveWidget(layout, 'progress', 'up').order).toEqual(['dueSoon', 'whatsNew', 'progress', 'pinned', 'streak']);
     expect(moveWidget(layout, 'dueSoon', 'up')).toBe(layout);
     expect(toggleWidget(toggleWidget(layout, 'pinned'), 'pinned')).toEqual(layout);
   });

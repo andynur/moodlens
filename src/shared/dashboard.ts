@@ -1,7 +1,7 @@
 import type { MoodleTask } from './types';
 
-/** Today widgets (ML-004). Streak joins when XP (v0.6) stores data. */
-export const WIDGETS = ['dueSoon', 'whatsNew', 'pinned', 'progress'] as const;
+/** Today widgets (ML-004). `streak` shows the XP streak (ML-021). */
+export const WIDGETS = ['dueSoon', 'whatsNew', 'pinned', 'progress', 'streak'] as const;
 export type WidgetId = (typeof WIDGETS)[number];
 
 export interface DashboardLayout {

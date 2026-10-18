@@ -4,7 +4,7 @@
  * Pure logic: no storage, no clock reads. Callers pass the time and the student's IANA time zone.
  */
 
-import { dayKey, dayNumber, keyFromDayNumber, weekKey } from './days';
+import { dayKey, dayNumber, isDayKey, keyFromDayNumber, weekKey } from './days';
 
 export { dayKey, weekKey };
 
@@ -169,4 +169,29 @@ export function weeklyProgress(
   let earned = 0;
   for (let day = first; day < first + 7; day++) earned += state.daily[keyFromDayNumber(day)] ?? 0;
   return { weekStart, earned, goal: state.weeklyGoal };
+}
+
+/** Runtime guard for the stored state; anything that fails starts over from a fresh state. */
+export function isXpState(input: unknown): input is XpState {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return false;
+  const state = input as Partial<XpState>;
+  const whole = (value: unknown, max: number) =>
+    typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= max;
+  if (!whole(state.totalXp, Number.MAX_SAFE_INTEGER) || !whole(state.weeklyGoal, MAX_WEEKLY_GOAL)) return false;
+  if (!state.daily || typeof state.daily !== 'object' || Array.isArray(state.daily)) return false;
+  const daily = Object.entries(state.daily);
+  if (daily.length > DAILY_HISTORY_DAYS || !daily.every(([day, xp]) => isDayKey(day) && whole(xp, DAILY_XP_CAP))) {
+    return false;
+  }
+  if (!Array.isArray(state.earlyTaskIds) || state.earlyTaskIds.length > MAX_EARLY_TASK_IDS) return false;
+  if (!state.earlyTaskIds.every((id) => typeof id === 'string' && id.length > 0 && id.length <= 300)) return false;
+  const streak = state.streak;
+  if (!streak || typeof streak !== 'object') return false;
+  if (!whole(streak.current, 100_000) || !whole(streak.longest, 100_000)) return false;
+  if (!(streak.lastActiveDay === null || isDayKey(streak.lastActiveDay))) return false;
+  return (
+    Array.isArray(streak.freezeWeeks) &&
+    streak.freezeWeeks.length <= 520 &&
+    streak.freezeWeeks.every((week) => isDayKey(week))
+  );
 }

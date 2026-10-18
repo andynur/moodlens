@@ -39,3 +39,12 @@ export function weekKey(key: string): string {
   const weekday = new Date(day * DAY_MS).getUTCDay();
   return keyFromDayNumber(day - ((weekday + 6) % 7));
 }
+
+/** The browser's IANA time zone, or UTC when the platform does not report one. */
+export function localTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}

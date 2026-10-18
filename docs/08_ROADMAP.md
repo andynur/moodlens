@@ -69,10 +69,10 @@ Goal: accurate deadlines without fragile scraping.
 
 ## v0.5 — Dashboard and personalization
 
-- [~] Today dashboard with widgets: due soon, progress per course, what's new, streak (ML-004). Due soon, what's new, pinned and progress widgets with show/hide/reorder done; streak waits for v0.6 XP wiring.
+- [x] Today dashboard with widgets: due soon, progress per course, what's new, streak (ML-004). Due soon, what's new, pinned, progress and streak widgets with show/hide/reorder done.
 - [x] Pin, reorder, color, nickname, hide courses (ML-016).
 - [x] Snapshot history and "what's new since last visit" diff (ML-017): per-course records, badge, list, local "Mark as seen".
-- [x] Opt-in Moodle page appearance: dark mode, font size, line width, hide blocks from a fixed list (ML-018, D-015). Live check on 2 Moodle themes pending (PRD-009 AC 4).
+- [x] Opt-in Moodle page appearance: dark mode, font size, line width, hide blocks from a fixed list (ML-018, D-015). Verified live on Edwiser RemUI (SiberMu, 2026-10-19); a second theme is still pending (PRD-009 AC 4).
 - [ ] Candidate (needs PRD-009 update first): appearance theme presets that restyle Moodle with design tokens (color, type, spacing, cards) and CSS-only layout tweaks; no DOM rewriting, no third-party brand assets, off on assessment-guarded pages (ML-018).
 - [x] Export/import local backup JSON (ML-023 part 2).
 
@@ -84,7 +84,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] IndexedDB store design and retention settings. D-014 design, `src/background/studyStore.ts`, retention rules, wiring into site removal, clear-all and backup import, and the Settings retention control (90 days / 1 year / 2 years, pruned on save and on browser start) done.
 - [x] Flashcards: user-authored decks, FSRS-style scheduling, daily review (ML-019). Scheduler (PRD-010 AC 4), CSV/JSON import/export, background study service (`src/background/study.ts`) and the Study page with decks, card entry, review ratings and import/export done; store paths checked in Chrome, no automated IndexedDB coverage.
 - [~] Save mistakes from closed quiz review pages into private decks (ML-020, D-009). Guarded capture, private card builder (PRD-010 AC 2), offer plumbing (`src/background/practice.ts`) and the Study page save button done; a sanitized review fixture is still missing, so the selectors stay unverified and the save path is untested against real Moodle markup.
-- [~] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules done (`src/shared/xp.ts`, PRD-010 AC 5); storage and UI pending.
+- [x] Local XP, levels, streaks, weekly goals (ML-021, D-006). Rules (PRD-010 AC 5), storage (`src/background/xp.ts`, key `xp`, in the backup allowlist), awards for card reviews, finished review sessions and tasks opened early, the Study page XP card and the Today streak widget done.
 - [ ] P2: focus timer and per-activity notes (ML-026).
 
 **Exit gate:** guard tests pass for every known attempt URL and state; no quiz content leaves the device; XP rules documented and tested.

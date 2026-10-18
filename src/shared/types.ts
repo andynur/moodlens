@@ -99,6 +99,10 @@ export type IncomingMessage =
   | { type: 'STUDY_EXPORT_CARDS'; format: 'json' | 'csv' }
   | { type: 'PRACTICE_OFFER'; count: unknown }
   | { type: 'STUDY_SAVE_MISTAKES'; deckId: string }
+  | { type: 'STUDY_SESSION_DONE' }
+  | { type: 'XP_STATE' }
+  | { type: 'SET_WEEKLY_GOAL'; goal: unknown }
+  | { type: 'TASK_OPENED'; taskId: string; dueAt: string }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;
@@ -152,6 +156,19 @@ export interface StudyOverviewResponse {
   offer?: PracticeOffer | null;
   /** Cards that exist but are not due today, for the "nothing to review" message. */
   later: number;
+}
+/** Local XP for the panel (ML-021); never a Moodle grade. */
+export interface XpView {
+  ok: boolean;
+  totalXp: number;
+  level: number;
+  levelStartXp: number;
+  nextLevelXp: number;
+  today: number;
+  streak: number;
+  longestStreak: number;
+  weeklyGoal: number;
+  weeklyEarned: number;
 }
 export interface StudyExportResponse {
   ok: boolean;

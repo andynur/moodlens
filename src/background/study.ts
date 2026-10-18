@@ -18,7 +18,7 @@ import {
   type PortableCard,
   type ReviewLog
 } from '../shared/cards';
-import { dayKey } from '../shared/days';
+import { dayKey, localTimeZone } from '../shared/days';
 import { isDue, previewIntervals, reviewCard, reviewQueue, SRS_RATINGS, type SrsRating } from '../shared/srs';
 import type {
   OkResponse,
@@ -29,6 +29,7 @@ import type {
 } from '../shared/types';
 import { practiceOffer } from './practice';
 import { loadSites } from './sites';
+import { awardStudyXp } from './xp';
 import { deleteDeck, getCard, listCards, listDecks, openStudyDb, putCards, putDeck, recordReview } from './studyStore';
 
 /** New cards offered per site per day; the rest waits so a big import cannot flood one day. */
@@ -36,14 +37,6 @@ const NEW_CARDS_PER_DAY = 20;
 const MAX_CARDS_PER_CALL = 500;
 
 const EMPTY_OVERVIEW: StudyOverviewResponse = { ok: false, decks: [], queue: [], later: 0 };
-
-function timeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  } catch {
-    return 'UTC';
-  }
-}
 
 async function withDb<T>(
   factory: IDBFactory | undefined,
@@ -76,7 +69,7 @@ function cardView(card: Flashcard, at: Date, zone: string): StudyCardView {
 export async function studyOverview(
   factory: IDBFactory | undefined = globalThis.indexedDB,
   at = new Date(),
-  zone = timeZone()
+  zone = localTimeZone()
 ): Promise<StudyOverviewResponse> {
   const sites = await loadSites();
   const offer = sites.length > 0 ? await practiceOffer() : null;
@@ -173,7 +166,7 @@ export async function reviewFlashcard(
   input: { cardId: unknown; rating: unknown },
   factory: IDBFactory | undefined = globalThis.indexedDB,
   at = new Date(),
-  zone = timeZone()
+  zone = localTimeZone()
 ): Promise<OkResponse & { dueDay?: string | null }> {
   if (typeof input.cardId !== 'string' || !SRS_RATINGS.includes(input.rating as SrsRating)) return { ok: false };
   const rating = input.rating as SrsRating;
@@ -191,7 +184,10 @@ export async function reviewFlashcard(
       scheduledDays: memory.scheduledDays
     };
     const ok = await recordReview(db, { ...card, memory }, log);
-    return ok ? { ok: true, dueDay: memory.dueDay } : { ok: false };
+    if (!ok) return { ok: false };
+    // Study points for the review itself; finishing the queue awards the session separately (ML-021).
+    await awardStudyXp({ kind: 'card-reviewed' }, at, zone);
+    return { ok: true, dueDay: memory.dueDay };
   });
 }
 

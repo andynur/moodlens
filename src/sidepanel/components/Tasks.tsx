@@ -16,7 +16,7 @@ import {
   type TaskGroup
 } from '../../shared/tasks';
 import type { Locale, Site, TaskKind } from '../../shared/types';
-import { isTaskUrl } from '../../shared/validation';
+import { openTask } from '../openTask';
 import { taskKindText, taskText } from '../taskStrings';
 import { useTaskData } from '../useTaskData';
 
@@ -285,7 +285,7 @@ export function TasksView({ sites, locale, hidden }: { sites: Site[]; locale: Lo
                       {site && (
                         <button
                           type="button"
-                          onClick={() => isTaskUrl(task.url, site.origin) && chrome.tabs.create({ url: task.url })}
+                          onClick={() => openTask(task, site)}
                           className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700"
                         >
                           <ExternalLink size={12} />
