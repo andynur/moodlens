@@ -18,7 +18,14 @@ async function captureTasks(force = false): Promise<void> {
     .catch(() => null)) as TaskCaptureClaimResponse | null;
   if (!claim?.ok || !claim.due || !claim.siteId) return;
   try {
-    const payload = await captureTaskDataset(document, location.href, claim.siteId);
+    const payload = await captureTaskDataset(
+      document,
+      location.href,
+      claim.siteId,
+      new Date(),
+      undefined,
+      claim.unsupported
+    );
     const message: IncomingMessage = { type: 'TASK_DATASET', payload };
     await chrome.runtime.sendMessage(message);
   } catch {

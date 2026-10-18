@@ -31,6 +31,7 @@ export interface Course {
 export type TaskKind = 'assign' | 'quiz' | 'attendance' | 'forum' | 'event' | 'other';
 export type TaskStatus = 'open' | 'overdue' | 'done' | 'unknown';
 export type TaskSource = 'ajax' | 'dom';
+export type TaskAjaxCapability = 'courses' | 'tasks';
 export interface MoodleTask {
   siteId: string;
   courseId: string;
@@ -48,6 +49,7 @@ export interface TaskDataset {
   tasks: MoodleTask[];
   capturedAt: string;
   source: TaskSource;
+  unsupported?: TaskAjaxCapability[];
 }
 /** `system` follows `prefers-color-scheme` until the student picks light or dark. */
 export type Theme = 'light' | 'dark' | 'system';
@@ -85,6 +87,7 @@ export interface TaskCaptureClaimResponse {
   ok: boolean;
   due: boolean;
   siteId?: string;
+  unsupported?: TaskAjaxCapability[];
 }
 export interface EnableSiteResponse {
   ok: boolean;

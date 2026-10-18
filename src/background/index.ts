@@ -1,6 +1,6 @@
 import type { EnableSiteResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
 import { claimRollingWindow } from '../shared/rateLimit';
-import { snapshotKey, taskDataKey, taskFetchKey, taskFetchRateKey } from '../shared/sites';
+import { snapshotKey, taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from '../shared/sites';
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
 import { migrateStorage } from './migrate';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
@@ -50,6 +50,7 @@ const TASK_FETCH_INTERVAL_MS = 15 * 60 * 1000;
 const TASK_FETCH_RATE_WINDOW_MS = 60 * 1000;
 // Each capture makes at most two allowlisted AJAX calls, preserving D-003's 10 calls/minute/site cap.
 const TASK_FETCH_RATE_MAX = 5;
+const TASK_UNSUPPORTED_TTL_MS = 24 * 60 * 60 * 1000;
 
 async function senderSite(sender: chrome.runtime.MessageSender) {
   if (!sender.tab || !sender.url) return null;
@@ -66,20 +67,37 @@ async function claimTaskCapture(
   if (!site) return { ok: false, due: false };
   const fetchKey = taskFetchKey(site.id);
   const rateKey = taskFetchRateKey(site.id);
-  const stored = await chrome.storage.local.get([fetchKey, rateKey]);
+  const unsupportedKey = taskUnsupportedKey(site.id);
+  const stored = await chrome.storage.local.get([fetchKey, rateKey, unsupportedKey]);
   const previous = typeof stored[fetchKey] === 'string' ? Date.parse(stored[fetchKey] as string) : NaN;
   const now = Date.now();
   const due = force === true || !Number.isFinite(previous) || now - previous >= TASK_FETCH_INTERVAL_MS;
-  if (!due) return { ok: true, due: false, siteId: site.id };
+  const cached = stored[unsupportedKey];
+  const unsupported =
+    cached && typeof cached === 'object'
+      ? (['courses', 'tasks'] as const).filter((capability) => {
+          const until = (cached as Record<string, unknown>)[capability];
+          return typeof until === 'number' && until > now;
+        })
+      : [];
+  if (!due) return { ok: true, due: false, siteId: site.id, unsupported };
   const rate = claimRollingWindow(stored[rateKey], now, TASK_FETCH_RATE_MAX, TASK_FETCH_RATE_WINDOW_MS);
-  if (!rate.allowed) return { ok: true, due: false, siteId: site.id };
+  if (!rate.allowed) return { ok: true, due: false, siteId: site.id, unsupported };
   await chrome.storage.local.set({ [fetchKey]: new Date(now).toISOString(), [rateKey]: rate.timestamps });
-  return { ok: true, due: true, siteId: site.id };
+  return { ok: true, due: true, siteId: site.id, unsupported };
 }
 
 async function storeTaskDataset(payload: unknown, sender: chrome.runtime.MessageSender): Promise<OkResponse> {
   const site = await senderSite(sender);
   if (!site || !isTaskDataset(payload, site.id, site.origin)) return { ok: false };
+  if (payload.unsupported?.length) {
+    const key = taskUnsupportedKey(site.id);
+    const current = await chrome.storage.local.get(key);
+    const cache = current[key] && typeof current[key] === 'object' ? (current[key] as Record<string, unknown>) : {};
+    const until = Date.now() + TASK_UNSUPPORTED_TTL_MS;
+    for (const capability of payload.unsupported) cache[capability] = until;
+    await chrome.storage.local.set({ [key]: cache });
+  }
   await chrome.storage.local.set({ [taskDataKey(site.id)]: payload });
   await syncReminders();
   return { ok: true };

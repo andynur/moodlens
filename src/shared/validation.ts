@@ -28,6 +28,7 @@ const KNOWN_COMPLETION: ReadonlySet<string> = new Set<CompletionStatus>(['comple
 const TASK_KINDS: ReadonlySet<string> = new Set<TaskKind>(['assign', 'quiz', 'attendance', 'forum', 'event', 'other']);
 const TASK_STATUSES: ReadonlySet<string> = new Set<TaskStatus>(['open', 'overdue', 'done', 'unknown']);
 const TASK_SOURCES: ReadonlySet<string> = new Set<TaskSource>(['ajax', 'dom']);
+const TASK_AJAX_CAPABILITIES: ReadonlySet<string> = new Set(['courses', 'tasks']);
 
 // Every URL policy takes the enabled site's origin (from the site registry) instead of a constant (D-002).
 export function canonicalCourseUrl(input: string, origin: string): string | null {
@@ -179,6 +180,13 @@ export function isTaskDataset(input: unknown, siteId: string, origin: string): i
     Number.isFinite(Date.parse(data.capturedAt)) &&
     typeof data.source === 'string' &&
     TASK_SOURCES.has(data.source) &&
-    data.tasks.every((task) => task.source === data.source)
+    data.tasks.every((task) => task.source === data.source) &&
+    (data.unsupported === undefined ||
+      (Array.isArray(data.unsupported) &&
+        data.unsupported.length <= 2 &&
+        new Set(data.unsupported).size === data.unsupported.length &&
+        data.unsupported.every((capability) =>
+          typeof capability === 'string' ? TASK_AJAX_CAPABILITIES.has(capability) : false
+        )))
   );
 }

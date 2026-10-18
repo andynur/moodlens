@@ -52,7 +52,18 @@ describe('task capture source fallback', () => {
     };
     const result = await captureTaskDataset(fallback, `${origin}/my/`, siteId, new Date(), client as never);
     expect(result.source).toBe('dom');
+    expect(result.unsupported).toEqual(['courses', 'tasks']);
     expect(result.courses).toHaveLength(1);
     expect(result.tasks[0]).toMatchObject({ title: 'Quiz', source: 'dom' });
+  });
+
+  it('does not retry capabilities held in the per-site unsupported cache', async () => {
+    const client = { call: vi.fn() };
+    const result = await captureTaskDataset(document, `${origin}/my/`, siteId, new Date(), client as never, [
+      'courses',
+      'tasks'
+    ]);
+    expect(client.call).not.toHaveBeenCalled();
+    expect(result.unsupported).toEqual(['courses', 'tasks']);
   });
 });
