@@ -13,6 +13,7 @@
 - Set the beta package version to `0.7.0` and added `npm run release:zip`, which runs the full gate, validates permissions and manifest version, rejects unsafe ZIP entries and prints a SHA-256 checksum.
 - Recorded the post-security-review v0.7.0 candidate checksum and package contents, with store upload and live beta gates explicitly left to the owner.
 - Added a privacy-safe beta QA runbook covering proof for three Moodle sites, an anonymous ten-tester cohort, P0/P1 triage and the auditable seven-day stability clock.
+- Smoke-tested the final unpacked build in a clean Chrome 154 profile: its service worker loaded without Moodlens errors, and the complete bilingual onboarding plus initial dashboard had no 320px overflow.
 
 ### Fixed (v0.6)
 

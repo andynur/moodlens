@@ -22,6 +22,14 @@ Artifact: `release/moodlens-v0.7.0.zip` (ignored build output; regenerate locall
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - `npm audit`: 0 vulnerabilities.
 
+## Clean-profile Chrome smoke test
+
+Chrome 154 loaded the final `dist/` through the DevTools `Extensions.loadUnpacked` command in a temporary clean profile. The Moodlens service worker reported manifest version `0.7.0`, an empty initial site registry and zero registered content scripts before permission. No Moodlens runtime exception or error log was observed.
+
+The real packaged side panel completed all three onboarding steps after switching from English to Indonesian at a 320×800 viewport. Every step and the initial Today dashboard had `scrollWidth === clientWidth === 320` with no element crossing the viewport boundary. The temporary profile was deleted after the run.
+
+This is unpacked-build and layout evidence only. The optional host request was not approved by a real user in that temporary profile, so the reachable public Moodle 5.3 demo was not counted as enabled-site or beta acceptance evidence.
+
 ## Store upload set
 
 - Extension ZIP: regenerate with `npm run release:zip`, then compare its SHA-256 with this file.
@@ -33,4 +41,3 @@ Artifact: `release/moodlens-v0.7.0.zip` (ignored build output; regenerate locall
 ## Proof boundary and external gates
 
 This proves the local source/build/package candidate only. It does not prove Chrome Web Store upload or approval, CI on the unpublished commits, trademark permission, authenticated QA on three Moodle sites, ten beta testers, or seven P0/P1-free days. Do not create the final `v0.7.0` tag until the publication decision and exact uploaded ZIP are confirmed.
-
