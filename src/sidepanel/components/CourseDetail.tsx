@@ -288,46 +288,45 @@ export function CourseDetail(props: Feedback & { entry: CourseEntry; locale: Loc
           className="max-h-[calc(100dvh-3rem)] overflow-y-auto overscroll-contain rounded-xl border border-line bg-canvas shadow-card"
         >
           {snapshot.activities.map((activity) => (
-            <article
-              key={`${activity.type}-${activity.id}`}
-              className="flex items-start gap-3 border-b border-line p-3 last:border-b-0"
-            >
-              <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-medium break-words">{activity.title}</h4>
-                <p className="mt-0.5 text-xs text-ink-3">{translate(typeLabel[activity.type])}</p>
-                {activity.url === null ? (
-                  <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-ink-3">
-                    <Lock size={12} />
-                    {translate('restricted')}
-                  </p>
-                ) : (
-                  <Button variant="link" className="mt-1.5 text-xs" onClick={() => openActivity(activity.url!)}>
-                    {translate('open')} <ExternalLink size={12} />
-                  </Button>
-                )}
-                <ActivityNote
-                  key={`${activity.id}-${notes[activity.id] ?? ''}`}
-                  {...props}
-                  activityId={activity.id}
-                  text={notes[activity.id]}
-                  onSaved={loadNotes}
-                />
+            <article key={`${activity.type}-${activity.id}`} className="border-b border-line p-3 last:border-b-0">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-medium break-words">{activity.title}</h4>
+                  <p className="mt-0.5 text-xs text-ink-3">{translate(typeLabel[activity.type])}</p>
+                  {activity.url === null ? (
+                    <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-ink-3">
+                      <Lock size={12} />
+                      {translate('restricted')}
+                    </p>
+                  ) : (
+                    <Button variant="link" className="mt-1.5 text-xs" onClick={() => openActivity(activity.url!)}>
+                      {translate('open')} <ExternalLink size={12} />
+                    </Button>
+                  )}
+                </div>
+                <div
+                  className={cx(
+                    'flex shrink-0 items-center gap-1 text-[11px] font-medium',
+                    completionStyle[activity.completion]
+                  )}
+                >
+                  {activity.completion === 'complete' ? (
+                    <CheckCircle2 size={14} />
+                  ) : activity.completion === 'incomplete' ? (
+                    <CircleDashed size={14} />
+                  ) : (
+                    <CircleHelp size={14} />
+                  )}
+                  {translate(completionLabel[activity.completion])}
+                </div>
               </div>
-              <div
-                className={cx(
-                  'flex shrink-0 items-center gap-1 text-[11px] font-medium',
-                  completionStyle[activity.completion]
-                )}
-              >
-                {activity.completion === 'complete' ? (
-                  <CheckCircle2 size={14} />
-                ) : activity.completion === 'incomplete' ? (
-                  <CircleDashed size={14} />
-                ) : (
-                  <CircleHelp size={14} />
-                )}
-                {translate(completionLabel[activity.completion])}
-              </div>
+              <ActivityNote
+                key={`${activity.id}-${notes[activity.id] ?? ''}`}
+                {...props}
+                activityId={activity.id}
+                text={notes[activity.id]}
+                onSaved={loadNotes}
+              />
             </article>
           ))}
         </div>

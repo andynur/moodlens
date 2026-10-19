@@ -89,7 +89,7 @@ function useLayout(): [DashboardLayout, (next: DashboardLayout) => void] {
   ];
 }
 
-function CourseButton(props: Feedback & { entry: CourseEntry; onSelect: (key: string) => void }) {
+function CourseButton(props: Feedback & { entry: CourseEntry; onSelect: (key: string) => void; showSite?: boolean }) {
   const { entry, translate } = props;
   return (
     <button
@@ -98,13 +98,17 @@ function CourseButton(props: Feedback & { entry: CourseEntry; onSelect: (key: st
       className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm font-medium hover:text-accent-ink"
     >
       <ColorDot color={entry.prefs.color} />
-      <span className="min-w-0 flex-1 break-words">{courseTitle(entry, translate)}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words">{courseTitle(entry, translate)}</span>
+        {props.showSite && <span className="block text-xs font-normal break-words text-ink-3">{entry.site.label}</span>}
+      </span>
     </button>
   );
 }
 
 function DueSoon(props: WidgetProps) {
   const { translate, locale } = props;
+  const showSite = new Set(props.sites.map((site) => site.id)).size > 1;
   const hidden = new Set(props.entries.filter((entry) => entry.prefs.hidden).map((entry) => entry.key));
   const tasks = dueSoon(props.tasks, hidden);
   if (tasks.length === 0) return <Hint>{translate('dueSoonEmpty')}</Hint>;
@@ -125,6 +129,7 @@ function DueSoon(props: WidgetProps) {
               <span className="block text-xs break-words text-ink-2">
                 <span className="font-medium text-warning-ink">{formatRelativeDue(task.dueAt!, locale)}</span>
                 {entry ? ` · ${courseTitle(entry, translate)}` : ''}
+                {showSite && site ? ` · ${site.label}` : ''}
               </span>
             </span>
             {site && isTaskUrl(task.url, site.origin) && (
@@ -147,13 +152,14 @@ function DueSoon(props: WidgetProps) {
 
 function WhatsNew(props: WidgetProps) {
   const changed = props.entries.filter((entry) => entry.changes.length > 0);
+  const showSite = new Set(props.sites.map((site) => site.id)).size > 1;
   if (changed.length === 0) return <Hint>{props.translate('whatsNewEmpty')}</Hint>;
   return (
     <ul className="space-y-4">
       {changed.map((entry) => (
         <li key={entry.key} className="space-y-2">
           <div className="flex items-center gap-2">
-            <CourseButton {...props} entry={entry} />
+            <CourseButton {...props} entry={entry} showSite={showSite} />
             <NewBadge translate={props.translate} count={entry.changes.length} />
           </div>
           <ChangeList {...props} entry={entry} />
@@ -166,12 +172,13 @@ function WhatsNew(props: WidgetProps) {
 function Pinned(props: WidgetProps) {
   const { translate } = props;
   const pinned = props.entries.filter((entry) => entry.prefs.pinned);
+  const showSite = new Set(props.sites.map((site) => site.id)).size > 1;
   if (pinned.length === 0) return <Hint>{translate('pinnedEmpty')}</Hint>;
   return (
     <ul className="-my-1 divide-y divide-line">
       {pinned.map((entry) => (
         <li key={entry.key} className="flex items-center gap-2 py-1.5">
-          <CourseButton {...props} entry={entry} />
+          <CourseButton {...props} entry={entry} showSite={showSite} />
           <Button
             variant="ghost"
             size="icon"
@@ -189,6 +196,7 @@ function Pinned(props: WidgetProps) {
 
 function Progress(props: WidgetProps) {
   if (props.entries.length === 0) return <Hint>{props.translate('noData')}</Hint>;
+  const showSite = new Set(props.sites.map((site) => site.id)).size > 1;
   return (
     <ul className="space-y-3">
       {props.entries.map((entry) => {
@@ -198,7 +206,7 @@ function Progress(props: WidgetProps) {
         return (
           <li key={entry.key} className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <CourseButton {...props} entry={entry} />
+              <CourseButton {...props} entry={entry} showSite={showSite} />
               <span className="shrink-0 text-xs text-ink-2 tabular-nums">
                 {done}/{total}
               </span>

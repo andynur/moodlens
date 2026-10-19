@@ -4,6 +4,7 @@
 
 ### Fixed (v0.6)
 
+- Today now shows the Moodle site label when more than one site is enabled, so matching course names remain distinguishable in Due soon, What's new, Pinned and Course progress. Activity notes now use the full activity-row width at 320px instead of sharing a narrow row with the completion label.
 - Course detail crashed the whole side panel when the background answered a focus request with `{ ok: false }` (no `session`), which happens for untrusted senders and on any background error. The focus card now validates the reply with `isFocusSession` and only shows "Focus session done" on an `ok` reply. Found by the ML-026 Chrome run.
 
 ### Fixed (v0.4)
