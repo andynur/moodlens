@@ -57,6 +57,8 @@ You can inspect the source, enable or remove sites individually, keep notificati
 
 Material policy changes will be recorded in the repository and extension release notes. For privacy questions, open a GitHub issue without personal or course data. For a security vulnerability, follow [`SECURITY.md`](SECURITY.md) and report it privately.
 
+Moodlens's use of information received through Chrome APIs adheres to the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data), including the Limited Use requirements. Moodlens uses this data only to provide or improve its disclosed study-companion purpose; it does not sell data, use it for advertising or credit decisions, or allow humans to read it except with the user's explicit consent or when required for security or law.
+
 ## Bahasa Indonesia
 
 Moodlens adalah ekstensi Chrome gratis dan sumber terbuka yang membantu mahasiswa mengatur informasi dari situs mata kuliah Moodle yang mereka pilih untuk diaktifkan. Moodlens merupakan proyek independen dan tidak berafiliasi dengan atau didukung oleh Moodle Pty Ltd maupun universitas mana pun.
@@ -111,3 +113,5 @@ Anda dapat memeriksa kode sumber, mengaktifkan atau menghapus situs satu per sat
 ### Perubahan dan kontak
 
 Perubahan kebijakan yang penting akan dicatat di repositori dan catatan rilis ekstensi. Untuk pertanyaan privasi, buka issue GitHub tanpa data pribadi atau data mata kuliah. Untuk kerentanan keamanan, ikuti [`SECURITY.md`](SECURITY.md) dan laporkan secara privat.
+
+Penggunaan informasi yang diterima Moodlens melalui API Chrome mematuhi [Kebijakan Data Pengguna Chrome Web Store](https://developer.chrome.com/docs/webstore/program-policies/user-data), termasuk persyaratan Limited Use. Moodlens menggunakan data tersebut hanya untuk menyediakan atau meningkatkan tujuan pendamping belajar yang dinyatakan; Moodlens tidak menjual data, menggunakannya untuk iklan atau keputusan kredit, maupun mengizinkan manusia membacanya kecuali dengan persetujuan langsung pengguna atau jika diperlukan untuk keamanan atau hukum.

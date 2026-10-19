@@ -5,31 +5,31 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 ## Product and legal
 
 - [x] Moodle trademark policy reviewed for the name "Moodlens" and the tagline; permission or fallback name ready (D-001). High risk without written permission; the BelajarLens fallback package and activation steps are in `docs/releases/v0.7/TRADEMARK_REVIEW.md`.
-- [ ] Listing body and screenshots describe only shipped features; unshipped AI features labeled "coming soon" (D-001).
-- [ ] No university names or logos implying affiliation; "Independent project" disclaimer in UI and listing.
+- [x] Listing body describes only shipped features; unshipped AI is labeled “not included in this beta” (`docs/releases/v0.7/STORE_LISTING.md`). Screenshot verification remains with the asset item below (D-001).
+- [x] No university names or logos implying affiliation; the bilingual listing and always-visible UI copy use the independent-project disclaimer.
 - [~] Privacy policy page prepared in EN and ID (`PRIVACY.md`); publication waits for the local commits to be pushed to the already-public repository.
 - [~] "What we never do" page prepared in EN and ID (`WHAT_WE_NEVER_DO.md`); publication waits for push.
 - [x] Open-source license chosen and added (`LICENSE`, MIT).
 
 ## Store listing
 
-- [ ] Single-purpose description: study companion for Moodle course pages the student enables.
-- [ ] Short and long description in EN; ID listing translation.
+- [x] Single-purpose description: local-first study companion for Moodle course sites the student enables.
+- [x] Short and long description in EN; ID listing translation (`docs/releases/v0.7/STORE_LISTING.md`).
 - [ ] Icons 16/32/48/128 and store icon 128; promo tile 440×280.
 - [ ] At least 3 screenshots 1280×800 (Today, Tasks, Practice), no real student data.
-- [ ] Category: Education.
-- [ ] Privacy practices tab matches `docs/06_SECURITY_PRIVACY.md` §2 data inventory.
-- [ ] Limited Use certification checked truthfully.
+- [x] Category: Education.
+- [x] Privacy practices answers drafted against the shipped data paths and `docs/06_SECURITY_PRIVACY.md` §2 inventory.
+- [~] Limited Use statement added to `PRIVACY.md` and dashboard certification copy drafted; the owner must check it in the Developer Dashboard after final ZIP comparison.
 
 ## Permission justifications (paste into dashboard)
 
-- [ ] `storage`: save preferences and study data locally.
-- [ ] `sidePanel`: show the study companion next to the course.
-- [ ] `scripting`: run the course reader only on Moodle sites the student enables.
-- [ ] `alarms`: local deadline reminders.
-- [ ] optional `notifications`: show reminders when the student turns them on.
-- [ ] optional host `https://*/*`: requested for one Moodle site at a time after the student clicks "Enable".
-- [ ] optional AI provider hosts (if AI ships): requested when the student chooses a provider.
+- [x] `storage`: save preferences and study data locally.
+- [x] `sidePanel`: show the study companion next to the course.
+- [x] `scripting`: run packaged code only on Moodle sites the student enables.
+- [x] `alarms`: local deadline reminders and focus-session completion; no polling.
+- [x] optional `notifications`: show reminders when the student turns them on.
+- [x] optional host `https://*/*`: requested for one Moodle site at a time after the student clicks "Enable".
+- [x] optional AI provider hosts: not declared because AI does not ship in v0.7.
 
 ## Engineering
 

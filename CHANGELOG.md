@@ -6,6 +6,7 @@
 
 - Reviewed the official Moodle trademark guidelines. “Moodlens” is high risk without written permission; documented the permission path and a ready BelajarLens fallback package without changing the active product name.
 - Added bilingual privacy and “what we never do” pages plus a bilingual lecturer guide describing the read-only, assessment-guard and local-data boundaries.
+- Drafted the Chrome Web Store listing in English and Indonesian with a single-purpose statement, accurate v0.7 feature boundaries, permission justifications, privacy-practices answers and Limited Use disclosure.
 
 ### Fixed (v0.6)
 

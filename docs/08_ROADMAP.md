@@ -93,7 +93,7 @@ Goal: accurate deadlines without fragile scraping.
 
 - [x] Trademark review for "Moodlens" and fallback name ready (D-001). Review found the name high risk without written permission; BelajarLens fallback package documented.
 - [~] Privacy policy page, "what we never do" page, public GitHub repo. The repository is publicly readable; bilingual pages and the lecturer guide are ready locally, pending push.
-- [ ] Store listing draft: description EN/ID, screenshots, icons, single-purpose statement, permission justifications.
+- [~] Store listing draft: EN/ID descriptions, single-purpose statement, privacy declarations and permission justifications are dashboard-ready; screenshots and promo asset remain.
 - [ ] Publish as **unlisted** or trusted-testers; feedback form (no telemetry).
 - [ ] Beta QA on at least 3 Moodle sites; bug triage.
 

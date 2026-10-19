@@ -20,10 +20,11 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - v0.6 UI QA follow-up (2026-10-19): activity notes now take the full activity-row width; Today shows site labels when multiple Moodle sites are enabled across Due soon, What's new, Pinned and Course progress. Multi-site labels have component regression coverage (`tests/today.test.ts`); full check green. The 320px note layout still needs a rendered recheck.
 - v0.7 trademark review (2026-10-19): official Moodle guidelines make “Moodlens” high risk without written permission because it is a minor derivation used for compatible software. Primary path: request permission at `trademarks@moodle.com`; ready fallback: BelajarLens, with bilingual compatibility wording, disclaimer and activation steps in `docs/releases/v0.7/TRADEMARK_REVIEW.md`. This is not legal clearance.
 - v0.7 public policy package (2026-10-19): bilingual `PRIVACY.md` and `WHAT_WE_NEVER_DO.md`, plus `docs/releases/v0.7/LECTURER_GUIDE.md`, match the shipped local-only data paths and integrity boundaries. The GitHub repository is publicly readable; these local commits are not published until pushed.
+- v0.7 store copy (2026-10-19): `docs/releases/v0.7/STORE_LISTING.md` has dashboard-ready EN/ID descriptions, single-purpose statement, category, permission justifications, privacy-practices answers and Limited Use copy. It states AI is not shipped. Store assets, final ZIP comparison and dashboard checkbox remain.
 
 ## Next task
 
-0. Agent: prepare the bilingual store listing, permission/privacy declarations and synthetic-data assets.
+0. Agent: create and visually verify store icon, promo tile and EN/ID 1280×800 screenshots from synthetic data.
 1. Owner: a sanitized quiz attempt and review fixture (ML-020/ML-022). Every quiz selector and the save path stay unverified until then; SiberMu has quizzes but no finished attempt was available in this session.
 2. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
 3. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
