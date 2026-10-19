@@ -5,6 +5,7 @@
 ### Release preparation (v0.7)
 
 - Reviewed the official Moodle trademark guidelines. “Moodlens” is high risk without written permission; documented the permission path and a ready BelajarLens fallback package without changing the active product name.
+- Added bilingual privacy and “what we never do” pages plus a bilingual lecturer guide describing the read-only, assessment-guard and local-data boundaries.
 
 ### Fixed (v0.6)
 

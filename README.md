@@ -18,6 +18,7 @@ Moodlens is a Chrome side panel extension that reads your own Moodle course page
 - [Project status](#project-status)
 - [Features](#features)
 - [What Moodlens never does](#what-moodlens-never-does)
+- [Privacy policy](PRIVACY.md)
 - [Getting started](#getting-started)
 - [Development](#development)
 - [Project structure](#project-structure)
@@ -64,6 +65,8 @@ Full list with priorities: [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLO
 - Mark activities done, submit attendance, post to forums or submit anything.
 - Read passwords or cookies, or send your data to a developer server. There is no server.
 - Run on sites you have not enabled.
+
+Read the complete bilingual [What Moodlens Never Does](WHAT_WE_NEVER_DO.md) page and [Privacy Policy](PRIVACY.md).
 
 ## Getting started
 

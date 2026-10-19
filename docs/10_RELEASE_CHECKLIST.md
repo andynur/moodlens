@@ -7,8 +7,8 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 - [x] Moodle trademark policy reviewed for the name "Moodlens" and the tagline; permission or fallback name ready (D-001). High risk without written permission; the BelajarLens fallback package and activation steps are in `docs/releases/v0.7/TRADEMARK_REVIEW.md`.
 - [ ] Listing body and screenshots describe only shipped features; unshipped AI features labeled "coming soon" (D-001).
 - [ ] No university names or logos implying affiliation; "Independent project" disclaimer in UI and listing.
-- [ ] Privacy policy page published (GitHub Pages or repo) in EN and ID.
-- [ ] "What we never do" page published.
+- [~] Privacy policy page prepared in EN and ID (`PRIVACY.md`); publication waits for the local commits to be pushed to the already-public repository.
+- [~] "What we never do" page prepared in EN and ID (`WHAT_WE_NEVER_DO.md`); publication waits for push.
 - [x] Open-source license chosen and added (`LICENSE`, MIT).
 
 ## Store listing

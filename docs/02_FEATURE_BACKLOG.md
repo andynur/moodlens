@@ -23,7 +23,7 @@ Definitions: **Done** = merged, tested, verified on a real site; **Provisional**
 | ML-020 | Practice from closed quiz reviews | P1 | v0.6 | Planned | PRD-010 | ML-022, D-009, review page fixture |
 | ML-021 | Local XP, streaks, goals | P1 | v0.6 | Planned | PRD-010 | D-006 |
 | ML-026 | Focus timer, notes per activity | P2 | v0.6 | Implemented (Chrome QA pending) | PRD-010 | — |
-| ML-025 | Chrome Web Store release package | P0 | v0.7/v1.0 | Planned | PRD-011 | D-001 trademark review |
+| ML-025 | Chrome Web Store release package | P0 | v0.7/v1.0 | In progress | PRD-011 | D-001 trademark review |
 | ML-007 | Local PDF extraction (PDF.js) | P1 | v0.8 | Planned (cut line) | PRD-004 | ML-022 |
 | ML-008 | BYOK provider setup and consent | P1 | v0.8 | Planned (cut line) | PRD-004 | Security review |
 | ML-009 | Cited AI summary, Q&A, generated practice | P1 | v0.8 | Planned (cut line) | PRD-004 | ML-007, ML-008 |
