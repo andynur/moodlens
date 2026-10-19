@@ -47,4 +47,4 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 - [ ] `npm run build` then zip the contents of `dist/` (manifest at zip root).
 - [ ] Upload, set visibility (unlisted for beta, public for v1.0).
 - [ ] Release notes in `CHANGELOG.md`; git tag `vX.Y.Z`.
-- [ ] GitHub Issues templates for bug report and site compatibility report. **(v1.0)**
+- [x] GitHub Issues templates for bug report, beta feedback and site compatibility report.

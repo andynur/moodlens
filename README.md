@@ -1,7 +1,7 @@
 # Moodlens
 
 [![CI](https://github.com/andynur/moodlens/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/andynur/moodlens/actions/workflows/ci.yml)
-![Status: pre-release](https://img.shields.io/badge/status-pre--release%20v0.2-orange)
+![Status: closed beta preparation](https://img.shields.io/badge/status-v0.7%20closed%20beta-orange)
 ![Chrome MV3](https://img.shields.io/badge/Chrome-MV3%20%E2%89%A5116-4285F4)
 ![Languages: EN | ID](https://img.shields.io/badge/i18n-EN%20%7C%20ID-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -31,7 +31,7 @@ Moodlens is a Chrome side panel extension that reads your own Moodle course page
 
 | | |
 |---|---|
-| Current release | **v0.2 — Stabilize foundation** (in progress) |
+| Current release | **v0.7 — Closed beta on the Chrome Web Store** (in progress) |
 | Target | v1.0 on the Chrome Web Store |
 | First verified site | `https://solusi.sibermu.ac.id/` |
 | Live handoff | [`docs/00_STATUS.md`](docs/00_STATUS.md) |
@@ -41,21 +41,21 @@ Moodlens is pre-release software. Expect breaking changes to stored local data b
 
 ## Features
 
-### Available now
+### Available in the v0.7 build
 
 - Manifest V3 side panel in English and Bahasa Indonesia.
-- Light, dark and system themes.
-- Read-only course page parser for the pilot site, tested against sanitized fixtures.
-- Activity list with completion state `complete`, `incomplete` or `unknown`, and safe links back to Moodle.
-- **Settings > Clear all local data.**
+- Runtime enablement for individual HTTPS Moodle sites; no static host access.
+- Read-only course, activity and deadline capture with DOM fallback and safe source links.
+- Today, Courses and Tasks views across enabled sites, including local reminders and `.ics` export.
+- Local personalization, “what's new”, light/dark themes and opt-in Moodle reading-comfort options.
+- Private flashcards with spaced repetition, guarded finished-review practice, local XP and streaks.
+- Focus timer, per-activity notes, backup/restore, site removal and clear-all controls.
+- Assessment guard that pauses study help during active assessments and fails closed.
 
-### Planned for v1.0
+### Coming later
 
-- **Everything due, in one place:** tasks and deadlines across courses, reminders, `.ics` calendar export.
-- **Your Moodle, your way:** Today dashboard, pinned and colored courses, "what's new since last visit", dark mode for Moodle pages.
-- **Practice that sticks:** flashcards with spaced repetition, review of your own mistakes after a quiz closes, local XP, streaks and goals.
-- **Optional AI study (bring your own key):** cited summaries and practice from material you choose.
-- **Any Moodle 4.x site** you enable, one site at a time.
+- Optional AI study (bring your own key) is planned for v0.8 and is not included in the v0.7 beta.
+- Accessibility, performance and final localization review are scheduled for the v0.9 release candidate.
 
 Full list with priorities: [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLOG.md).
 
@@ -70,7 +70,7 @@ Read the complete bilingual [What Moodlens Never Does](WHAT_WE_NEVER_DO.md) page
 
 ## Getting started
 
-Moodlens is not yet on the Chrome Web Store. To try it, build it from source.
+Moodlens is preparing a closed Chrome Web Store beta. Until a tester link is published, build it from source.
 
 ### Requirements
 
@@ -154,7 +154,7 @@ Core principles:
 5. Minimal permissions. Host access is requested at runtime for one site at a time.
 6. English and Indonesian parity for every string.
 
-The manifest requests only `storage` and `sidePanel`. Details: [`docs/06_SECURITY_PRIVACY.md`](docs/06_SECURITY_PRIVACY.md).
+Required permissions are `storage`, `sidePanel`, `scripting` and `alarms`. Notifications and one HTTPS Moodle origin at a time are optional and requested only through an explicit user action. Details: [`docs/06_SECURITY_PRIVACY.md`](docs/06_SECURITY_PRIVACY.md) and the bilingual [Privacy Policy](PRIVACY.md).
 
 **Reporting a vulnerability:** do not open a public issue. Follow [`SECURITY.md`](SECURITY.md).
 

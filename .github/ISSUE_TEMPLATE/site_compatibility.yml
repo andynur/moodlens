@@ -1,0 +1,69 @@
+name: Site compatibility report
+description: Report read-only behavior on a Moodle version or theme using sanitized evidence.
+labels: [site-compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report only a site you are authorized to test. **Never attach raw HTML, Network exports, screenshots or URLs containing student, account or course data.** Follow `tests/fixtures/README.md` before sharing a sanitized fixture. Report security or assessment-guard bypasses privately through SECURITY.md.
+  - type: dropdown
+    id: result
+    attributes:
+      label: Compatibility result
+      options:
+        - Detection works; course and task data work
+        - Detection works; some data is missing
+        - Site is not detected
+        - Appearance option is not reversible
+        - Other read-only compatibility problem
+    validations:
+      required: true
+  - type: input
+    id: moodle
+    attributes:
+      label: Moodle version
+      placeholder: Moodle 4.5
+    validations:
+      required: true
+  - type: input
+    id: theme
+    attributes:
+      label: Theme name and version, if known
+      placeholder: Boost 4.5
+  - type: input
+    id: browser
+    attributes:
+      label: Moodlens, Chrome and operating-system versions
+      placeholder: Moodlens 0.7.0, Chrome 141, macOS 15
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and observed result
+      description: Use synthetic labels and omit private URLs.
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Read-only Network check
+      description: If inspected, did Moodlens make only allowlisted same-site reads and zero Moodle writes?
+      options:
+        - Not inspected
+        - Allowlisted reads and zero writes observed
+        - Unexpected request observed; reported privately
+  - type: textarea
+    id: sanitized
+    attributes:
+      label: Sanitized fixture or public demo URL, if available
+      description: Link only to data that you reviewed under tests/fixtures/README.md.
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Authorization and privacy
+      options:
+        - label: I was authorized to test this site.
+          required: true
+        - label: This report contains no personal data, credentials, private URLs or real course content.
+          required: true
