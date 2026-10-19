@@ -96,6 +96,7 @@ Goal: accurate deadlines without fragile scraping.
 - [~] Privacy policy page, "what we never do" page, public GitHub repo. The repository is publicly readable; bilingual pages and the lecturer guide are ready locally, pending push.
 - [x] Store listing draft: EN/ID descriptions, single-purpose statement, privacy declarations, permission justifications, icons, promo tile and three synthetic-data screenshots per locale are ready.
 - [x] Reproducible v0.7.0 ZIP generated after the security review; checksum and package evidence recorded.
+- [x] Privacy-safe beta QA ledger, three-site evidence standard, P0/P1 triage rules and seven-day clock procedure are ready (`docs/releases/v0.7/BETA_QA_RUNBOOK.md`).
 - [~] Publish as **unlisted** or trusted-testers; opt-in GitHub beta feedback form is ready with no telemetry, but store upload and tester configuration require the owner account.
 - [ ] Beta QA on at least 3 Moodle sites; bug triage.
 

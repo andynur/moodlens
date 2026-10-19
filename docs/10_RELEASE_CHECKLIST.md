@@ -38,6 +38,7 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 - [x] `dist/` inspected: 12 files plus 2 directory entries; no source maps, secrets, test fixtures, store-preview harness or remote code.
 - [x] Security review (`prompts/SECURITY_REVIEW_PROMPT.md`) with no open Critical/High (`docs/releases/v0.7/SECURITY_REVIEW.md`).
 - [ ] Manual QA in `docs/09_TEST_PLAN.md` on 3 sites.
+- [x] Beta QA evidence ledger, anonymous ten-tester cohort, P0/P1 definitions and seven-day reset rule prepared (`docs/releases/v0.7/BETA_QA_RUNBOOK.md`).
 - [ ] Accessibility and 320px layout pass. **(v1.0)**
 - [ ] EN/ID parity test green; native speaker review. **(v1.0)**
 - [x] AI features and provider hosts are absent from the v0.7 package; listing labels AI as not included (D-007).
