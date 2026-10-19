@@ -1,11 +1,12 @@
-// Generates placeholder extension icons (public/icons/icon-<size>.png) without extra dependencies.
-// Design: blue rounded square with a white lens ring. Replace with final artwork before v1.0.
+// Generates the extension/store icons (public/icons/icon-<size>.png) without extra dependencies.
+// Design: padded purple tile, white study lens and a small gold insight spark.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 
 const SIZES = [16, 32, 48, 128];
-const BLUE = [29, 78, 216];
+const PURPLE = [86, 69, 212];
 const WHITE = [255, 255, 255];
+const GOLD = [245, 215, 94];
 
 const crcTable = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -35,26 +36,44 @@ function coverage(x, y, inside) {
 }
 
 function icon(size) {
-  const radius = size * 0.22;
-  const center = size / 2;
-  const ringOuter = size * 0.3;
-  const ringInner = size * 0.19;
+  const padding = size * 0.125;
+  const radius = size * 0.18;
+  const centerX = size * 0.47;
+  const centerY = size * 0.48;
+  const ringOuter = size * 0.22;
+  const ringInner = size * 0.135;
   const inSquare = (x, y) => {
-    const dx = Math.max(radius - x, 0, x - (size - radius));
-    const dy = Math.max(radius - y, 0, y - (size - radius));
+    const dx = Math.max(padding + radius - x, 0, x - (size - padding - radius));
+    const dy = Math.max(padding + radius - y, 0, y - (size - padding - radius));
     return dx * dx + dy * dy <= radius * radius;
   };
   const inRing = (x, y) => {
-    const d = Math.hypot(x - center, y - center);
+    const d = Math.hypot(x - centerX, y - centerY);
     return d <= ringOuter && d >= ringInner;
   };
+  const inHandle = (x, y) => {
+    const ax = size * 0.61;
+    const ay = size * 0.62;
+    const bx = size * 0.72;
+    const by = size * 0.73;
+    const vx = bx - ax;
+    const vy = by - ay;
+    const t = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy)));
+    return Math.hypot(x - (ax + t * vx), y - (ay + t * vy)) <= size * 0.045;
+  };
+  const inSpark = (x, y) =>
+    size >= 32 && Math.abs(x - size * 0.69) / (size * 0.055) + Math.abs(y - size * 0.29) / (size * 0.075) <= 1;
   const rows = [];
   for (let y = 0; y < size; y++) {
     const row = Buffer.alloc(1 + size * 4);
     for (let x = 0; x < size; x++) {
       const alpha = coverage(x, y, inSquare);
-      const ring = coverage(x, y, inRing);
-      const color = BLUE.map((value, i) => Math.round(value + (WHITE[i] - value) * ring));
+      const lens = Math.max(coverage(x, y, inRing), coverage(x, y, inHandle));
+      const spark = coverage(x, y, inSpark);
+      const color = PURPLE.map((value, i) => {
+        const withLens = value + (WHITE[i] - value) * lens;
+        return Math.round(withLens + (GOLD[i] - withLens) * spark);
+      });
       row.set([...color, Math.round(alpha * 255)], 1 + x * 4);
     }
     rows.push(row);

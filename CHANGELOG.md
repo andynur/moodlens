@@ -7,6 +7,7 @@
 - Reviewed the official Moodle trademark guidelines. “Moodlens” is high risk without written permission; documented the permission path and a ready BelajarLens fallback package without changing the active product name.
 - Added bilingual privacy and “what we never do” pages plus a bilingual lecturer guide describing the read-only, assessment-guard and local-data boundaries.
 - Drafted the Chrome Web Store listing in English and Indonesian with a single-purpose statement, accurate v0.7 feature boundaries, permission justifications, privacy-practices answers and Limited Use disclosure.
+- Added final extension/store icons, a locale-neutral 440×280 promo tile and visually verified 1280×800 Today, Tasks and Practice screenshots in English and Indonesian, all from synthetic data. Renamed the pre-AI Study navigation label from “Study AI” to “Study” / “Belajar”.
 
 ### Fixed (v0.6)
 

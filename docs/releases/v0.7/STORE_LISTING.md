@@ -166,8 +166,8 @@ Limited Use certification statement:
 ## Graphic assets
 
 - Store icon: `store-assets/icon-128.png`
-- Small promo tile: `store-assets/promo-440x280.png`
-- English screenshots: `store-assets/en/01-today-1280x800.png`, `02-tasks-1280x800.png`, `03-practice-1280x800.png`
+- Small promo tile: `store-assets/promo-440x280.jpg`
+- English screenshots: `store-assets/en/01-today-1280x800.jpg`, `02-tasks-1280x800.jpg`, `03-practice-1280x800.jpg`
 - Indonesian screenshots: matching files under `store-assets/id/`
 - Every screenshot uses synthetic course and site data only.
 

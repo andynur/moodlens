@@ -15,8 +15,8 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 
 - [x] Single-purpose description: local-first study companion for Moodle course sites the student enables.
 - [x] Short and long description in EN; ID listing translation (`docs/releases/v0.7/STORE_LISTING.md`).
-- [ ] Icons 16/32/48/128 and store icon 128; promo tile 440×280.
-- [ ] At least 3 screenshots 1280×800 (Today, Tasks, Practice), no real student data.
+- [x] Icons 16/32/48/128 and store icon 128; locale-neutral promo tile 440×280. Dimensions and rendered appearance verified.
+- [x] Three screenshots 1280×800 (Today, Tasks, Practice) in both EN and ID, rendered from synthetic data and visually verified (`store-assets/`).
 - [x] Category: Education.
 - [x] Privacy practices answers drafted against the shipped data paths and `docs/06_SECURITY_PRIVACY.md` §2 inventory.
 - [~] Limited Use statement added to `PRIVACY.md` and dashboard certification copy drafted; the owner must check it in the Developer Dashboard after final ZIP comparison.
