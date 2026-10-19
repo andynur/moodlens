@@ -1,4 +1,4 @@
-import type { AiErrorCode, AiProviderId } from '../shared/ai/providers';
+import { AI_PROVIDERS, type AiErrorCode, type AiProviderId } from '../shared/ai/providers';
 import type { AiPurpose } from '../shared/ai/prompt';
 import type { Locale } from '../shared/types';
 
@@ -189,4 +189,4 @@ export function aiPurposeText(locale: Locale, purpose: AiPurpose): string {
 export function aiErrorText(locale: Locale, error: AiErrorCode): string {
   return errorStrings[locale][error];
 }
-export const AI_PROVIDER_ORDER: readonly AiProviderId[] = ['openai', 'gemini'];
+export const AI_PROVIDER_ORDER: readonly AiProviderId[] = AI_PROVIDERS;

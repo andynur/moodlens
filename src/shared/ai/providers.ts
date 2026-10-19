@@ -4,12 +4,29 @@
  */
 
 // A local Ollama option needs a loopback host permission; the owner deferred it past v0.8.
-export type AiProviderId = 'openai' | 'gemini';
-export const AI_PROVIDERS: readonly AiProviderId[] = ['openai', 'gemini'];
+// Anthropic is deferred by the owner (D-019).
+export type AiProviderId = 'openai' | 'gemini' | 'deepseek' | 'qwen' | 'kimi' | 'commandcode' | 'sumopod';
+export const AI_PROVIDERS: readonly AiProviderId[] = [
+  'openai',
+  'gemini',
+  'deepseek',
+  'qwen',
+  'kimi',
+  'commandcode',
+  'sumopod'
+];
+
+/** Wire format of the provider's API. Every provider except Gemini speaks OpenAI Chat Completions. */
+export type AiApiFormat = 'openai-chat' | 'gemini';
 
 export interface AiProviderInfo {
   id: AiProviderId;
   label: string;
+  format: AiApiFormat;
+  /** Fixed endpoint URL; Gemini's is a prefix completed with the model name. */
+  endpoint: string;
+  /** Sends `response_format: json_object`. Off for gateways whose backends may reject it. */
+  jsonMode: boolean;
   /** Origin the request goes to; shown on the consent screen. */
   origin: string;
   /** Optional host permission requested when the student picks this provider (D-002 style). */
@@ -21,6 +38,9 @@ export const PROVIDER_INFO: Readonly<Record<AiProviderId, AiProviderInfo>> = {
   openai: {
     id: 'openai',
     label: 'OpenAI',
+    format: 'openai-chat',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    jsonMode: true,
     origin: 'https://api.openai.com',
     permission: 'https://api.openai.com/*',
     defaultModel: 'gpt-4.1-mini'
@@ -28,9 +48,64 @@ export const PROVIDER_INFO: Readonly<Record<AiProviderId, AiProviderInfo>> = {
   gemini: {
     id: 'gemini',
     label: 'Google Gemini',
+    format: 'gemini',
+    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/',
+    jsonMode: true,
     origin: 'https://generativelanguage.googleapis.com',
     permission: 'https://generativelanguage.googleapis.com/*',
     defaultModel: 'gemini-2.5-flash'
+  },
+  deepseek: {
+    id: 'deepseek',
+    label: 'DeepSeek',
+    format: 'openai-chat',
+    endpoint: 'https://api.deepseek.com/chat/completions',
+    jsonMode: true,
+    origin: 'https://api.deepseek.com',
+    permission: 'https://api.deepseek.com/*',
+    defaultModel: 'deepseek-flash'
+  },
+  qwen: {
+    // International (Singapore) Model Studio endpoint; mainland China keys are region-locked and not supported.
+    id: 'qwen',
+    label: 'Qwen (Alibaba Model Studio)',
+    format: 'openai-chat',
+    endpoint: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions',
+    jsonMode: true,
+    origin: 'https://dashscope-intl.aliyuncs.com',
+    permission: 'https://dashscope-intl.aliyuncs.com/*',
+    defaultModel: 'qwen-flash'
+  },
+  kimi: {
+    // Global Moonshot platform; api.moonshot.cn keys are region-locked and not supported.
+    id: 'kimi',
+    label: 'Kimi (Moonshot AI)',
+    format: 'openai-chat',
+    endpoint: 'https://api.moonshot.ai/v1/chat/completions',
+    jsonMode: true,
+    origin: 'https://api.moonshot.ai',
+    permission: 'https://api.moonshot.ai/*',
+    defaultModel: 'kimi-k2.6'
+  },
+  commandcode: {
+    id: 'commandcode',
+    label: 'Command Code',
+    format: 'openai-chat',
+    endpoint: 'https://api.commandcode.ai/provider/v1/chat/completions',
+    jsonMode: false,
+    origin: 'https://api.commandcode.ai',
+    permission: 'https://api.commandcode.ai/*',
+    defaultModel: 'deepseek/deepseek-v4-flash'
+  },
+  sumopod: {
+    id: 'sumopod',
+    label: 'SumoPod',
+    format: 'openai-chat',
+    endpoint: 'https://ai.sumopod.com/v1/chat/completions',
+    jsonMode: false,
+    origin: 'https://ai.sumopod.com',
+    permission: 'https://ai.sumopod.com/*',
+    defaultModel: 'gpt-4.1-mini'
   }
 };
 
@@ -65,10 +140,10 @@ export const AI_SETTINGS_KEY = 'aiSettings';
 export function defaultAiSettings(): AiSettings {
   return {
     provider: null,
-    models: {
-      openai: PROVIDER_INFO.openai.defaultModel,
-      gemini: PROVIDER_INFO.gemini.defaultModel
-    }
+    models: Object.fromEntries(AI_PROVIDERS.map((id) => [id, PROVIDER_INFO[id].defaultModel])) as Record<
+      AiProviderId,
+      string
+    >
   };
 }
 
@@ -101,11 +176,12 @@ export function buildProviderRequest(
   key: string,
   prompt: AiPrompt
 ): ProviderRequest {
+  const info = PROVIDER_INFO[provider];
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (provider === 'openai') {
+  if (info.format === 'openai-chat') {
     headers.Authorization = `Bearer ${key}`;
     return {
-      url: `${PROVIDER_INFO.openai.origin}/v1/chat/completions`,
+      url: info.endpoint,
       init: {
         method: 'POST',
         headers,
@@ -115,14 +191,14 @@ export function buildProviderRequest(
             { role: 'system', content: prompt.system },
             { role: 'user', content: prompt.user }
           ],
-          ...(prompt.json ? { response_format: { type: 'json_object' } } : {})
+          ...(prompt.json && info.jsonMode ? { response_format: { type: 'json_object' } } : {})
         })
       }
     };
   }
   headers['x-goog-api-key'] = key;
   return {
-    url: `${PROVIDER_INFO.gemini.origin}/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+    url: `${info.endpoint}${encodeURIComponent(model)}:generateContent`,
     init: {
       method: 'POST',
       headers,
@@ -143,7 +219,7 @@ export function replyText(provider: AiProviderId, body: unknown): string | null 
   if (!body || typeof body !== 'object') return null;
   const value = body as Record<string, unknown>;
   let text: unknown = null;
-  if (provider === 'openai') {
+  if (PROVIDER_INFO[provider].format === 'openai-chat') {
     const choices = Array.isArray(value.choices) ? value.choices : [];
     const message = (choices[0] as { message?: { content?: unknown } } | undefined)?.message;
     text = message?.content;

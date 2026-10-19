@@ -5,6 +5,7 @@
 ### Added (v0.8 AI study, BYOK)
 
 - Optional AI study with the student's own OpenAI or Gemini key (ML-007/008/009, D-018): key kept only in Chrome session storage with an always visible Forget key; local PDF text extraction with PDF.js bundled in the package, with scanned-page and unreadable-page warnings; keyword retrieval with page metadata; a consent screen with provider, destination, purpose, exact text and a token estimate before every request; page-cited summaries, answers and forum idea outlines, or "insufficient evidence"; generated flashcards and practice questions the student checks before saving to a deck. Paused while the assessment guard is active. EN/ID strings, updated privacy policy. `MOODLENS_AI=off` builds without AI (D-007). Prompt-injection corpus and consent tests added. Optional Ollama deferred.
+- More BYOK providers over OpenAI-compatible fixed endpoints: DeepSeek, Qwen (Model Studio international), Kimi (Moonshot global), Command Code and SumoPod; no manifest change (D-019).
 
 ### Changed (release planning)
 

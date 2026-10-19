@@ -8,6 +8,7 @@ Supported future configurations:
 
 - OpenAI (user-supplied key, explicitly selected model / endpoint).
 - Gemini (user-supplied key, explicitly selected model / endpoint).
+- OpenAI-compatible Chat Completions providers with fixed endpoints: DeepSeek, Qwen (Model Studio international), Kimi (Moonshot global), Command Code, SumoPod (D-019).
 - Ollama local (loopback endpoint, user-managed local service; Chrome permission/CORS review needed). Deferred past v0.8 (D-018).
 
 API keys are provided **by the student**. They must never be shipped in the bundle, logged, transmitted to content scripts, or saved in an ordinary `.env` file in a distributable extension. Default future policy: use `chrome.storage.session` and provide `Forget key` / `Clear session`. Persistent key storage, if ever offered, must have explicit warning and additional review.

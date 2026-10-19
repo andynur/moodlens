@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { KeyRound, Trash2 } from 'lucide-react';
-import { PROVIDER_INFO, type AiProviderId } from '../../shared/ai/providers';
+import { AI_PROVIDERS, PROVIDER_INFO, type AiProviderId } from '../../shared/ai/providers';
 import type { TranslationKey } from '../../shared/i18n';
 import type { AiSettingsView, Locale } from '../../shared/types';
 import { AI_PROVIDER_ORDER, aiText, type AiStringKey } from '../aiStrings';
@@ -16,8 +16,8 @@ const EMPTY: AiSettingsView = {
   ok: false,
   enabled: false,
   provider: null,
-  models: { openai: '', gemini: '' },
-  keys: { openai: false, gemini: false }
+  models: Object.fromEntries(AI_PROVIDERS.map((id) => [id, ''])) as Record<AiProviderId, string>,
+  keys: Object.fromEntries(AI_PROVIDERS.map((id) => [id, false])) as Record<AiProviderId, boolean>
 };
 
 /** Loads the provider settings view; `version` reloads it after a change. */

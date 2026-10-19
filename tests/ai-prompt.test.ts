@@ -8,7 +8,15 @@ import {
   validateTaskInput,
   type AiEvidence
 } from '../src/shared/ai/prompt';
-import { buildProviderRequest, classifyHttpError, cleanKey, cleanModel, replyText } from '../src/shared/ai/providers';
+import {
+  AI_PROVIDERS,
+  buildProviderRequest,
+  classifyHttpError,
+  cleanKey,
+  cleanModel,
+  PROVIDER_INFO,
+  replyText
+} from '../src/shared/ai/providers';
 
 const evidence = [
   { page: 3, text: 'Photosynthesis happens in chloroplasts.' },
@@ -63,6 +71,35 @@ describe('provider requests', () => {
     expect(gemini.url).toBe('https://generativelanguage.googleapis.com/v1beta/models/gemini-x:generateContent');
     expect(gemini.url).not.toContain('AIza');
     expect(gemini.init.headers['x-goog-api-key']).toBe('AIza-secret-1');
+  });
+
+  it.each([
+    ['deepseek', 'https://api.deepseek.com/chat/completions', true],
+    ['qwen', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions', true],
+    ['kimi', 'https://api.moonshot.ai/v1/chat/completions', true],
+    ['commandcode', 'https://api.commandcode.ai/provider/v1/chat/completions', false],
+    ['sumopod', 'https://ai.sumopod.com/v1/chat/completions', false]
+  ] as const)('sends %s an OpenAI-compatible request to its fixed endpoint', (provider, url, jsonMode) => {
+    const request = buildProviderRequest(provider, 'vendor/model-x', 'key-secret-123', prompt);
+    expect(request.url).toBe(url);
+    expect(request.url.startsWith(PROVIDER_INFO[provider].origin + '/')).toBe(true);
+    expect(request.init.headers.Authorization).toBe('Bearer key-secret-123');
+    expect(request.init.body).not.toContain('key-secret-123');
+    const body = JSON.parse(request.init.body) as { model: string; messages: unknown[]; response_format?: unknown };
+    expect(body.model).toBe('vendor/model-x');
+    expect(body.messages).toHaveLength(2);
+    expect('response_format' in body).toBe(jsonMode);
+    expect(replyText(provider, { choices: [{ message: { content: 'hi' } }] })).toBe('hi');
+  });
+
+  it('has a valid default model and a matching permission for every provider', () => {
+    for (const id of AI_PROVIDERS) {
+      const info = PROVIDER_INFO[id];
+      expect(cleanModel(info.defaultModel)).toBe(info.defaultModel);
+      expect(info.permission).toBe(`${info.origin}/*`);
+      expect(info.endpoint.startsWith(`${info.origin}/`)).toBe(true);
+      expect(info.origin.startsWith('https://')).toBe(true);
+    }
   });
 
   it('refuses model names and keys that could change the request', () => {

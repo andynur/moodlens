@@ -7,6 +7,7 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Last done
 
+- v0.8 providers (2026-10-19, D-019): added DeepSeek, Qwen (Model Studio intl), Kimi (Moonshot global), Command Code and SumoPod as OpenAI-compatible fixed-endpoint providers; tests cover endpoint, auth header and JSON mode per provider. Anthropic deferred by owner. No manifest change. Not run against real keys.
 - v0.8 AI study (2026-10-19, D-018): all five roadmap items implemented. `src/shared/ai/` (providers, prompt/reply parsing, chunks + BM25 retrieval, build flag), `src/background/ai.ts` (session keys, `AI_PREPARE` one-time nonce preview, `AI_SEND` with guard/permission/key/rate checks), `src/sidepanel/pdf.ts` (pdfjs-dist 6.4.299, bundled worker), `AiStudy.tsx`, `AiSettings.tsx`, EN/ID strings in `src/sidepanel/aiStrings.ts`. Tests: `tests/ai-*.test.ts` (consent, single-use nonce, guard, errors, 10-entry injection corpus). Chrome 154 smoke of real `dist/` in the real side panel (synthetic 3-page PDF, scratchpad harness): extraction, scanned-page warning, consent screen with destination/text, Cancel, local insufficient-evidence, zero provider requests, no console errors, no 320px overflow (22/22). Owner chose to drop Ollama (no new host permission). Not observed: a real OpenAI/Gemini request and the Chrome permission prompt on Continue.
 - Release sequencing (2026-10-19, owner decision, D-017): closed v0.7 without claiming its unobserved external gates, consolidated trademark, publication, three-site QA, tester and seven-day stability work in `docs/PRE_RELEASE_NOTES.md`, and advanced the active release to v0.8. All deferred items remain mandatory before the first official public release.
 - v0.6 IndexedDB study store (D-014): `src/background/studyStore.ts` (decks, cards, review logs, per-site caps, delete by site, log retention 90/365/730 days) plus record validators in `src/shared/cards.ts`. IndexedDB paths exercised in Chrome on 2026-10-19 (still no automated test double); wired to `removeSite`, clear-all and backup import.
@@ -29,7 +30,7 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Next task
 
-1. v0.8 exit gate (owner): one Summary and one Flashcards run each against a real OpenAI and Gemini key, accepting the Chrome permission prompt; note results without key or course text. If a PRD-004 gate fails, ship with `MOODLENS_AI=off` (D-007).
+1. v0.8 exit gate (owner): one Summary and one Flashcards run each against a real OpenAI and Gemini key (plus at least one of DeepSeek/Qwen/Kimi/Command Code/SumoPod; default model names are unverified), accepting the Chrome permission prompt; note results without key or course text. If a PRD-004 gate fails, ship with `MOODLENS_AI=off` (D-007).
 2. Refresh store listing/privacy-practice answers for the AI scope (`docs/releases/v0.7/STORE_LISTING.md` says AI is not shipped).
 3. Then v0.9 release candidate (`docs/08_ROADMAP.md`); every item in `docs/PRE_RELEASE_NOTES.md` stays mandatory before official release.
 

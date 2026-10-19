@@ -56,7 +56,7 @@ tests/
 | `optional_host_permissions: https://*/*` | v0.3 | Request one Moodle origin at a time, on user click |
 | `alarms` | v0.4 | Local reminders |
 | optional `notifications` | v0.4 | Requested only when the student turns reminders on |
-| optional provider origins | v0.8 | `https://api.openai.com/*` or `https://generativelanguage.googleapis.com/*`, covered by the optional `https://*/*` entry; requested on the consent screen's Continue click |
+| optional provider origins | v0.8 | the chosen provider's fixed origin (`PROVIDER_INFO` in `src/shared/ai/providers.ts`: OpenAI, Gemini, DeepSeek, Qwen, Kimi, Command Code, SumoPod; D-019), covered by the optional `https://*/*` entry; requested on the consent screen's Continue click |
 
 No `<all_urls>`, no `tabs`, no `cookies`, no `webRequest`, no `downloads` in v1.
 
