@@ -95,7 +95,7 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse: (
     const capture = captureReviewMistakes(document, location.href);
     sendResponse(
       capture
-        ? { ok: true, mistakes: capture.mistakes, ...(capture.cmid ? { cmid: capture.cmid } : {}) }
+        ? { ok: true, url: location.href, mistakes: capture.mistakes, ...(capture.cmid ? { cmid: capture.cmid } : {}) }
         : { ok: false }
     );
   }

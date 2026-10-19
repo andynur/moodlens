@@ -91,6 +91,7 @@ Goal: accurate deadlines without fragile scraping.
 
 ## v0.7 — Closed beta on Chrome Web Store
 
+- [x] Source/test security review complete: no open Critical/High; one Practice capture context/bounds finding fixed. Live quiz-fixture verification remains an owner QA dependency.
 - [x] Trademark review for "Moodlens" and fallback name ready (D-001). Review found the name high risk without written permission; BelajarLens fallback package documented.
 - [~] Privacy policy page, "what we never do" page, public GitHub repo. The repository is publicly readable; bilingual pages and the lecturer guide are ready locally, pending push.
 - [x] Store listing draft: EN/ID descriptions, single-purpose statement, privacy declarations, permission justifications, icons, promo tile and three synthetic-data screenshots per locale are ready.

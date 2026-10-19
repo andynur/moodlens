@@ -5,7 +5,7 @@
  * or backup includes.
  */
 import { MAX_REVIEW_QUESTIONS, type ReviewMistake } from '../content/moodle/quiz-review';
-import { newQuizReviewCard, type Flashcard } from '../shared/cards';
+import { MAX_CARD_TEXT, newQuizReviewCard, type Flashcard } from '../shared/cards';
 import type { OkResponse, PracticeOffer } from '../shared/types';
 import { loadSites } from './sites';
 import { listDecks, openStudyDb, putCards } from './studyStore';
@@ -84,7 +84,11 @@ function isMistakeList(value: unknown): value is ReviewMistake[] {
         item !== null &&
         typeof item === 'object' &&
         typeof (item as ReviewMistake).question === 'string' &&
-        typeof (item as ReviewMistake).answer === 'string'
+        (item as ReviewMistake).question.trim().length > 0 &&
+        (item as ReviewMistake).question.length <= MAX_CARD_TEXT &&
+        typeof (item as ReviewMistake).answer === 'string' &&
+        (item as ReviewMistake).answer.trim().length > 0 &&
+        (item as ReviewMistake).answer.length <= MAX_CARD_TEXT
     )
   );
 }
@@ -106,8 +110,10 @@ export async function saveQuizMistakes(
     ok?: boolean;
     mistakes?: unknown;
     cmid?: unknown;
+    url?: unknown;
   } | null;
-  if (!answer?.ok || !isMistakeList(answer.mistakes) || answer.mistakes.length === 0) return { ok: false };
+  if (!answer?.ok || answer.url !== offer.url || !isMistakeList(answer.mistakes) || answer.mistakes.length === 0)
+    return { ok: false };
   // Only the course module id may be kept; an attempt id never becomes part of a card (ML-020).
   const cmid = typeof answer.cmid === 'string' && /^\d{1,12}$/.test(answer.cmid) ? answer.cmid : null;
   const sourceUrl = cmid ? `${site.origin}/mod/quiz/view.php?id=${cmid}` : undefined;

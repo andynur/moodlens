@@ -75,6 +75,27 @@ describe('practice offer (ML-020)', () => {
     });
   });
 
+  it('binds captured mistakes to the offered URL and enforces text bounds at the message boundary', async () => {
+    await enable(A);
+    stub.state.tabs = [{ id: 11, url: REVIEW } as chrome.tabs.Tab];
+    await offerFrom(REVIEW, 1);
+    stub.state.tabListening = true;
+
+    stub.tabMessages.mockResolvedValueOnce({
+      ok: true,
+      url: `${A}/mod/quiz/review.php?attempt=5&cmid=9`,
+      mistakes: [{ question: 'Question', answer: 'Answer' }]
+    });
+    await expect(stub.send({ type: 'STUDY_SAVE_MISTAKES', deckId: 'deck-1' }, page)).resolves.toEqual({ ok: false });
+
+    stub.tabMessages.mockResolvedValueOnce({
+      ok: true,
+      url: REVIEW,
+      mistakes: [{ question: 'Q'.repeat(2001), answer: 'Answer' }]
+    });
+    await expect(stub.send({ type: 'STUDY_SAVE_MISTAKES', deckId: 'deck-1' }, page)).resolves.toEqual({ ok: false });
+  });
+
   it('forgets the offer when all local data is cleared', async () => {
     await enable(A);
     stub.state.tabs = [{ id: 11, url: REVIEW } as chrome.tabs.Tab];
