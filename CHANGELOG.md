@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed (v0.6)
+
+- Course detail crashed the whole side panel when the background answered a focus request with `{ ok: false }` (no `session`), which happens for untrusted senders and on any background error. The focus card now validates the reply with `isFocusSession` and only shows "Focus session done" on an `ok` reply. Found by the ML-026 Chrome run.
+
 ### Fixed (v0.4)
 
 - Timeline capture asked for `limitnum: 500`, which Moodle rejects ("Limit must be between 1 and 50 (inclusive)"); the error marked the capability unsupported for 24 hours and forced DOM fallback. The request now uses the documented maximum of 50 (`TIMELINE_LIMIT`), verified against a live Moodle 4.x site.

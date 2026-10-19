@@ -3,6 +3,7 @@ import { NotebookPen, Play, Square, Timer } from 'lucide-react';
 import {
   DEFAULT_FOCUS_MINUTES,
   FOCUS_MINUTES,
+  isFocusSession,
   MAX_NOTE_LENGTH,
   type FocusMinutes,
   type FocusSession
@@ -23,6 +24,16 @@ async function send<T>(message: unknown, fallback: T): Promise<T> {
   return ((await chrome.runtime.sendMessage(message).catch(() => null)) as T | null) ?? fallback;
 }
 
+/** Background reply checked like any other input: an error reply (`{ ok: false }`) has no session. */
+async function focusRequest(message: unknown): Promise<FocusStateResponse> {
+  const state = await send<Partial<FocusStateResponse> | null>(message, null);
+  return {
+    ok: state?.ok === true,
+    session: isFocusSession(state?.session) ? state.session : null,
+    ...(typeof state?.awarded === 'number' ? { awarded: state.awarded } : {})
+  };
+}
+
 function clock(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
@@ -35,10 +46,9 @@ export function FocusCard(props: Feedback & { entry: CourseEntry }) {
   const [minutes, setMinutes] = useState<FocusMinutes>(DEFAULT_FOCUS_MINUTES);
   const [now, setNow] = useState(() => Date.now());
   const [done, setDone] = useState<number | null>(null);
-  const empty: FocusStateResponse = { ok: false, session: null };
 
   useEffect(() => {
-    void send<FocusStateResponse>({ type: 'FOCUS_STATE' }, empty).then((state) => setSession(state.session));
+    void focusRequest({ type: 'FOCUS_STATE' }).then((state) => setSession(state.session));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -54,26 +64,28 @@ export function FocusCard(props: Feedback & { entry: CourseEntry }) {
   useEffect(() => {
     if (!ended || !session) return;
     const mine = session.siteId === entry.site.id && session.courseId === entry.courseId;
-    void send<FocusStateResponse>({ type: 'FOCUS_STATE' }, empty).then((state) => {
+    void focusRequest({ type: 'FOCUS_STATE' }).then((state) => {
       setSession(state.session);
-      if (mine && !state.session) setDone(state.awarded ?? 0);
+      if (mine && state.ok && !state.session) setDone(state.awarded ?? 0);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ended]);
 
   const mine = session !== null && session.siteId === entry.site.id && session.courseId === entry.courseId;
   const start = async () => {
-    const state = await send<FocusStateResponse>(
-      { type: 'FOCUS_START', siteId: entry.site.id, courseId: entry.courseId, minutes },
-      empty
-    );
+    const state = await focusRequest({
+      type: 'FOCUS_START',
+      siteId: entry.site.id,
+      courseId: entry.courseId,
+      minutes
+    });
     if (!state.ok) props.onError('siteActionError');
     setDone(null);
     setNow(Date.now());
     setSession(state.session);
   };
   const stop = async () => {
-    const state = await send<FocusStateResponse>({ type: 'FOCUS_CANCEL' }, empty);
+    const state = await focusRequest({ type: 'FOCUS_CANCEL' });
     if (!state.ok) props.onError('siteActionError');
     else setSession(null);
   };
