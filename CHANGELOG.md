@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Release preparation (v0.7)
+
+- Reviewed the official Moodle trademark guidelines. “Moodlens” is high risk without written permission; documented the permission path and a ready BelajarLens fallback package without changing the active product name.
+
 ### Fixed (v0.6)
 
 - Today now shows the Moodle site label when more than one site is enabled, so matching course names remain distinguishable in Due soon, What's new, Pinned and Course progress. Activity notes now use the full activity-row width at 320px instead of sharing a narrow row with the completion label.

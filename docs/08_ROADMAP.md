@@ -91,7 +91,7 @@ Goal: accurate deadlines without fragile scraping.
 
 ## v0.7 — Closed beta on Chrome Web Store
 
-- [ ] Trademark review for "Moodlens" and fallback name ready (D-001).
+- [x] Trademark review for "Moodlens" and fallback name ready (D-001). Review found the name high risk without written permission; BelajarLens fallback package documented.
 - [ ] Privacy policy page, "what we never do" page, public GitHub repo.
 - [ ] Store listing draft: description EN/ID, screenshots, icons, single-purpose statement, permission justifications.
 - [ ] Publish as **unlisted** or trusted-testers; feedback form (no telemetry).
