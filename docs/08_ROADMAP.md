@@ -1,6 +1,6 @@
 # Delivery Roadmap — v0.1 to v1.0 (Chrome Web Store)
 
-Each release has an **exit gate**. Do not start the next release's P0 work until the current gate passes, except for parallel discovery tasks. Record slips and scope moves in this file and in `docs/14_DECISIONS.md` when they change architecture.
+Each feature release has an **exit gate**. Before v1.0, deferred live, legal and store evidence in `docs/PRE_RELEASE_NOTES.md` must also pass. Record slips and scope moves in this file and in `docs/14_DECISIONS.md` when they change architecture or release policy.
 
 Status legend: `[x]` done, `[ ]` open, `[~]` in progress.
 
@@ -89,28 +89,28 @@ Goal: accurate deadlines without fragile scraping.
 
 **Exit gate:** guard tests pass for every known attempt URL and state; no quiz content leaves the device; XP rules documented and tested. Met in tests; the quiz DOM markers themselves still need a sanitized attempt/review fixture.
 
-## v0.7 — Closed beta on Chrome Web Store
+## v0.7 — Release package (done 2026-10-19)
 
 - [x] Source/test security review complete: no open Critical/High; one Practice capture context/bounds finding fixed. Live quiz-fixture verification remains an owner QA dependency.
 - [x] Trademark review for "Moodlens" and fallback name ready (D-001). Review found the name high risk without written permission; BelajarLens fallback package documented.
-- [~] Privacy policy page, "what we never do" page, public GitHub repo. The repository is publicly readable; bilingual pages and the lecturer guide are ready locally, pending push.
+- [x] Privacy policy page, "what we never do" page and lecturer guide prepared in EN/ID. Publication is deferred to the pre-release checklist.
 - [x] Store listing draft: EN/ID descriptions, single-purpose statement, privacy declarations, permission justifications, icons, promo tile and three synthetic-data screenshots per locale are ready.
 - [x] Reproducible v0.7.0 ZIP generated after the security review; checksum and package evidence recorded.
 - [x] Privacy-safe beta QA ledger, three-site evidence standard, P0/P1 triage rules and seven-day clock procedure are ready (`docs/releases/v0.7/BETA_QA_RUNBOOK.md`).
-- [~] Publish as **unlisted** or trusted-testers; opt-in GitHub beta feedback form is ready with no telemetry, but store upload and tester configuration require the owner account.
-- [ ] Beta QA on at least 3 Moodle sites; bug triage.
+- [x] Store upload, trusted-tester configuration and live beta operations explicitly deferred to `docs/PRE_RELEASE_NOTES.md`; the opt-in GitHub beta feedback form is ready with no telemetry.
+- [x] Three-site QA, tester cohort, bug triage and stability-clock requirements preserved in `docs/PRE_RELEASE_NOTES.md` for completion against the final feature candidate.
 
-**Exit gate:** store review approved; at least 10 beta testers; no P0/P1 bugs open for 7 days.
+**Exit gate:** local v0.7 package, security review, listing assets and beta process documentation complete. External publication and beta acceptance are deferred by D-017 and remain mandatory before v1.0.
 
 ## v0.8 — AI study (BYOK, cut line)
 
-- [ ] Provider settings: OpenAI, Gemini, optional Ollama; session key storage; forget key (ML-008).
-- [ ] PDF.js packaged locally, text extraction with page metadata (ML-007).
-- [ ] Consent screen showing destination, content, purpose.
-- [ ] Cited summary, Q&A, AI-generated flashcards/practice from selected material (ML-009).
-- [ ] Prompt-injection corpus tests; guard integration.
+- [x] Provider settings: OpenAI, Gemini; session key storage; forget key (ML-008). Optional Ollama deferred (D-018).
+- [x] PDF.js packaged locally, text extraction with page metadata (ML-007).
+- [x] Consent screen showing destination, content, purpose.
+- [x] Cited summary, Q&A, AI-generated flashcards/practice from selected material (ML-009).
+- [x] Prompt-injection corpus tests; guard integration.
 
-**Exit gate:** all PRD-004 acceptance criteria pass. If not met by the planned date, disable AI behind a build flag and continue to v0.9 (D-007).
+**Exit gate:** all PRD-004 acceptance criteria pass. If not met by the planned date, disable AI behind a build flag (`MOODLENS_AI=off`) and continue to v0.9 (D-007). Open: one request against a real OpenAI and Gemini key (owner), recorded without key or course text.
 
 ## v0.9 — Release candidate
 

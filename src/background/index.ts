@@ -1,7 +1,8 @@
-import type { EnableSiteResponse, ExportBackupResponse, OkResponse, TaskCaptureClaimResponse } from '../shared/types';
+import type { OkResponse, TaskCaptureClaimResponse } from '../shared/types';
 import { claimRollingWindow } from '../shared/rateLimit';
 import { taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from '../shared/sites';
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
+import { aiSettingsView, cancelAiTask, forgetAiKeys, prepareAiTask, saveAiKey, saveAiSettings, sendAiTask } from './ai';
 import { appearanceFor, setAppearance } from './appearance';
 import { exportBackup, importBackup } from './backup';
 import { cancelFocus, clearFocusAlarm, focusState, handleFocusAlarm, startFocus } from './focus';
@@ -136,7 +137,7 @@ async function clearAll(): Promise<OkResponse> {
   return { ok: true };
 }
 
-type Task = () => Promise<OkResponse | EnableSiteResponse | ExportBackupResponse | TaskCaptureClaimResponse>;
+type Task = () => Promise<unknown>;
 
 // Tasks run one at a time: several read-modify-write the same per-site keys.
 let queue: Promise<unknown> = Promise.resolve();
@@ -189,12 +190,30 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'FOCUS_START',
     'FOCUS_CANCEL',
     'NOTES_FOR_COURSE',
-    'SAVE_NOTE'
+    'SAVE_NOTE',
+    'AI_SETTINGS',
+    'AI_SAVE_SETTINGS',
+    'AI_SAVE_KEY',
+    'AI_FORGET_KEYS',
+    'AI_PREPARE',
+    'AI_CANCEL'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
   if (!fromExtensionPage(sender)) return () => Promise.resolve({ ok: false });
   switch (message.type) {
+    case 'AI_SETTINGS':
+      return () => aiSettingsView();
+    case 'AI_SAVE_SETTINGS':
+      return () => saveAiSettings({ provider: message.provider, model: message.model });
+    case 'AI_SAVE_KEY':
+      return () => saveAiKey({ provider: message.provider, key: message.key });
+    case 'AI_FORGET_KEYS':
+      return () => forgetAiKeys();
+    case 'AI_PREPARE':
+      return () => prepareAiTask(message.task);
+    case 'AI_CANCEL':
+      return () => cancelAiTask();
     case 'STUDY_OVERVIEW':
       return () => studyOverview();
     case 'STUDY_CREATE_DECK':
@@ -267,6 +286,16 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
 }
 
 chrome.runtime.onMessage.addListener((raw: unknown, sender, sendResponse: (value: unknown) => void) => {
+  // A provider request can take a minute; it runs beside the queue so the panel stays responsive.
+  // `sendAiTask` claims its one-time nonce itself.
+  if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'AI_SEND') {
+    if (!fromExtensionPage(sender)) return false;
+    void ready
+      .then(() => sendAiTask((raw as { nonce?: unknown }).nonce))
+      .then(sendResponse)
+      .catch(() => sendResponse({ ok: false, error: 'provider-down' }));
+    return true;
+  }
   const task = route(raw, sender);
   if (!task) return false;
   void ready

@@ -1,6 +1,6 @@
 # Release Checklist — Chrome Web Store
 
-Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items marked **(v1.0)** may stay open for beta.
+Use for the first official public release. The v0.7 development milestone closed with a locally verified package; its unfinished live, legal and store operations are consolidated in `docs/PRE_RELEASE_NOTES.md` and remain required before v1.0 (D-017).
 
 ## Product and legal
 

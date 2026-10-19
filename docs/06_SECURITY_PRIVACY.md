@@ -18,7 +18,7 @@
 | XP, streaks, goals, notes | Moodlens | `storage.local` / IndexedDB | No |
 | Flashcards, review logs, quiz-review cards | Student / closed review page | IndexedDB per site | No (quiz-derived cards never exported, D-009) |
 | BYOK API key | Student | `storage.session` | Only to the chosen provider as auth header |
-| Selected PDF chunks | Student-chosen material | IndexedDB | Only to the chosen provider after consent |
+| Selected PDF text and chunks | Student-chosen local file | Side panel memory only (v0.8) | Only the excerpts shown on the consent screen, to the chosen provider |
 | `.ics` export | Tasks | File saved by student | Student decides |
 
 Never read or store: passwords, cookies, `sesskey` (beyond one in-memory call), grades (v1), messages, participants, other students' data.

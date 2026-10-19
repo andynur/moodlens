@@ -30,7 +30,7 @@ Moodlens does not intentionally read or store passwords, cookies, grades, messag
 
 Moodlens has no developer-operated server. While an enabled Moodle tab is open, it may make bounded, read-only requests to that same Moodle site's standard AJAX endpoint to obtain course and calendar information. The browser attaches your existing Moodle session; Moodlens does not extract or retain the session cookie. Moodlens does not poll Moodle while the site is closed.
 
-The v0.7 beta contains no external AI-provider integration. If a future release adds optional AI, this policy and the in-product consent screen must be updated before any student content can be sent to a provider.
+Optional AI study (from v0.8) is off until you choose a provider (OpenAI or Google Gemini) and enter your own API key. The key is kept in Chrome session storage until you close the browser or press "Forget key"; session storage is not encryption, and the key is never synced, backed up or sent anywhere except to that provider as a request header. A PDF you pick is read on your device and kept only in the open panel. Before every request, a consent screen shows the provider, the exact destination address, the purpose and the exact text that will be sent; nothing is sent until you press Continue, and Chrome asks for access to the provider's address first. When you continue, the selected excerpts and your question leave your device and the provider's own terms, logging and retention apply. AI study is paused while an assessment page is open.
 
 ### Permissions
 
@@ -87,7 +87,7 @@ Moodlens tidak dengan sengaja membaca atau menyimpan kata sandi, cookie, nilai, 
 
 Moodlens tidak memiliki server yang dioperasikan pengembang. Saat tab Moodle yang diaktifkan terbuka, Moodlens dapat membuat permintaan baca-saja yang dibatasi ke endpoint AJAX standar pada situs Moodle yang sama untuk memperoleh informasi mata kuliah dan kalender. Browser menyertakan sesi Moodle yang sudah ada; Moodlens tidak mengambil atau menyimpan cookie sesi. Moodlens tidak melakukan polling ketika situs Moodle ditutup.
 
-Beta v0.7 tidak berisi integrasi penyedia AI eksternal. Jika rilis mendatang menambahkan AI opsional, kebijakan ini dan layar persetujuan di dalam produk harus diperbarui sebelum konten mahasiswa dapat dikirim ke penyedia.
+Fitur belajar dengan AI (sejak v0.8) bersifat opsional dan mati sampai Anda memilih penyedia (OpenAI atau Google Gemini) dan memasukkan kunci API milik Anda sendiri. Kunci disimpan di penyimpanan sesi Chrome sampai browser ditutup atau Anda menekan "Lupakan kunci"; penyimpanan sesi bukan enkripsi, dan kunci tidak pernah disinkronkan, dicadangkan, atau dikirim ke mana pun selain ke penyedia tersebut sebagai header permintaan. PDF yang Anda pilih dibaca di perangkat Anda dan hanya disimpan di panel yang sedang terbuka. Sebelum setiap permintaan, layar persetujuan menampilkan penyedia, alamat tujuan yang persis, tujuan penggunaan, dan teks persis yang akan dikirim; tidak ada yang dikirim sebelum Anda menekan Lanjutkan, dan Chrome lebih dulu meminta akses ke alamat penyedia. Saat Anda melanjutkan, kutipan yang dipilih dan pertanyaan Anda keluar dari perangkat, dan ketentuan, pencatatan, serta penyimpanan data milik penyedia berlaku. Fitur AI dijeda selama halaman penilaian terbuka.
 
 ### Izin
 

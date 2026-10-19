@@ -32,7 +32,9 @@ src/
     moodle/        detect.ts, ajax.ts, adapter.ts, guard.ts, appearance.ts
   shared/          types.ts, validation.ts, i18n/ (en.ts, id.ts), messages.ts, days.ts, xp.ts, srs.ts, cards.ts
   sidepanel/       App.tsx, views/, components/, hooks/
-  ai/              (v0.8) providers/, consent.ts, pdf/, retrieval.ts
+  shared/ai/       (v0.8) providers.ts, prompt.ts, documents.ts (chunks, retrieval), flag.ts
+  background/ai.ts (v0.8) session keys, prepare (consent preview) and one-time send
+  sidepanel/pdf.ts (v0.8) PDF.js extraction; components/AiStudy.tsx, AiSettings.tsx
 tests/
   fixtures/        sanitized HTML and JSON per site variant
 ```
@@ -54,7 +56,7 @@ tests/
 | `optional_host_permissions: https://*/*` | v0.3 | Request one Moodle origin at a time, on user click |
 | `alarms` | v0.4 | Local reminders |
 | optional `notifications` | v0.4 | Requested only when the student turns reminders on |
-| optional provider origins | v0.8 | Requested when the student picks an AI provider |
+| optional provider origins | v0.8 | `https://api.openai.com/*` or `https://generativelanguage.googleapis.com/*`, covered by the optional `https://*/*` entry; requested on the consent screen's Continue click |
 
 No `<all_urls>`, no `tabs`, no `cookies`, no `webRequest`, no `downloads` in v1.
 
@@ -109,5 +111,10 @@ No critical state in globals. Rehydrate from storage on each event. Alarms recre
 Explicit selection + consent -> local PDF.js extraction -> sanitize -> chunk
   -> keyword retrieval -> cited evidence -> chosen provider (BYOK) -> answer with citations or "insufficient evidence"
 ```
+
+- PDF text and chunks live only in side panel memory; nothing is written to IndexedDB (no opt-in retention yet).
+- `AI_PREPARE` builds the exact prompt and stores it in `chrome.storage.session` under a one-time nonce (10-minute TTL); the panel shows it. `AI_SEND` carries only the nonce, so the text sent is the text shown. Both steps re-check the guard; send also checks the host permission, the key and a 6 requests/minute limit, and runs outside the serialized message queue.
+- Replies are parsed as JSON; citations must name an excerpt that was sent, otherwise the result is "insufficient evidence". Generated cards become student cards only after the student keeps them.
+- Build flag: `MOODLENS_AI=off` builds with every AI control hidden and every AI message refused (D-007).
 
 Tool registry for the post-v1 agent stays in `docs/05_BYOK_AGENT_DESIGN.md`.

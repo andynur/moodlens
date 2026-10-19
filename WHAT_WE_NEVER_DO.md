@@ -32,7 +32,8 @@ Moodlens adalah pendamping belajar lokal yang independen. Janji berikut merupaka
 - No developer backend, account, advertising, analytics or telemetry.
 - We never sell, rent or transfer your data for advertising or profiling.
 - We never read passwords or cookies, and we never store or log Moodle `sesskey` values.
-- We never treat Moodle page text, PDFs or future AI output as trusted instructions.
+- We never treat Moodle page text, PDFs or AI output as trusted instructions.
+- We never send anything to an AI provider before you see the exact text and destination and press Continue, and never while an assessment page is open.
 
 ### We never pretend to be Moodle or your institution
 
@@ -68,7 +69,8 @@ See the full [`PRIVACY.md`](PRIVACY.md), the public [source code](https://github
 - Tidak ada backend pengembang, akun, iklan, analitik, atau telemetri.
 - Kami tidak pernah menjual, menyewakan, atau memindahkan data Anda untuk iklan atau pembuatan profil.
 - Kami tidak pernah membaca kata sandi atau cookie, serta tidak pernah menyimpan atau mencatat nilai `sesskey` Moodle.
-- Kami tidak pernah menganggap teks halaman Moodle, PDF, atau keluaran AI di masa depan sebagai instruksi tepercaya.
+- Kami tidak pernah menganggap teks halaman Moodle, PDF, atau keluaran AI sebagai instruksi tepercaya.
+- Kami tidak pernah mengirim apa pun ke penyedia AI sebelum Anda melihat teks dan tujuan yang persis lalu menekan Lanjutkan, dan tidak pernah saat halaman penilaian terbuka.
 
 ### Kami tidak pernah mengaku sebagai Moodle atau institusi Anda
 

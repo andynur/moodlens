@@ -9,7 +9,9 @@ const common = {
   target: ['chrome116'],
   minify: false,
   sourcemap: false,
-  logLevel: 'info'
+  logLevel: 'info',
+  // D-007 cut line: `MOODLENS_AI=off` builds without AI study.
+  define: { __AI_ENABLED__: JSON.stringify(process.env.MOODLENS_AI !== 'off') }
 };
 await build({ ...common, entryPoints: ['src/background/index.ts'], outfile: 'dist/background.js' });
 await build({ ...common, entryPoints: ['src/content/index.ts'], outfile: 'dist/content.js' });

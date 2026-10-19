@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import type { OkResponse, Locale, Theme } from '../shared/types';
 import { t, type TranslationKey } from '../shared/i18n';
+import { AiSettings } from './components/AiSettings';
+import { AiStudy } from './components/AiStudy';
 import { AppearanceSettings } from './components/Appearance';
 import { BackupSettings } from './components/Backup';
 import { Onboarding, ONBOARDED_KEY } from './components/Onboarding';
@@ -71,6 +73,7 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [restored, setRestored] = useState(0);
   const [onboarding, setOnboarding] = useState(false);
+  const [studyVersion, setStudyVersion] = useState(0);
   const translate = (key: TranslationKey) => t(locale, key);
 
   useEffect(() => {
@@ -264,7 +267,10 @@ export default function App() {
             {page === 'tasks' && <TasksView sites={sitesState.sites} locale={locale} hidden={hiddenCourses} />}
             {page === 'study' && (
               <>
-                <StudyPage sites={sitesState.sites} guard={guard} {...feedback} />
+                {hasChrome && (
+                  <AiStudy locale={locale} guard={guard} onCardsSaved={() => setStudyVersion((count) => count + 1)} />
+                )}
+                <StudyPage key={studyVersion} sites={sitesState.sites} guard={guard} {...feedback} />
                 <Hint faint className="px-1">
                   {translate('studyPrivacy')}
                 </Hint>
@@ -303,6 +309,11 @@ export default function App() {
                 {hasChrome && sitesState.sites.length > 0 && (
                   <Card>
                     <AppearanceSettings state={sitesState} {...feedback} />
+                  </Card>
+                )}
+                {hasChrome && (
+                  <Card>
+                    <AiSettings locale={locale} onError={feedback.onError} />
                   </Card>
                 )}
                 {hasChrome && (

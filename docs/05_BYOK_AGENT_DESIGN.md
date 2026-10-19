@@ -1,6 +1,6 @@
 # BYOK Learning AI and Future Agent Design
 
-**Status:** specification only. No production AI calls, key storage, prompt engine, PDF extraction or agent tools exist yet. BYOK study features target **v0.8 behind the v1 cut line** (D-007). The tool-based agent is **post-v1** (D-008). The assessment guard (ML-022, v0.6) is a hard dependency for every AI feature.
+**Status:** BYOK study (ML-007/008/009) implemented in v0.8 (D-018): `src/shared/ai/` (providers, prompt, documents/retrieval), `src/background/ai.ts` (keys, prepare/send), `src/sidepanel/pdf.ts` and `components/AiStudy.tsx`. The tool-based agent below is still specification only and **post-v1** (D-008). The assessment guard (ML-022) gates every AI request.
 
 ## Provider model
 
@@ -8,7 +8,7 @@ Supported future configurations:
 
 - OpenAI (user-supplied key, explicitly selected model / endpoint).
 - Gemini (user-supplied key, explicitly selected model / endpoint).
-- Ollama local (loopback endpoint, user-managed local service; Chrome permission/CORS review needed).
+- Ollama local (loopback endpoint, user-managed local service; Chrome permission/CORS review needed). Deferred past v0.8 (D-018).
 
 API keys are provided **by the student**. They must never be shipped in the bundle, logged, transmitted to content scripts, or saved in an ordinary `.env` file in a distributable extension. Default future policy: use `chrome.storage.session` and provide `Forget key` / `Clear session`. Persistent key storage, if ever offered, must have explicit warning and additional review.
 

@@ -51,10 +51,11 @@ Moodlens is pre-release software. Expect breaking changes to stored local data b
 - Private flashcards with spaced repetition, guarded finished-review practice, local XP and streaks.
 - Focus timer, per-activity notes, backup/restore, site removal and clear-all controls.
 - Assessment guard that pauses study help during active assessments and fails closed.
+- Optional AI study with your own OpenAI or Gemini key (v0.8, unreleased): local PDF reading, a consent screen showing the exact text and destination before every request, page-cited summaries and answers, and generated flashcards you check before saving.
 
 ### Coming later
 
-- Optional AI study (bring your own key) is planned for v0.8 and is not included in the v0.7 beta.
+- A local Ollama provider (needs a loopback host permission) is deferred past v0.8.
 - Accessibility, performance and final localization review are scheduled for the v0.9 release candidate.
 
 Full list with priorities: [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLOG.md).

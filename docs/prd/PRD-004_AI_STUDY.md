@@ -12,7 +12,7 @@ ML-022 assessment guard (v0.6), IndexedDB store (v0.6), security review.
 
 ## Requirements
 
-- Providers: OpenAI, Gemini, optional Ollama (loopback). Student enters key; stored in `chrome.storage.session`; "Forget key" always visible.
+- Providers: OpenAI, Gemini. Optional Ollama (loopback) is deferred past v0.8: it needs a new `http://127.0.0.1/*` optional host permission (D-018). Student enters key; stored in `chrome.storage.session`; "Forget key" always visible.
 - Provider origin requested as optional host permission when chosen.
 - PDF.js packaged locally; extract text with page numbers; warn on scanned PDFs.
 - Consent screen before every new document transfer: provider, destination URL, what text, purpose. Cancel and Continue.

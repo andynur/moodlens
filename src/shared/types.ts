@@ -1,4 +1,6 @@
 import type { CardOrigin } from './cards';
+import type { AiErrorCode, AiProviderId } from './ai/providers';
+import type { AiPurpose, AiResult } from './ai/prompt';
 import type { SrsRating } from './srs';
 export type ActivityType =
   'resource' | 'page' | 'url' | 'attendance' | 'quiz' | 'forum' | 'assign' | 'folder' | 'book' | 'feedback' | 'unknown';
@@ -184,3 +186,24 @@ export interface EnableSiteResponse {
   ok: boolean;
   site: Site | null;
 }
+/** Provider settings for the panel (ML-008). Keys are never sent back, only whether one is held. */
+export interface AiSettingsView {
+  ok: boolean;
+  enabled: boolean;
+  provider: AiProviderId | null;
+  models: Record<AiProviderId, string>;
+  keys: Record<AiProviderId, boolean>;
+}
+/** What the consent screen shows before anything is sent (PRD-004 AC 1, AC 2). */
+export interface AiConsentPreview {
+  nonce: string;
+  provider: AiProviderId;
+  model: string;
+  destination: string;
+  purpose: AiPurpose;
+  text: string;
+  tokens: number;
+  permission: string;
+}
+export type AiPrepareResponse = { ok: true; preview: AiConsentPreview } | { ok: false; error: AiErrorCode };
+export type AiSendResponse = { ok: true; result: AiResult } | { ok: false; error: AiErrorCode };

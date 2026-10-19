@@ -2,11 +2,13 @@
 
 Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old entries; history lives in git and `CHANGELOG.md`.
 
-**Current release:** v0.7 — Closed beta on Chrome Web Store (`docs/08_ROADMAP.md`, `docs/prd/PRD-011_STORE_RELEASE.md`). v0.4–v0.6 are code-complete; their open items are owner QA (below).
+**Current release:** v0.8 — AI study, BYOK (`docs/08_ROADMAP.md`, `docs/prd/PRD-004_AI_STUDY.md`). v0.7 is closed as a local development/package milestone; deferred official-release work is in `docs/PRE_RELEASE_NOTES.md` (D-017).
 **Last updated:** 2026-10-19.
 
 ## Last done
 
+- v0.8 AI study (2026-10-19, D-018): all five roadmap items implemented. `src/shared/ai/` (providers, prompt/reply parsing, chunks + BM25 retrieval, build flag), `src/background/ai.ts` (session keys, `AI_PREPARE` one-time nonce preview, `AI_SEND` with guard/permission/key/rate checks), `src/sidepanel/pdf.ts` (pdfjs-dist 6.4.299, bundled worker), `AiStudy.tsx`, `AiSettings.tsx`, EN/ID strings in `src/sidepanel/aiStrings.ts`. Tests: `tests/ai-*.test.ts` (consent, single-use nonce, guard, errors, 10-entry injection corpus). Chrome 154 smoke of real `dist/` in the real side panel (synthetic 3-page PDF, scratchpad harness): extraction, scanned-page warning, consent screen with destination/text, Cancel, local insufficient-evidence, zero provider requests, no console errors, no 320px overflow (22/22). Owner chose to drop Ollama (no new host permission). Not observed: a real OpenAI/Gemini request and the Chrome permission prompt on Continue.
+- Release sequencing (2026-10-19, owner decision, D-017): closed v0.7 without claiming its unobserved external gates, consolidated trademark, publication, three-site QA, tester and seven-day stability work in `docs/PRE_RELEASE_NOTES.md`, and advanced the active release to v0.8. All deferred items remain mandatory before the first official public release.
 - v0.6 IndexedDB study store (D-014): `src/background/studyStore.ts` (decks, cards, review logs, per-site caps, delete by site, log retention 90/365/730 days) plus record validators in `src/shared/cards.ts`. IndexedDB paths exercised in Chrome on 2026-10-19 (still no automated test double); wired to `removeSite`, clear-all and backup import.
 - Live SiberMu evidence (2026-10-19, owner-authorized browser session, `/my/`): detection `high` + hint `4.x`. **Bug found and fixed:** `captureTaskDataset` sent `limitnum: 500`, which `core_calendar_get_action_events_by_timesort` rejects with `Limit must be between 1 and 50 (inclusive)`; the error envelope read as `unsupported`, so tasks were cached unsupported for 24 hours and the site fell back to DOM for good. Now `TIMELINE_LIMIT = 50` with a regression test in `tests/task-capture.test.ts`. At that limit the live call returns 30 events (resource 18, quiz 8, feedback 2, forum 1, assign 1); `core_course_get_enrolled_courses_by_timeline_classification` with `limit: 200` works (4 courses). No `mod_attendance` event in the whole timeline, so ML-005 stays Blocked. The dashboard itself calls only `theme_remui_get_myoverviewcourses` and `theme_remui_get_msg_contact_list_count` (Edwiser RemUI), not `core_calendar_get_action_events_by_timesort` — the earlier note saying it does was wrong.
 - Agent QA v0.5/v0.6 (2026-10-19, only the parts that needed a browser): ML-018 appearance verified live on SiberMu `/my/` with the installed build — `moodlens-width` gives `max-width: 726.75px` in `#region-main`, `moodlens-large-text` 16px to 18px, `moodlens-dark` applies the inversion filter, `data-moodlens-hide="online_users"` hides `.block_online_users`, and removing the classes restores the original computed styles and root attributes exactly. `calendar_month`, `recentlyaccesseditems` and `badges` are absent on that dashboard, so those selectors stay unverified. D-014 study store exercised against real Chrome IndexedDB (esbuild bundle on localhost): open/upgrade, `putDeck`/`putCards` validation and site check, `recordReview` card+log pair and mismatch refusal, `deleteDeck` (cards and its logs), `deleteSiteStudyData` and `deleteStudyDb` all behave as specified, and `pruneReviewLogs` at 365 days keeps only the in-window log and leaves the other site untouched. v0.6 logic-only work (guard, XP, FSRS, card import/export) was skipped: unit tests already cover it.
@@ -27,16 +29,13 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Next task
 
-0. Owner: push the focused v0.7 commits, publish the policy pages, choose Moodlens permission vs BelajarLens fallback, then upload the checksum-matched ZIP as unlisted/trusted-testers.
-1. Owner: a sanitized quiz attempt and review fixture (ML-020/ML-022). Every quiz selector and the save path stay unverified until then; SiberMu has quizzes but no finished attempt was available in this session.
-2. Owner v0.4/v0.7 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar; recruit at least 10 testers and track 7 P0/P1-free days.
-3. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
-4. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
-5. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
+1. v0.8 exit gate (owner): one Summary and one Flashcards run each against a real OpenAI and Gemini key, accepting the Chrome permission prompt; note results without key or course text. If a PRD-004 gate fails, ship with `MOODLENS_AI=off` (D-007).
+2. Refresh store listing/privacy-practice answers for the AI scope (`docs/releases/v0.7/STORE_LISTING.md` says AI is not shipped).
+3. Then v0.9 release candidate (`docs/08_ROADMAP.md`); every item in `docs/PRE_RELEASE_NOTES.md` stays mandatory before official release.
 
 ## Blockers / waiting on owner
 
-- Authenticated access to 3 Moodle sites for the v0.4 exit gate; a finished quiz attempt for the ML-020/ML-022 fixtures; push `main` so CI runs.
+- None for starting v0.8. External accounts, authorized Moodle evidence, product-name resolution and testers remain pre-release dependencies, not v0.8 implementation blockers.
 ## Known failing checks
 
 - None locally. Unverified (needs an authenticated Moodle session or Chrome internals, both out of agent reach): live Moodle AJAX availability/results, 3-site deadline parity, live `service.php` network trace, unpacked load in `chrome://extensions`, browser-restart reminder delivery, `notifications` permission prompt, ICS import in Google/Apple Calendar.
