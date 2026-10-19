@@ -9,6 +9,7 @@
 - Drafted the Chrome Web Store listing in English and Indonesian with a single-purpose statement, accurate v0.7 feature boundaries, permission justifications, privacy-practices answers and Limited Use disclosure.
 - Added final extension/store icons, a locale-neutral 440×280 promo tile and visually verified 1280×800 Today, Tasks and Practice screenshots in English and Indonesian, all from synthetic data. Renamed the pre-AI Study navigation label from “Study AI” to “Study” / “Belajar”.
 - Added opt-in beta feedback and site-compatibility issue forms with public-data warnings, and refreshed the README for the v0.7 feature and permission set.
+- Set the beta package version to `0.7.0` and added `npm run release:zip`, which runs the full gate, validates permissions and manifest version, rejects unsafe ZIP entries and prints a SHA-256 checksum.
 
 ### Fixed (v0.6)
 

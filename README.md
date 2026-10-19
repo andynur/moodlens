@@ -104,6 +104,7 @@ After you change code, run `npm run build` again and click **Reload** on the ext
 |---|---|
 | `npm run check` | Runs every gate: lint, format check, typecheck, tests, build. Run it before you open a pull request. |
 | `npm run build` | Typechecks and builds the unpacked extension into `dist/`. |
+| `npm run release:zip` | Runs the full gate, verifies the built manifest and ZIP contents, then creates `release/moodlens-vX.Y.Z.zip`. |
 | `npm run dev` | Serves a browser preview of the side panel UI only. Chrome extension APIs need the built extension. |
 | `npm test` | Runs the Vitest suite once. |
 | `npm run lint` | Runs ESLint. |

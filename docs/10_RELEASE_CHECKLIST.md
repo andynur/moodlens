@@ -33,18 +33,18 @@ Use for v0.7 (closed beta, unlisted or trusted testers) and v1.0 (public). Items
 
 ## Engineering
 
-- [ ] CI green on the release tag; lockfile committed; `npm audit` reviewed.
-- [ ] Version in `package.json`, manifest and UI match.
-- [ ] `dist/` inspected: no source maps with secrets, no test fixtures, no remote code.
+- [~] Local full gate green, lockfile updated and committed, and `npm audit` reports 0 vulnerabilities; CI on the release tag waits for push/tag.
+- [x] Version `0.7.0` in `package.json`, built manifest and UI match.
+- [x] `dist/` inspected: 12 files plus 2 directory entries; no source maps, secrets, test fixtures, store-preview harness or remote code.
 - [ ] Security review (`prompts/SECURITY_REVIEW_PROMPT.md`) with no open Critical/High.
 - [ ] Manual QA in `docs/09_TEST_PLAN.md` on 3 sites.
 - [ ] Accessibility and 320px layout pass. **(v1.0)**
 - [ ] EN/ID parity test green; native speaker review. **(v1.0)**
-- [ ] AI features either pass PRD-004 gates or are disabled by build flag (D-007).
+- [x] AI features and provider hosts are absent from the v0.7 package; listing labels AI as not included (D-007).
 
 ## Packaging and publishing
 
-- [ ] `npm run build` then zip the contents of `dist/` (manifest at zip root).
+- [x] `npm run release:zip` runs the full gate, validates the manifest and creates a verified ZIP with `manifest.json` at its root.
 - [ ] Upload, set visibility (unlisted for beta, public for v1.0).
-- [ ] Release notes in `CHANGELOG.md`; git tag `vX.Y.Z`.
+- [~] Release notes are in `CHANGELOG.md`; final `v0.7.0` tag waits for the post-security-review ZIP and owner publication decision.
 - [x] GitHub Issues templates for bug report, beta feedback and site compatibility report.
