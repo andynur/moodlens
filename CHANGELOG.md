@@ -11,6 +11,7 @@
 - Added final extension/store icons, a locale-neutral 440×280 promo tile and visually verified 1280×800 Today, Tasks and Practice screenshots in English and Indonesian, all from synthetic data. Renamed the pre-AI Study navigation label from “Study AI” to “Study” / “Belajar”.
 - Added opt-in beta feedback and site-compatibility issue forms with public-data warnings, and refreshed the README for the v0.7 feature and permission set.
 - Set the beta package version to `0.7.0` and added `npm run release:zip`, which runs the full gate, validates permissions and manifest version, rejects unsafe ZIP entries and prints a SHA-256 checksum.
+- Recorded the post-security-review v0.7.0 candidate checksum and package contents, with store upload and live beta gates explicitly left to the owner.
 
 ### Fixed (v0.6)
 
