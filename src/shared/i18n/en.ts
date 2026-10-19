@@ -235,6 +235,22 @@ export const en = {
   onboardingBack: 'Back',
   onboardingSkip: 'Skip',
   onboardingDone: 'Get started',
+  focusTimer: 'Focus timer',
+  focusHint:
+    'Study this course in one timed block. A finished session earns 10 Moodlens XP; stopping early earns none.',
+  focusLength: 'Session length',
+  minutesShort: 'min',
+  focusStart: 'Start focus',
+  focusStop: 'Stop',
+  focusRemaining: 'Time left',
+  focusOtherCourse: 'A focus session is running for another course. Starting one here stops it without XP.',
+  focusDoneTitle: 'Focus session done',
+  focusDoneMessage: 'Nice work. Take a short break.',
+  note: 'Note',
+  noteAdd: 'Add note',
+  noteEdit: 'Edit note',
+  noteHint: 'Plain text, kept only on this device and not in backups. Save it empty to delete it.',
+  noteSaved: 'Note saved.',
   copyright: 'Local development build'
 } as const;
 

@@ -43,6 +43,7 @@ Fixtures: `tests/fixtures/<variant>/`. Synthetic or sanitized only.
 10. (v0.4) Network tab: only `service.php` calls with allowlisted `info=` names; zero write functions. Tasks match Moodle's timeline block.
 11. (v0.5) Appearance on/off restores original page.
 12. (v0.6) Start a practice quiz attempt on a test course: all Moodlens practice/AI UI disabled.
+12a. (v0.6) Course detail: start a 15-minute focus session, close and reopen the panel (timer continues), let it finish (+10 XP, no XP after Stop); add, edit and empty-save an activity note; remove the site and confirm its notes are gone.
 13. (v0.8) No provider request before consent; forget key works.
 
 ## Multi-site matrix (v0.4+)

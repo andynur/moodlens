@@ -4,9 +4,11 @@ import { taskDataKey, taskFetchKey, taskFetchRateKey, taskUnsupportedKey } from 
 import { isCourseSnapshot, isCourseUrl, canonicalCourseUrl, isTaskDataset } from '../shared/validation';
 import { appearanceFor, setAppearance } from './appearance';
 import { exportBackup, importBackup } from './backup';
+import { cancelFocus, clearFocusAlarm, focusState, handleFocusAlarm, startFocus } from './focus';
 import { clearGuardReports, guardStatus, reportGuard } from './guard';
 import { markCourseSeen, moveCourseOrder, saveSnapshot, setCoursePrefs } from './courses';
 import { migrateStorage } from './migrate';
+import { courseNotes, saveNote } from './notes';
 import { clearReminderAlarms, handleReminderAlarm, setReminderPrefs, syncReminders } from './reminders';
 import { pruneAllReviewLogs, setReviewLogRetention } from './retention';
 import { clearPracticeOffer, recordPracticeOffer, saveQuizMistakes } from './practice';
@@ -37,7 +39,12 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(reconcile);
 chrome.permissions.onAdded.addListener(reconcile);
 chrome.permissions.onRemoved.addListener(reconcile);
-chrome.alarms.onAlarm.addListener((alarm) => void ready.then(() => handleReminderAlarm(alarm)).catch(() => undefined));
+chrome.alarms.onAlarm.addListener(
+  (alarm) =>
+    void ready
+      .then(() => serialized(() => Promise.all([handleReminderAlarm(alarm), handleFocusAlarm(alarm)])))
+      .catch(() => undefined)
+);
 
 function fromExtensionPage(sender: chrome.runtime.MessageSender): boolean {
   return !sender.tab && sender.id === chrome.runtime.id;
@@ -116,6 +123,7 @@ async function storeTaskDataset(payload: unknown, sender: chrome.runtime.Message
 async function clearAll(): Promise<OkResponse> {
   await revokeAllSites();
   await clearReminderAlarms();
+  await clearFocusAlarm();
   await Promise.all([
     chrome.storage.local.clear(),
     chrome.storage.session.clear(),
@@ -176,7 +184,12 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
     'STUDY_SESSION_DONE',
     'XP_STATE',
     'SET_WEEKLY_GOAL',
-    'TASK_OPENED'
+    'TASK_OPENED',
+    'FOCUS_STATE',
+    'FOCUS_START',
+    'FOCUS_CANCEL',
+    'NOTES_FOR_COURSE',
+    'SAVE_NOTE'
   ];
   if (typeof message.type !== 'string' || !known.includes(message.type)) return null;
   // Everything below reads or changes stored data: trusted extension pages only.
@@ -200,6 +213,22 @@ function route(raw: unknown, sender: chrome.runtime.MessageSender): Task | null 
       return () => saveWeeklyGoal(message.goal);
     case 'TASK_OPENED':
       return () => recordTaskOpened({ taskId: message.taskId, dueAt: message.dueAt });
+    case 'FOCUS_STATE':
+      return () => focusState();
+    case 'FOCUS_START':
+      return () => startFocus({ siteId: message.siteId, courseId: message.courseId, minutes: message.minutes });
+    case 'FOCUS_CANCEL':
+      return () => cancelFocus();
+    case 'NOTES_FOR_COURSE':
+      return () => courseNotes({ siteId: message.siteId, courseId: message.courseId });
+    case 'SAVE_NOTE':
+      return () =>
+        saveNote({
+          siteId: message.siteId,
+          courseId: message.courseId,
+          activityId: message.activityId,
+          text: message.text
+        });
     case 'STUDY_SAVE_MISTAKES':
       return () => saveQuizMistakes({ deckId: message.deckId });
     case 'STUDY_EXPORT_CARDS':

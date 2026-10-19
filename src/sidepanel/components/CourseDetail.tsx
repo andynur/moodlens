@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Bell,
@@ -18,6 +18,7 @@ import { isActivityUrl } from '../../shared/validation';
 import { colorDot, colorLabel, courseTitle, openCourse, type CourseEntry } from '../courseEntries';
 import { hasChrome, sendSiteCommand } from '../useSites';
 import { Badge, Button, Card, CardTitle, cx, Hint, Input, SectionLabel, type Tone } from '../ui';
+import { ActivityNote, FocusCard } from './Focus';
 import type { Feedback } from './Sites';
 
 const completionStyle: Record<CompletionStatus, string> = {
@@ -189,6 +190,19 @@ export function CourseDetail(props: Feedback & { entry: CourseEntry; locale: Loc
     const count = (status: CompletionStatus) => snapshot.activities.filter((a) => a.completion === status).length;
     return { complete: count('complete'), incomplete: count('incomplete'), unknown: count('unknown') };
   }, [snapshot]);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const loadNotes = useCallback(() => {
+    if (!hasChrome) return;
+    void chrome.runtime
+      .sendMessage({ type: 'NOTES_FOR_COURSE', siteId: site.id, courseId: entry.courseId })
+      .then((response: { ok?: boolean; notes?: { activityId: string; text: string }[] } | undefined) => {
+        if (response?.ok && response.notes) {
+          setNotes(Object.fromEntries(response.notes.map((note) => [note.activityId, note.text])));
+        }
+      })
+      .catch(() => undefined);
+  }, [site.id, entry.courseId]);
+  useEffect(loadNotes, [loadNotes]);
   function openActivity(url: string) {
     if (!isActivityUrl(url, site.origin)) {
       props.onError('noNavigation');
@@ -291,6 +305,13 @@ export function CourseDetail(props: Feedback & { entry: CourseEntry; locale: Loc
                     {translate('open')} <ExternalLink size={12} />
                   </Button>
                 )}
+                <ActivityNote
+                  key={`${activity.id}-${notes[activity.id] ?? ''}`}
+                  {...props}
+                  activityId={activity.id}
+                  text={notes[activity.id]}
+                  onSaved={loadNotes}
+                />
               </div>
               <div
                 className={cx(
@@ -311,6 +332,7 @@ export function CourseDetail(props: Feedback & { entry: CourseEntry; locale: Loc
           ))}
         </div>
       </section>
+      <FocusCard {...props} />
       <Personalize key={entry.key} {...props} />
     </>
   );

@@ -103,6 +103,11 @@ export type IncomingMessage =
   | { type: 'XP_STATE' }
   | { type: 'SET_WEEKLY_GOAL'; goal: unknown }
   | { type: 'TASK_OPENED'; taskId: string; dueAt: string }
+  | { type: 'FOCUS_STATE' }
+  | { type: 'FOCUS_START'; siteId: string; courseId: string; minutes: unknown }
+  | { type: 'FOCUS_CANCEL' }
+  | { type: 'NOTES_FOR_COURSE'; siteId: string; courseId: string }
+  | { type: 'SAVE_NOTE'; siteId: string; courseId: string; activityId: string; text: unknown }
   | { type: 'SET_APPEARANCE'; siteId: string; appearance: unknown };
 export interface OkResponse {
   ok: boolean;

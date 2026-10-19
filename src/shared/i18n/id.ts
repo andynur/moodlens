@@ -240,5 +240,22 @@ export const id = {
   onboardingBack: 'Kembali',
   onboardingSkip: 'Lewati',
   onboardingDone: 'Mulai',
+  focusTimer: 'Timer fokus',
+  focusHint:
+    'Belajar mata kuliah ini dalam satu blok waktu. Sesi yang selesai memberi 10 XP Moodlens; berhenti lebih awal tidak memberi XP.',
+  focusLength: 'Durasi sesi',
+  minutesShort: 'mnt',
+  focusStart: 'Mulai fokus',
+  focusStop: 'Hentikan',
+  focusRemaining: 'Sisa waktu',
+  focusOtherCourse: 'Sesi fokus sedang berjalan untuk mata kuliah lain. Memulai di sini menghentikannya tanpa XP.',
+  focusDoneTitle: 'Sesi fokus selesai',
+  focusDoneMessage: 'Kerja bagus. Istirahat sebentar.',
+  note: 'Catatan',
+  noteAdd: 'Tambah catatan',
+  noteEdit: 'Ubah catatan',
+  noteHint:
+    'Teks biasa, hanya disimpan di perangkat ini dan tidak masuk cadangan. Simpan dalam keadaan kosong untuk menghapusnya.',
+  noteSaved: 'Catatan disimpan.',
   copyright: 'Versi pengembangan lokal'
 } as const satisfies Record<TranslationKey, string>;

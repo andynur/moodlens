@@ -62,6 +62,10 @@ As an exam preparer, I practice and review my own mistakes with spaced repetitio
 
 - Pomodoro-style timer per course; awards focus XP.
 - Plain-text notes per activity, local only.
+- Implementation (`src/shared/focus.ts`, `src/background/focus.ts`, `src/background/notes.ts`, `src/sidepanel/components/Focus.tsx`; tests in `tests/focus.test.ts`):
+  - One session at a time, 15, 25 or 50 minutes, stored under `focus` with a `chrome.alarms` alarm at its end. Only the background completes it, and only once the full length has passed; a stored session whose end does not follow from its start and length is ignored.
+  - Completion awards 10 XP (`focus-session-completed`, daily cap applies) when the site is still registered, and shows a notification only if the student already granted `notifications`. Stopping or replacing a session awards nothing.
+  - Notes: up to 5,000 characters of plain text per activity, 2,000 notes per site, in the study IndexedDB `notes` store (schema v2). Saving empty text deletes the note. Notes are deleted with the site and are not part of backups or card exports.
 
 ## Acceptance criteria
 

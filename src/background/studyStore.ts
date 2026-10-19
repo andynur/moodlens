@@ -1,5 +1,5 @@
 /**
- * IndexedDB study store (v0.6, D-014): decks, flashcards and review logs.
+ * IndexedDB study store (v0.6, D-014): decks, flashcards, review logs and activity notes (ML-026).
  * One database with a `siteId` field and index on every record, so site removal deletes by index
  * instead of dropping per-site databases. Records read back are validated; invalid ones are skipped.
  *
@@ -18,13 +18,15 @@ import {
   type ReviewLog,
   type ReviewLogRetention
 } from '../shared/cards';
+import { isActivityNote, NOTES_PER_SITE, type ActivityNote } from '../shared/focus';
 
 export const STUDY_DB_NAME = 'moodlens-study';
-export const STUDY_DB_VERSION = 1;
+export const STUDY_DB_VERSION = 2;
 const DECKS = 'decks';
 const CARDS = 'cards';
 const LOGS = 'reviewLogs';
-type StoreName = typeof DECKS | typeof CARDS | typeof LOGS;
+const NOTES = 'notes';
+type StoreName = typeof DECKS | typeof CARDS | typeof LOGS | typeof NOTES;
 
 function promised<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -41,7 +43,7 @@ function finished(transaction: IDBTransaction): Promise<void> {
   });
 }
 
-/** Schema v1. Later versions add `if (event.oldVersion < n)` steps; never edit a shipped step. */
+/** Schema v1 and v2 (notes). Later versions add `if (event.oldVersion < n)` steps; never edit a shipped step. */
 function upgrade(db: IDBDatabase, oldVersion: number): void {
   if (oldVersion < 1) {
     db.createObjectStore(DECKS, { keyPath: 'id' }).createIndex('bySite', 'siteId');
@@ -52,6 +54,11 @@ function upgrade(db: IDBDatabase, oldVersion: number): void {
     logs.createIndex('bySite', 'siteId');
     logs.createIndex('bySiteTime', ['siteId', 'reviewedAt']);
     logs.createIndex('byCard', 'cardId');
+  }
+  if (oldVersion < 2) {
+    const notes = db.createObjectStore(NOTES, { keyPath: 'id' });
+    notes.createIndex('bySite', 'siteId');
+    notes.createIndex('byCourse', ['siteId', 'courseId']);
   }
 }
 
@@ -130,6 +137,29 @@ export async function recordReview(db: IDBDatabase, card: Flashcard, log: Review
   return true;
 }
 
+/** Notes of one course; invalid rows are skipped. */
+export async function listCourseNotes(db: IDBDatabase, siteId: string, courseId: string): Promise<ActivityNote[]> {
+  const rows = await promised(db.transaction(NOTES).objectStore(NOTES).index('byCourse').getAll([siteId, courseId]));
+  return rows.filter(isActivityNote);
+}
+
+/** Adds or replaces a note. Refuses invalid records and new notes past the per-site cap. */
+export async function putNote(db: IDBDatabase, note: ActivityNote): Promise<boolean> {
+  if (!isActivityNote(note)) return false;
+  const existing = await promised(db.transaction(NOTES).objectStore(NOTES).getKey(note.id));
+  if (existing === undefined && (await countForSite(db, NOTES, note.siteId)) >= NOTES_PER_SITE) return false;
+  const transaction = db.transaction(NOTES, 'readwrite');
+  transaction.objectStore(NOTES).put(note);
+  await finished(transaction);
+  return true;
+}
+
+export async function deleteNote(db: IDBDatabase, id: string): Promise<void> {
+  const transaction = db.transaction(NOTES, 'readwrite');
+  transaction.objectStore(NOTES).delete(id);
+  await finished(transaction);
+}
+
 function deleteByIndex(store: IDBObjectStore, index: string, query: IDBValidKey | IDBKeyRange): void {
   const request = store.index(index).openKeyCursor(query);
   request.onsuccess = () => {
@@ -153,8 +183,9 @@ export async function deleteDeck(db: IDBDatabase, deckId: string): Promise<void>
 
 /** Deletes every study record of a site (site removal and clear-all). */
 export async function deleteSiteStudyData(db: IDBDatabase, siteId: string): Promise<void> {
-  const transaction = db.transaction([DECKS, CARDS, LOGS], 'readwrite');
-  for (const store of [DECKS, CARDS, LOGS] as const) deleteByIndex(transaction.objectStore(store), 'bySite', siteId);
+  const transaction = db.transaction([DECKS, CARDS, LOGS, NOTES], 'readwrite');
+  for (const store of [DECKS, CARDS, LOGS, NOTES] as const)
+    deleteByIndex(transaction.objectStore(store), 'bySite', siteId);
   await finished(transaction);
 }
 

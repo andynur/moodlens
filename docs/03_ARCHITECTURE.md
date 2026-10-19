@@ -72,7 +72,7 @@ No `<all_urls>`, no `tabs`, no `cookies`, no `webRequest`, no `downloads` in v1.
 
 - `chrome.storage.local`, keyed by site: `sites`, `site:<id>:lastCourseSnapshot`, `site:<id>:snapshots` (what's new records per course), `site:<id>:courses` (personalization per course), `site:<id>:tasks`, global `locale`, `theme`, `onboarded`, `dashboard`, `xp`. Access level `TRUSTED_CONTEXTS`. Backup export is allowlist-based (`src/shared/backup.ts`).
 - `chrome.storage.session`: BYOK keys (v0.8), short-lived caches.
-- IndexedDB (v0.6, D-014): database `moodlens-study` v1 with stores `decks`, `cards`, `reviewLogs` (`src/background/studyStore.ts`). Every record carries `siteId` and a `bySite` index; site removal and clear-all delete by index. Caps per site: 200 decks, 10,000 cards, 50,000 review logs. Review logs kept 90, 365 (default) or 730 days. Notes (ML-026) and PDF chunks (v0.8) add stores in later schema versions.
+- IndexedDB (v0.6, D-014): database `moodlens-study` v1 with stores `decks`, `cards`, `reviewLogs` (`src/background/studyStore.ts`). Every record carries `siteId` and a `bySite` index; site removal and clear-all delete by index. Caps per site: 200 decks, 10,000 cards, 50,000 review logs. Review logs kept 90, 365 (default) or 730 days. Schema v2 adds `notes` (ML-026, indexes `bySite` and `byCourse`); PDF chunks (v0.8) add stores in later schema versions. The focus timer session is a `chrome.storage.local` key (`focus`) with the `moodlens-focus` alarm.
 - Storage schema has a `schemaVersion` and a migration function in background (v0.3).
 - Size caps per site; oldest snapshots pruned (keep last 2 per course for diff).
 

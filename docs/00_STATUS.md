@@ -22,14 +22,16 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 - v0.6 ML-021 XP wired (2026-10-19): `src/background/xp.ts` stores the state under `xp` (validated by `isXpState`, part of the backup allowlist) and awards card reviews, finished review sessions and tasks opened at least 3 days early (`src/sidepanel/openTask.ts`); Study page XP card (level bar, today, streak, longest, weekly goal) and the Today `streak` widget, EN/ID (`tests/xp-store.test.ts`).
 - UI kit (2026-10-19, owner request, D-016): side panel redesigned on `DESIGN.md` tokens (`src/sidepanel/styles.css`) with owned components in `src/sidepanel/ui.tsx`; no shadcn/ui, no new dependency. Checked in headless Chrome at 320/400px, light and dark, in browser-preview mode (Today, Tasks, Study, Settings); screens that need real data (course detail, task rows, deck list, review card, Sites list) are not yet seen rendered.
 - Agent QA of the new v0.6 UI (2026-10-19, local chrome-API harness, built side panel): Study page renders EN/ID with the XP card (level bar, today, streak, longest, weekly goal), the review card with the four rating intervals, the decks list, the new-deck and add-card forms and import/export; `guard=on` hides the review and the save offer and shows the paused banner with its reason; the save offer lists only decks of the offering site; Today shows the streak widget. At 320px both locales render with `scrollWidth == clientWidth` and no element wider than 320px. The study service itself was run against real Chrome IndexedDB (17 checks).
+- v0.6 ML-026 (2026-10-19): focus timer (`src/background/focus.ts`, key `focus`, alarm `moodlens-focus`, XP only after the full length) and per-activity notes (`src/background/notes.ts`, study IndexedDB schema v2 `notes`) on the course detail page, EN/ID (`tests/focus.test.ts`, 9 tests). Not yet seen rendered or run against real IndexedDB; manual steps in `docs/09_TEST_PLAN.md` item 12a. All v0.6 roadmap items are now implemented; open v0.6 items are owner fixtures and QA.
 
 ## Next task
 
-0. Owner: a sanitized quiz attempt and review fixture (ML-020/ML-022). Every quiz selector and the save path stay unverified until then; SiberMu has quizzes but no finished attempt was available in this session.
-1. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
-2. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
-3. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
-4. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
+0. Agent: Chrome check of ML-026 (course detail render at 320px EN/ID, notes store v1 to v2 upgrade on an existing profile).
+1. Owner: a sanitized quiz attempt and review fixture (ML-020/ML-022). Every quiz selector and the save path stay unverified until then; SiberMu has quizzes but no finished attempt was available in this session.
+2. Owner v0.4 exit QA: compare deadlines with Moodle timeline on 3 sites; inspect Network for allowlisted `service.php` reads and zero writes; restart Chrome and verify a reminder; import ICS in Google and Apple Calendar.
+3. Owner: when an attendance session or deadline falls inside the 7-day timeline window, recapture the timeline AJAX response containing `mod_attendance` and run `npm run fixture:sanitize -- <saved.json> ...` (steps in `tests/fixtures/README.md`); ML-005 stays Blocked until the printed summary and fixture prove timestamp/state mapping.
+4. Owner live QA on SiberMu: reload unpacked `dist/`, grant access again, enable, open course, remove site (v0.3 test plan item 9).
+5. Owner QA onboarding at 320px EN/ID (fresh profile), then v0.5 Today/Courses/appearance at 320px.
 
 ## Blockers / waiting on owner
 
