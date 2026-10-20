@@ -1,5 +1,6 @@
 // Generates the extension/store icons (public/icons/icon-<size>.png) without extra dependencies.
-// Design: padded purple tile, white study lens and a small gold insight spark.
+// Design: padded purple tile, white graduation cap (lucide `graduation-cap` geometry, as in the side panel
+// header) and a small gold insight spark. store-assets/logo.svg and BrandMark in src/sidepanel/ui.tsx match.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
 
@@ -35,44 +36,76 @@ function coverage(x, y, inside) {
   return hits / 16;
 }
 
+// Graduation cap strokes in lucide's 24-unit grid, flattened to polylines.
+const CAP_BOARD = [
+  [21.6, 10],
+  [12, 5],
+  [2.4, 10],
+  [12, 15],
+  [21.6, 10]
+];
+const CAP_TASSEL = [
+  [22, 10],
+  [22, 16]
+];
+const CAP_BAND = [
+  [6, 12.5],
+  ...Array.from({ length: 17 }, (_, i) => {
+    const angle = Math.PI - (i / 16) * Math.PI;
+    return [12 + 6 * Math.cos(angle), 16 + 3 * Math.sin(angle)];
+  }),
+  [18, 12.5]
+];
+// Grid-to-tile mapping in 128-unit icon space: lucide (12, 12) lands at (62, 68), scaled 2.7x.
+const CAP_SCALE = 2.7;
+const CAP_X = 62;
+const CAP_Y = 68;
+
+function segmentDistance(x, y, [ax, ay], [bx, by]) {
+  const vx = bx - ax;
+  const vy = by - ay;
+  const t = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy)));
+  return Math.hypot(x - (ax + t * vx), y - (ay + t * vy));
+}
+
 function icon(size) {
-  const padding = size * 0.125;
-  const radius = size * 0.18;
-  const centerX = size * 0.47;
-  const centerY = size * 0.48;
-  const ringOuter = size * 0.22;
-  const ringInner = size * 0.135;
+  // Toolbar sizes fill the canvas like other extension icons; the store icon keeps the
+  // Chrome Web Store 16px transparent margin around 96px artwork.
+  const padding = size * (size <= 32 ? 0 : size <= 48 ? 0.0625 : 0.125);
+  const radius = (size - 2 * padding) * 0.24;
+  // Artwork is drawn in 128-unit space with the tile at 16..112, then fitted to the tile.
+  const unit = (size - 2 * padding) / 96;
+  const toPixel = (value) => padding + (value - 16) * unit;
+  // Thicker strokes and a solid board at small sizes keep the cap readable in the toolbar.
+  const halfStroke = (size <= 32 ? 1.2 : 1) * 0.5 * 2 * CAP_SCALE * unit;
+  const solidBoard = size <= 16;
+  const lines = [CAP_BOARD, CAP_TASSEL, CAP_BAND].map((line) =>
+    line.map(([x, y]) => [toPixel(CAP_X + (x - 12) * CAP_SCALE), toPixel(CAP_Y + (y - 12) * CAP_SCALE)])
+  );
   const inSquare = (x, y) => {
     const dx = Math.max(padding + radius - x, 0, x - (size - padding - radius));
     const dy = Math.max(padding + radius - y, 0, y - (size - padding - radius));
     return dx * dx + dy * dy <= radius * radius;
   };
-  const inRing = (x, y) => {
-    const d = Math.hypot(x - centerX, y - centerY);
-    return d <= ringOuter && d >= ringInner;
+  const inBoard = (x, y) => {
+    const [right, top] = lines[0];
+    return Math.abs(x - top[0]) / (right[0] - top[0]) + Math.abs(y - right[1]) / (right[1] - top[1]) <= 1;
   };
-  const inHandle = (x, y) => {
-    const ax = size * 0.61;
-    const ay = size * 0.62;
-    const bx = size * 0.72;
-    const by = size * 0.73;
-    const vx = bx - ax;
-    const vy = by - ay;
-    const t = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy)));
-    return Math.hypot(x - (ax + t * vx), y - (ay + t * vy)) <= size * 0.045;
-  };
+  const inCap = (x, y) =>
+    (solidBoard && inBoard(x, y)) ||
+    lines.some((line) => line.slice(1).some((point, i) => segmentDistance(x, y, line[i], point) <= halfStroke));
   const inSpark = (x, y) =>
-    size >= 32 && Math.abs(x - size * 0.69) / (size * 0.055) + Math.abs(y - size * 0.29) / (size * 0.075) <= 1;
+    size >= 32 && Math.abs(x - toPixel(88.32)) / (7.04 * unit) + Math.abs(y - toPixel(37.12)) / (9.6 * unit) <= 1;
   const rows = [];
   for (let y = 0; y < size; y++) {
     const row = Buffer.alloc(1 + size * 4);
     for (let x = 0; x < size; x++) {
       const alpha = coverage(x, y, inSquare);
-      const lens = Math.max(coverage(x, y, inRing), coverage(x, y, inHandle));
+      const cap = coverage(x, y, inCap);
       const spark = coverage(x, y, inSpark);
       const color = PURPLE.map((value, i) => {
-        const withLens = value + (WHITE[i] - value) * lens;
-        return Math.round(withLens + (GOLD[i] - withLens) * spark);
+        const withCap = value + (WHITE[i] - value) * cap;
+        return Math.round(withCap + (GOLD[i] - withCap) * spark);
       });
       row.set([...color, Math.round(alpha * 255)], 1 + x * 4);
     }

@@ -1,7 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Moodlens">
-  <!-- Same geometry as scripts/make-icons.mjs: purple tile, white study lens, gold insight spark. -->
+  <!-- Same geometry as scripts/make-icons.mjs: purple tile, white graduation cap, gold insight spark. -->
   <rect x="16" y="16" width="96" height="96" rx="23.04" fill="#5645d4"/>
-  <circle cx="60.16" cy="61.44" r="22.72" fill="none" stroke="#fff" stroke-width="10.88"/>
-  <line x1="78.08" y1="79.36" x2="92.16" y2="93.44" stroke="#fff" stroke-width="11.52" stroke-linecap="round"/>
+  <g transform="translate(62 68) scale(2.7) translate(-12 -12)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21.6 10 12 5 2.4 10 12 15z"/>
+    <path d="M22 10v6"/>
+    <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+  </g>
   <polygon points="88.32,27.52 95.36,37.12 88.32,46.72 81.28,37.12" fill="#f5d75e"/>
 </svg>

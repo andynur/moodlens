@@ -279,3 +279,25 @@ export function Segmented<T extends string>(props: {
 export function Divider() {
   return <hr className="border-line" />;
 }
+
+/** Vector copy of the extension icon (same geometry as scripts/make-icons.mjs and store-assets/logo.svg). */
+export function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="16 16 96 96" className={className} aria-hidden="true">
+      <rect x="16" y="16" width="96" height="96" rx="23.04" fill="#5645d4" />
+      <g
+        transform="translate(62 68) scale(2.7) translate(-12 -12)"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21.6 10 12 5 2.4 10 12 15z" />
+        <path d="M22 10v6" />
+        <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+      </g>
+      <polygon points="88.32,27.52 95.36,37.12 88.32,46.72 81.28,37.12" fill="#f5d75e" />
+    </svg>
+  );
+}

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   CircleAlert,
   CircleCheck,
-  GraduationCap,
   House,
   Library,
   ListChecks,
@@ -36,7 +35,7 @@ import { useTaskData } from './useTaskData';
 import { mergeTaskDatasets } from '../shared/tasks';
 import { hiddenCourseKeys } from '../shared/courses';
 import { taskText } from './taskStrings';
-import { Alert, Button, Card, cx, Hint, SectionLabel, Segmented, Select } from './ui';
+import { Alert, BrandMark, Button, Card, cx, Hint, SectionLabel, Segmented, Select } from './ui';
 
 type Page = 'today' | 'tasks' | 'courses' | 'study' | 'settings';
 const themeOptions: { key: Theme; icon: typeof Sun }[] = [
@@ -174,9 +173,7 @@ export default function App() {
     <div className="flex min-h-screen flex-col bg-surface text-ink">
       <header className="sticky top-0 z-10 border-b border-line bg-canvas">
         <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-white shadow-card">
-            <GraduationCap size={20} aria-hidden="true" />
-          </div>
+          <BrandMark className="h-9 w-9 shrink-0 rounded-lg shadow-card" />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[15px] leading-tight font-semibold">{translate('appName')}</h1>
             {/* The tagline is shown in full during onboarding; afterwards the header stays compact. */}

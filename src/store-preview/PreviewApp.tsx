@@ -1,4 +1,4 @@
-import { GraduationCap, House, Library, ListChecks, Settings2, Sparkles } from 'lucide-react';
+import { House, Library, ListChecks, Settings2, Sparkles } from 'lucide-react';
 import { t, type TranslationKey } from '../shared/i18n';
 import type { Locale, MoodleTask, Site } from '../shared/types';
 import { Today } from '../sidepanel/components/Today';
@@ -7,6 +7,7 @@ import { StudyPage } from '../sidepanel/components/Study';
 import { TasksView } from '../sidepanel/components/Tasks';
 import type { CourseEntry } from '../sidepanel/courseEntries';
 import { taskText } from '../sidepanel/taskStrings';
+import { BrandMark } from '../sidepanel/ui';
 import '../sidepanel/styles.css';
 
 type Screen = 'today' | 'tasks' | 'practice' | 'ai' | 'consent';
@@ -238,9 +239,7 @@ function Panel({ screen, className = '' }: { screen: Screen; className?: string 
     <div className={`preview-panel ${className}`}>
       <header className="sticky top-0 z-10 border-b border-line bg-canvas">
         <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-white shadow-card">
-            <GraduationCap size={20} aria-hidden="true" />
-          </div>
+          <BrandMark className="h-9 w-9 shrink-0 rounded-lg shadow-card" />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[15px] leading-tight font-semibold">Moodlens</h1>
           </div>
@@ -282,18 +281,6 @@ function Panel({ screen, className = '' }: { screen: Screen; className?: string 
         )}
       </main>
     </div>
-  );
-}
-
-/** Vector copy of the extension icon (same geometry as scripts/make-icons.mjs and store-assets/logo.svg). */
-function BrandMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="16 16 96 96" className={className} aria-hidden="true">
-      <rect x="16" y="16" width="96" height="96" rx="23.04" fill="#5645d4" />
-      <circle cx="60.16" cy="61.44" r="22.72" fill="none" stroke="#fff" strokeWidth="10.88" />
-      <line x1="78.08" y1="79.36" x2="92.16" y2="93.44" stroke="#fff" strokeWidth="11.52" strokeLinecap="round" />
-      <polygon points="88.32,27.52 95.36,37.12 88.32,46.72 81.28,37.12" fill="#f5d75e" />
-    </svg>
   );
 }
 
