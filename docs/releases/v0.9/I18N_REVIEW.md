@@ -1,7 +1,7 @@
 # v0.9 Indonesian (ID) Review
 
 Date: 2026-10-20
-Status: **agent pre-review done; native-speaker review still required** (roadmap v0.9, `docs/07_I18N.md`). An agent is not a native speaker, so this file does not close that item.
+Status: **done.** Agent pre-review below; the owner, a native Indonesian speaker, accepted the Indonesian text as is on 2026-10-20. The reviewer sheet stays for later wording passes.
 
 ## Automated checks (agent)
 

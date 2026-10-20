@@ -16,7 +16,7 @@
 
 ### Localization (v0.9)
 
-- Indonesian pre-review (`docs/releases/v0.9/I18N_REVIEW.md`): flashcard review is "ulas" instead of "ulangan" (which reads as a class test), quiz review page is "tinjauan" as in Moodle, one term "penilaian" for assessment, "perlu diulas" instead of "jatuh tempo", consent "Alamat tujuan". Removed the internal "(D-009)" from a student-facing hint, five unused keys and the "Local development build" footer (now "Free and open source (MIT)"). Glossary extended in `docs/07_I18N.md`.
+- Indonesian pre-review (`docs/releases/v0.9/I18N_REVIEW.md`): flashcard review is "ulas" instead of "ulangan" (which reads as a class test), quiz review page is "tinjauan" as in Moodle, one term "penilaian" for assessment, "perlu diulas" instead of "jatuh tempo", consent "Alamat tujuan". Removed the internal "(D-009)" from a student-facing hint, five unused keys and the "Local development build" footer (now "Free and open source (MIT)"). Glossary extended in `docs/07_I18N.md`. Owner (native speaker) accepted the Indonesian text.
 
 ### Accessibility (v0.9)
 

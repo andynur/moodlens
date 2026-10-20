@@ -25,6 +25,7 @@ These items are intentionally deferred while product features are completed. The
 
 ## Release acceptance
 
-- Complete the accessibility pass and EN/ID native-speaker review.
+- Accessibility pass and EN/ID native-speaker review: done in v0.9 (owner, a native speaker, accepted the Indonesian text on 2026-10-20). A manual screen reader session is still recommended.
+- Moved from the v0.8 exit gate (owner decision 2026-10-20): accept the Chrome host-permission prompt on Continue once by hand; run OpenAI and at least one OpenAI-compatible provider with a real key; decide whether to list providers not run with a real key.
 - Recruit at least ten opt-in testers, keep only privacy-safe evidence, and resolve all P0/P1 findings.
 - Start the stability clock only after the final candidate and tester/site prerequisites are in place; require seven consecutive days with no open P0/P1 issue before public release.

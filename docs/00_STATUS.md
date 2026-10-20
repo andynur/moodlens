@@ -2,7 +2,7 @@
 
 Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old entries; history lives in git and `CHANGELOG.md`.
 
-**Current release:** v0.9 — Release candidate (`docs/08_ROADMAP.md`). Version 0.9.0. v0.8 AI study is implemented (Gemini exit-gate QA passed); its remaining owner checks are listed under Next task. Deferred official-release work is in `docs/PRE_RELEASE_NOTES.md` (D-017).
+**Current release:** v0.9 — Release candidate, closed 2026-10-20 (`docs/08_ROADMAP.md`); next is v1.0. Version 0.9.0. v0.8 AI study is implemented (Gemini exit-gate QA passed); its remaining owner checks are listed under Next task. Deferred official-release work is in `docs/PRE_RELEASE_NOTES.md` (D-017).
 **Last updated:** 2026-10-20.
 
 ## Last done
@@ -24,9 +24,9 @@ Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old 
 
 ## Next task
 
-1. Owner: native Indonesian speaker review with `docs/releases/v0.9/I18N_REVIEW.md` (last open v0.9 roadmap item); then tick it.
+1. Done: v0.9 roadmap items all ticked; owner (native speaker) accepted the Indonesian text (2026-10-20).
 2. Done: `package-lock.json` synced to 0.9.0 (tree compared with `npm ls`, audit 0).
-3. Owner (from v0.8): accept the Chrome permission prompt on Continue once by hand; run OpenAI and one OpenAI-compatible provider when keys exist; decide whether to list untested providers.
+3. Moved to `docs/PRE_RELEASE_NOTES.md` (owner decision): Chrome permission prompt by hand, real-key runs of OpenAI and another provider, listing untested providers.
 4. Owner: optional manual screen reader session (VoiceOver/NVDA) per `ACCESSIBILITY.md`.
 5. Then v1.0 (`docs/08_ROADMAP.md`) after every item in `docs/PRE_RELEASE_NOTES.md`: trademark decision, publish policy pages, three-site live QA, fixtures, ten testers, seven-day stability, store submission.
 

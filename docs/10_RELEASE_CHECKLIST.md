@@ -41,7 +41,7 @@ Use for the first official public release. The v0.7 development milestone closed
 - [ ] Manual QA in `docs/09_TEST_PLAN.md` on 3 sites.
 - [x] Beta QA evidence ledger, anonymous ten-tester cohort, P0/P1 definitions and seven-day reset rule prepared (`docs/releases/v0.7/BETA_QA_RUNBOOK.md`).
 - [x] Accessibility and 320px layout pass: axe 0 violations, keyboard walk, AA token contrast test, no overflow at 320 px (`docs/releases/v0.9/ACCESSIBILITY.md`). Manual screen reader session still recommended.
-- [~] EN/ID parity test green; agent Indonesian pre-review done (`docs/releases/v0.9/I18N_REVIEW.md`); native speaker review open (owner).
+- [x] EN/ID parity test green; agent Indonesian pre-review (`docs/releases/v0.9/I18N_REVIEW.md`); native-speaker owner accepted the Indonesian text (2026-10-20).
 - [x] AI study ships behind the `MOODLENS_AI` build flag (D-007); the default build includes it and the listing describes it. Performance pass: `docs/releases/v0.9/PERFORMANCE.md`.
 
 ## Packaging and publishing
