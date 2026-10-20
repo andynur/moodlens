@@ -6,6 +6,10 @@
 
 - v0.9 security review (`docs/releases/v0.9/SECURITY_REVIEW.md`): no Critical/High/Medium. Fixed: provider replies are capped while streaming instead of read whole; Forget key also gives back provider host access (enabled Moodle sites keep theirs).
 
+### Performance (v0.9)
+
+- Performance pass (`docs/releases/v0.9/PERFORMANCE.md`): side panel shows Today in a median 154 ms; PDF.js stays lazy. Course records of one site now also have a 1,000,000-character budget, so a large site cannot fill the 10 MB `chrome.storage.local` quota.
+
 ### Accessibility (v0.9)
 
 - Accessibility pass (`docs/releases/v0.9/ACCESSIBILITY.md`): tertiary text tokens darkened to AA in light and dark, AI study heading level fixed, consent text box keyboard-scrollable, AI notices and results announced to screen readers, deck select named. axe reports 0 violations on every side panel screen in EN/ID/dark; no overflow at 320 px. New `tests/sidepanel-contrast.test.ts`.

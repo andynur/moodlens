@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addSnapshot,
+  COURSE_RECORDS_BUDGET,
   applySnapshot,
   cleanPrefs,
   isCoursePrefsMap,
@@ -80,6 +81,21 @@ describe('course records (ML-017 storage)', () => {
     }
     expect(Object.keys(records)).toHaveLength(MAX_COURSES_PER_SITE);
     expect(records['0']).toBeUndefined();
+  });
+  it('keeps one site under the storage budget, dropping the oldest courses first', () => {
+    const long = (n: number) =>
+      Array.from({ length: 200 }, (_, i) => activity(String(i), `${'Week topic and reading list '.repeat(10)}${n}`));
+    let records: CourseRecords = {};
+    for (let index = 0; index < 30; index++) {
+      records = addSnapshot(records, {
+        ...snapshot(1, long(index), String(index)),
+        capturedAt: new Date(index * 1000).toISOString()
+      });
+    }
+    expect(JSON.stringify(records).length).toBeLessThanOrEqual(COURSE_RECORDS_BUDGET);
+    expect(records['29']).toBeDefined();
+    expect(records['0']).toBeUndefined();
+    expect(Object.keys(records).length).toBeGreaterThan(1);
   });
   it('adds the last viewed course when it has no record', () => {
     expect(withLastSnapshot({}, first)).toEqual({ '7': { history: [first], seen: true } });

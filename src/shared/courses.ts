@@ -5,6 +5,12 @@ import { isCourseSnapshot } from './validation';
 /** Oldest courses are dropped beyond this, so one site cannot fill `chrome.storage.local`. */
 export const MAX_COURSES_PER_SITE = 50;
 export const MAX_NICKNAME = 60;
+/**
+ * Serialized size budget of one site's course records. 50 courses x 2 snapshots x 200 long activities
+ * could reach about 10 MB, the whole `chrome.storage.local` quota; past this budget the least recently
+ * captured courses are dropped first (v0.9 performance pass).
+ */
+export const COURSE_RECORDS_BUDGET = 1_000_000;
 
 export function courseRecordsKey(siteId: string): string {
   return `site:${siteId}:snapshots`;
@@ -46,9 +52,18 @@ function latestAt(record: CourseRecord): number {
 export function addSnapshot(records: CourseRecords, snapshot: CourseSnapshot): CourseRecords {
   const next: CourseRecords = { ...records, [snapshot.courseId]: applySnapshot(records[snapshot.courseId], snapshot) };
   const ids = Object.keys(next);
-  if (ids.length <= MAX_COURSES_PER_SITE) return next;
-  ids.sort((a, b) => latestAt(next[b]!) - latestAt(next[a]!));
-  return Object.fromEntries(ids.slice(0, MAX_COURSES_PER_SITE).map((id) => [id, next[id]!]));
+  if (ids.length <= MAX_COURSES_PER_SITE && JSON.stringify(next).length <= COURSE_RECORDS_BUDGET) return next;
+  // Newest first; the course just captured always stays.
+  ids.sort((a, b) =>
+    a === snapshot.courseId ? -1 : b === snapshot.courseId ? 1 : latestAt(next[b]!) - latestAt(next[a]!)
+  );
+  const kept = ids.slice(0, MAX_COURSES_PER_SITE);
+  let size = JSON.stringify(Object.fromEntries(kept.map((id) => [id, next[id]!]))).length;
+  while (kept.length > 1 && size > COURSE_RECORDS_BUDGET) {
+    const dropped = kept.pop()!;
+    size -= JSON.stringify({ [dropped]: next[dropped] }).length - 1;
+  }
+  return Object.fromEntries(kept.map((id) => [id, next[id]!]));
 }
 
 /**
