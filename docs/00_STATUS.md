@@ -2,7 +2,7 @@
 
 Keep under 40 lines. Every agent updates it at the end of a task. Overwrite old entries; history lives in git and `CHANGELOG.md`.
 
-**Current release:** v0.9 — Release candidate, closed 2026-10-20 (`docs/08_ROADMAP.md`); next is v1.0. Version 0.9.0. v0.8 AI study is implemented (Gemini exit-gate QA passed); its remaining owner checks are listed under Next task. Deferred official-release work is in `docs/PRE_RELEASE_NOTES.md` (D-017).
+**Current release:** v0.9 — Release candidate (`docs/08_ROADMAP.md`). Version 0.9.0. All five roadmap items done; exit gate waits on owner-only checklist items (push/CI, three-site QA, store upload, final tag). v0.8 AI study is implemented (Gemini exit-gate QA passed); its remaining owner checks are listed under Next task. Deferred official-release work is in `docs/PRE_RELEASE_NOTES.md` (D-017).
 **Last updated:** 2026-10-20.
 
 ## Last done

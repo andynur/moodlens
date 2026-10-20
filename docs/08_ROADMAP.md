@@ -112,7 +112,7 @@ Goal: accurate deadlines without fragile scraping.
 
 **Exit gate:** all PRD-004 acceptance criteria pass. If not met by the planned date, disable AI behind a build flag (`MOODLENS_AI=off`) and continue to v0.9 (D-007). Gemini observed 2026-10-20 (agent, real key, synthetic PDF): Summary and Flashcards pass in EN and ID. OpenAI real-key run skipped by owner (no key, 2026-10-20). The Chrome host-permission prompt check and the real-key runs of the other providers moved to `docs/PRE_RELEASE_NOTES.md` (owner decision 2026-10-20).
 
-## v0.9 — Release candidate (done 2026-10-20)
+## v0.9 — Release candidate
 
 - [x] Run `prompts/SECURITY_REVIEW_PROMPT.md`; fix all Critical/High. No Critical/High/Medium; two Low fixed (`docs/releases/v0.9/SECURITY_REVIEW.md`, 2026-10-20).
 - [x] Accessibility pass (keyboard, screen reader labels, contrast). axe 0 violations, Tab walk, 320 px reflow, token contrast test (`docs/releases/v0.9/ACCESSIBILITY.md`, 2026-10-20). Manual screen reader session still open.
@@ -120,7 +120,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] i18n review by a native Indonesian speaker. Agent pre-review and fixes (`docs/releases/v0.9/I18N_REVIEW.md`); the owner, a native speaker, accepted the Indonesian text as is (2026-10-20).
 - [x] Docs, README, CHANGELOG, store listing final. Version 0.9.0, README status, store listing header and fallback name (BelajarLens), release checklist, regenerated store images (2026-10-20).
 
-**Exit gate:** `docs/10_RELEASE_CHECKLIST.md` fully checked. Closed on 2026-10-20 like v0.7 (D-017): every engineering and review item is checked; the remaining checklist items are publication and live-evidence steps (push, CI on the tag, three-site manual QA, store upload, final tag) that belong to v1.0 and are tracked in `docs/PRE_RELEASE_NOTES.md`.
+**Exit gate:** `docs/10_RELEASE_CHECKLIST.md` fully checked. Open (2026-10-20): all five v0.9 items are done; the remaining checklist items need the owner (push and CI on the tag, three-site manual QA, store upload and visibility, final tag).
 
 ## v1.0 — Public release
 
