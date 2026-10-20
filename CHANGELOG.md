@@ -6,6 +6,10 @@
 
 - v0.9 security review (`docs/releases/v0.9/SECURITY_REVIEW.md`): no Critical/High/Medium. Fixed: provider replies are capped while streaming instead of read whole; Forget key also gives back provider host access (enabled Moodle sites keep theirs).
 
+### Accessibility (v0.9)
+
+- Accessibility pass (`docs/releases/v0.9/ACCESSIBILITY.md`): tertiary text tokens darkened to AA in light and dark, AI study heading level fixed, consent text box keyboard-scrollable, AI notices and results announced to screen readers, deck select named. axe reports 0 violations on every side panel screen in EN/ID/dark; no overflow at 320 px. New `tests/sidepanel-contrast.test.ts`.
+
 ### Changed
 
 - App icon now uses the graduation cap from the side panel header (gold spark kept) instead of the magnifying glass; toolbar, store icon, logo and header share one `BrandMark`.

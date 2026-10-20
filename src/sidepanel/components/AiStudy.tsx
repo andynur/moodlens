@@ -230,7 +230,7 @@ export function AiStudy({
 
   return (
     <Card className="space-y-3">
-      <CardTitle icon={BrainCircuit} tone="lavender">
+      <CardTitle icon={BrainCircuit} tone="lavender" level={2}>
         {text('aiStudy')}
       </CardTitle>
       <Hint>{text('aiStudyHint')}</Hint>
@@ -272,14 +272,18 @@ export function AiStudy({
         </Button>
       )}
       {doc && <Hint faint>{text('aiDocKept')}</Hint>}
-      {doc?.report.scanned === 'all' && <Alert tone="warning">{text('aiScannedAll')}</Alert>}
+      {doc?.report.scanned === 'all' && (
+        <Alert tone="warning" role="status">
+          {text('aiScannedAll')}
+        </Alert>
+      )}
       {doc?.report.scanned === 'partial' && (
-        <Alert tone="warning">
+        <Alert tone="warning" role="status">
           {text('aiScannedPartial')} {doc.report.emptyPages.join(', ')}
         </Alert>
       )}
       {doc && doc.report.failedPages.length > 0 && (
-        <Alert tone="warning">
+        <Alert tone="warning" role="status">
           {text('aiFailedPages')} {doc.report.failedPages.join(', ')}
         </Alert>
       )}
@@ -351,7 +355,12 @@ export function AiStudy({
             <dd>{aiPurposeText(locale, preview.purpose)}</dd>
           </dl>
           <p className="text-xs font-medium text-ink-2">{text('aiConsentText')}</p>
-          <pre className="max-h-64 overflow-auto rounded-md bg-well p-2 text-[11px] leading-snug break-words whitespace-pre-wrap">
+          {/* Focusable so keyboard users can scroll the full text they are agreeing to send. */}
+          <pre
+            tabIndex={0}
+            aria-label={text('aiConsentText')}
+            className="max-h-64 overflow-auto rounded-md bg-well p-2 text-[11px] leading-snug break-words whitespace-pre-wrap"
+          >
             {preview.text}
           </pre>
           <Hint faint>{text('aiConsentTokens').replace('{n}', String(preview.tokens))}</Hint>
@@ -382,7 +391,15 @@ export function AiStudy({
           {text(notice)}
         </Alert>
       )}
-      {result?.kind === 'insufficient' && <Alert tone="warning">{text('aiInsufficient')}</Alert>}
+      {result?.kind === 'insufficient' && (
+        <Alert tone="warning" role="status">
+          {text('aiInsufficient')}
+        </Alert>
+      )}
+      {/* Announces a finished request to screen readers; the visible result follows. */}
+      <p className="sr-only" role="status">
+        {result?.kind === 'answer' ? text('aiAnswerReady') : result?.kind === 'cards' ? text('aiCardsTitle') : ''}
+      </p>
       {result?.kind === 'answer' && (
         <div className="space-y-2">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -420,7 +437,12 @@ export function AiStudy({
           <Hint faint>{text('aiDisclaimer')}</Hint>
           {decks.length > 0 ? (
             <div className="flex gap-2">
-              <Select compact value={deckId} onChange={(event) => setDeckId(event.target.value)}>
+              <Select
+                compact
+                aria-label={text('aiDeckTarget')}
+                value={deckId}
+                onChange={(event) => setDeckId(event.target.value)}
+              >
                 {decks.map((deck) => (
                   <option key={deck.id} value={deck.id}>
                     {deck.name}
