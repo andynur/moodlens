@@ -53,7 +53,8 @@ export const PROVIDER_INFO: Readonly<Record<AiProviderId, AiProviderInfo>> = {
     jsonMode: true,
     origin: 'https://generativelanguage.googleapis.com',
     permission: 'https://generativelanguage.googleapis.com/*',
-    defaultModel: 'gemini-2.5-flash'
+    // Alias, not a pinned version: Gemini retires pinned models for new keys (2.5-flash answered 404 in 2026-10).
+    defaultModel: 'gemini-flash-latest'
   },
   deepseek: {
     id: 'deepseek',
