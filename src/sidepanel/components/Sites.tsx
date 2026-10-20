@@ -191,8 +191,13 @@ function SiteRow(props: Feedback & { site: Site; access: boolean | undefined }) 
       <div className="flex flex-wrap items-center gap-1.5">
         <Badge tone={detectionTone[detection]}>{translate(detectionLabel[detection])}</Badge>
         {site.versionHint && <Badge>{site.versionHint}</Badge>}
-        {props.access === false && <Badge tone="rose">{translate('siteAccessOff')}</Badge>}
       </div>
+      {/* A full sentence, so it wraps as text instead of a one-line badge (clipped at 320px). */}
+      {props.access === false && (
+        <p className="rounded-md bg-tint-rose px-2 py-1 text-[11px] font-semibold text-on-rose">
+          {translate('siteAccessOff')}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         {!editing && (
           <Button

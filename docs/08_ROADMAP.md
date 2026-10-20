@@ -73,7 +73,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] Pin, reorder, color, nickname, hide courses (ML-016).
 - [x] Snapshot history and "what's new since last visit" diff (ML-017): per-course records, badge, list, local "Mark as seen".
 - [x] Opt-in Moodle page appearance: dark mode, font size, line width, hide blocks from a fixed list (ML-018, D-015). Verified live on Edwiser RemUI (SiberMu, 2026-10-19); a second theme is still pending (PRD-009 AC 4).
-- [ ] Candidate (needs PRD-009 update first): appearance theme presets that restyle Moodle with design tokens (color, type, spacing, cards) and CSS-only layout tweaks; no DOM rewriting, no third-party brand assets, off on assessment-guarded pages (ML-018).
+- [x] Appearance theme presets `clean`, `sepia`, `contrast` from design tokens with CSS-only spacing; no DOM rewriting, no third-party brand assets, off on assessment-guarded pages (ML-018, D-020). Checked on a synthetic Boost-like page; live-theme check pending.
 - [x] Export/import local backup JSON (ML-023 part 2).
 
 **Exit gate:** dashboard usable at 320px; diff tests cover add/remove/rename; appearance injection reversible and scoped to enabled sites.
@@ -110,7 +110,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] Cited summary, Q&A, AI-generated flashcards/practice from selected material (ML-009).
 - [x] Prompt-injection corpus tests; guard integration.
 
-**Exit gate:** all PRD-004 acceptance criteria pass. If not met by the planned date, disable AI behind a build flag (`MOODLENS_AI=off`) and continue to v0.9 (D-007). Open: one request against a real OpenAI and Gemini key (owner), recorded without key or course text.
+**Exit gate:** all PRD-004 acceptance criteria pass. If not met by the planned date, disable AI behind a build flag (`MOODLENS_AI=off`) and continue to v0.9 (D-007). Gemini observed 2026-10-20 (agent, real key, synthetic PDF): Summary and Flashcards pass in EN and ID. OpenAI real-key run skipped by owner (no key, 2026-10-20). Open: the Chrome host-permission prompt on Continue, accepted by hand once (owner).
 
 ## v0.9 — Release candidate
 

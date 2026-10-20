@@ -27,3 +27,91 @@ html[data-moodlens-hide~='recentlyaccesseditems'] .block_recentlyaccesseditems,
 html[data-moodlens-hide~='badges'] .block_badges {
   display: none !important;
 }
+
+/* Theme presets (PRD-009). Tokens per preset; the shared rules below read only these tokens.
+   Never applied while the assessment guard is active (src/content/appearance.ts). No rule hides
+   anything, and Moodle's own notice boxes are left untouched. Moodle selectors are standard
+   Boost/Bootstrap classes, unverified on a live theme. */
+html.moodlens-theme-clean {
+  --ml-bg: #f6f7f9;
+  --ml-surface: #ffffff;
+  --ml-ink: #1a1a1a;
+  --ml-ink-2: #4b5563;
+  --ml-line: #e3e6eb;
+  --ml-accent: #0068c9;
+  --ml-on-accent: #ffffff;
+  --ml-radius: 12px;
+  --ml-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ml-leading: 1.6;
+}
+html.moodlens-theme-sepia {
+  --ml-bg: #f4ecd8;
+  --ml-surface: #fbf6ea;
+  --ml-ink: #3b2f22;
+  --ml-ink-2: #5f4b37;
+  --ml-line: #e2d5b8;
+  --ml-accent: #8a4b0f;
+  --ml-on-accent: #ffffff;
+  --ml-radius: 8px;
+  --ml-font: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --ml-leading: 1.7;
+}
+html.moodlens-theme-contrast {
+  --ml-bg: #ffffff;
+  --ml-surface: #ffffff;
+  --ml-ink: #000000;
+  --ml-ink-2: #1a1a1a;
+  --ml-line: #000000;
+  --ml-accent: #0033a0;
+  --ml-on-accent: #ffffff;
+  --ml-radius: 4px;
+  --ml-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ml-leading: 1.6;
+}
+
+html.moodlens-theme body {
+  background: var(--ml-bg) !important;
+  color: var(--ml-ink) !important;
+  font-family: var(--ml-font) !important;
+  line-height: var(--ml-leading) !important;
+}
+html.moodlens-theme :is(#page, #page-wrapper, #page-content, #topofscroll, .main-inner) {
+  background: transparent !important;
+}
+html.moodlens-theme :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--ml-ink) !important;
+  font-family: var(--ml-font) !important;
+}
+html.moodlens-theme :is(.text-muted, .dimmed_text, .activity-dates, .description) {
+  color: var(--ml-ink-2) !important;
+}
+html.moodlens-theme #region-main a:not(.btn):not(.dimmed) {
+  color: var(--ml-accent) !important;
+}
+html.moodlens-theme .btn-primary {
+  background: var(--ml-accent) !important;
+  border-color: var(--ml-accent) !important;
+  color: var(--ml-on-accent) !important;
+}
+html.moodlens-theme :is(#region-main .card, .block.card, .course-section, .activity-item) {
+  background: var(--ml-surface) !important;
+  color: var(--ml-ink) !important;
+  border: 1px solid var(--ml-line) !important;
+  border-radius: var(--ml-radius) !important;
+  box-shadow: none !important;
+}
+html.moodlens-theme .activity-item {
+  padding: 0.75rem 1rem !important;
+  margin-block: 0.5rem !important;
+}
+html.moodlens-theme .course-section {
+  padding: 1rem !important;
+  margin-block-end: 1rem !important;
+}
+html.moodlens-theme-contrast #region-main a:not(.btn) {
+  text-decoration: underline !important;
+}
+html.moodlens-theme-contrast :focus-visible {
+  outline: 3px solid var(--ml-ink) !important;
+  outline-offset: 2px !important;
+}

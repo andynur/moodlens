@@ -2,14 +2,16 @@ import { Paintbrush } from 'lucide-react';
 import {
   APPEARANCE_FLAGS,
   HIDEABLE_BLOCKS,
+  THEME_PRESETS,
   type AppearanceFlag,
   type AppearancePrefs,
-  type HideableBlock
+  type HideableBlock,
+  type ThemePreset
 } from '../../shared/appearance';
 import type { TranslationKey } from '../../shared/i18n';
 import type { Site } from '../../shared/types';
 import { sendSiteCommand, type SitesState } from '../useSites';
-import { CardTitle, Checkbox, Hint, SectionLabel } from '../ui';
+import { CardTitle, Checkbox, Field, Hint, SectionLabel, Select } from '../ui';
 import type { Feedback } from './Sites';
 
 const flagLabel: Record<AppearanceFlag, TranslationKey> = {
@@ -22,6 +24,11 @@ const blockLabel: Record<HideableBlock, TranslationKey> = {
   calendar_month: 'blockCalendarMonth',
   recentlyaccesseditems: 'blockRecentItems',
   badges: 'blockBadges'
+};
+const themeLabel: Record<ThemePreset, TranslationKey> = {
+  clean: 'themeClean',
+  sepia: 'themeSepia',
+  contrast: 'themeContrast'
 };
 
 function save(site: Site, appearance: AppearancePrefs, feedback: Feedback) {
@@ -36,6 +43,23 @@ function SiteAppearance(props: Feedback & { site: Site; prefs: AppearancePrefs; 
   return (
     <fieldset className="space-y-2 rounded-lg border border-line p-3" disabled={props.disabled}>
       <legend className="px-1 text-sm font-medium">{site.label}</legend>
+      <Field label={translate('appearanceTheme')}>
+        <Select
+          compact
+          value={prefs.theme ?? ''}
+          onChange={(event) =>
+            save(site, { ...prefs, theme: (event.target.value || undefined) as ThemePreset | undefined }, props)
+          }
+        >
+          <option value="">{translate('appearanceThemeNone')}</option>
+          {THEME_PRESETS.map((preset) => (
+            <option key={preset} value={preset}>
+              {translate(themeLabel[preset])}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      {prefs.theme && <Hint faint>{translate('appearanceThemeGuard')}</Hint>}
       {APPEARANCE_FLAGS.map((flag) => (
         <Checkbox
           key={flag}

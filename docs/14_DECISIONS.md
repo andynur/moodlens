@@ -127,3 +127,11 @@ Each decision has an ID, status, context, decision and consequences. Agents must
 - **Context:** Students asked for popular Chinese models and Indonesian or developer gateways. DeepSeek, Qwen (Alibaba Model Studio), Kimi (Moonshot AI), Command Code and SumoPod all expose OpenAI Chat Completions. Anthropic needs its own Messages format and a direct-browser-access header.
 - **Decision:** Add DeepSeek (`api.deepseek.com`), Qwen (`dashscope-intl.aliyuncs.com`, international region only), Kimi (`api.moonshot.ai`, global platform only), Command Code (`api.commandcode.ai/provider/v1`) and SumoPod (`ai.sumopod.com/v1`) as fixed-endpoint providers sharing the OpenAI request and reply shape. `response_format: json_object` is sent only to providers that document it; the two gateways do not get it because their backends vary. No custom base URL field. Anthropic is deferred by the owner.
 - **Consequences:** No manifest change: every origin is HTTPS and covered by the existing optional `https://*/*`, requested per provider on the consent screen's Continue. Region-locked mainland keys (`dashscope.aliyuncs.com`, `api.moonshot.cn`) do not work. Default model names are best-effort and editable; real-key runs remain an owner gate.
+
+## D-020 — Moodle theme presets: fixed token sets, off under the assessment guard
+
+- **Status:** Accepted (2026-10-20, owner request; resolves the D-015 open item).
+- **Context:** PRD-009 left theme presets open. Students want a calmer or more readable Moodle without the extension rewriting pages.
+- **Decision:** Three fixed presets (`clean`, `sepia`, `contrast`) stored as `theme` in the per-site appearance prefs. Each is a token block in the packaged `appearance.css`; shared rules under `html.moodlens-theme` restyle background, text, headings, links, primary buttons, cards and activity rows. No `display: none`, no rules for Moodle notices, no student CSS. The appearance script runs the ML-022 guard at `document_start` and again on `DOMContentLoaded`; while it is active only the preset class is withheld.
+- **Consequences:** No new permission, file or message. Backups carry the preset through the existing appearance validator. Selectors are standard Boost/Bootstrap classes and stay unverified on live themes until a rendered check on SiberMu and a second theme.
+

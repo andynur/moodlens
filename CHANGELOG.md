@@ -7,8 +7,18 @@
 - Optional AI study with the student's own OpenAI or Gemini key (ML-007/008/009, D-018): key kept only in Chrome session storage with an always visible Forget key; local PDF text extraction with PDF.js bundled in the package, with scanned-page and unreadable-page warnings; keyword retrieval with page metadata; a consent screen with provider, destination, purpose, exact text and a token estimate before every request; page-cited summaries, answers and forum idea outlines, or "insufficient evidence"; generated flashcards and practice questions the student checks before saving to a deck. Paused while the assessment guard is active. EN/ID strings, updated privacy policy. `MOODLENS_AI=off` builds without AI (D-007). Prompt-injection corpus and consent tests added. Optional Ollama deferred.
 - More BYOK providers over OpenAI-compatible fixed endpoints: DeepSeek, Qwen (Model Studio international), Kimi (Moonshot global), Command Code and SumoPod; no manifest change (D-019).
 
+### Added (appearance)
+
+- Moodle theme presets per site: Clean, Sepia reading and High contrast (ML-018, D-020). Token-based CSS only, AA contrast tested, nothing hidden, Moodle notices untouched, and the preset stays off on quiz, exam and other assessment pages. EN/ID.
+
+### Fixed (v0.8)
+
+- Sites card: the "access to this site is off" sentence wraps instead of being clipped as a one-line badge at narrow widths.
+- Gemini default model is now `gemini-flash-latest`: the pinned `gemini-2.5-flash` answered 404 "no longer available to new users" against a real key, so every Gemini request failed with the default settings.
+
 ### Changed (release planning)
 
+- Store listing draft refreshed for the v0.8 AI study scope (EN/ID copy, provider-host justification, privacy-practice answers for the user-approved transfer to the chosen AI provider), with `MOODLENS_AI=off` fallback lines.
 - Closed v0.7 as a locally verified development/package milestone and moved its unfinished trademark, publication, live-site QA, tester and stability requirements into `docs/PRE_RELEASE_NOTES.md`. They remain mandatory before the first official public release while v0.8 AI development proceeds (D-017).
 
 ### Release preparation (v0.7)

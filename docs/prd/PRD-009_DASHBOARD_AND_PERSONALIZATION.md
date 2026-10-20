@@ -31,7 +31,8 @@ As a student, I open one screen and immediately know what to do today, what chan
 - Per-site opt-in: dark mode for Moodle pages, larger font, comfortable line width, reduced clutter (hide blocks the student chooses from a fixed list).
 - One packaged stylesheet; inject/remove cleanly.
 - Never hide Moodle notices about deadlines, restrictions or academic integrity.
-- Open question (owner, 2026-10-18): theme presets (for example a clean, neutral look) built from design tokens plus CSS-only layout changes. Scope, token list and guarded-page behavior to be decided before v0.5 starts.
+- Theme presets (owner decision 2026-10-20): one optional preset per site from a fixed list — `clean` (neutral surfaces, rounded cards), `sepia` (warm, serif reading) and `contrast` (black on white, underlined links, strong focus ring). Each preset is a set of tokens (`--ml-bg`, `--ml-surface`, `--ml-ink`, `--ml-ink-2`, `--ml-line`, `--ml-accent`, `--ml-on-accent`, `--ml-radius`, `--ml-font`, `--ml-leading`) in the packaged stylesheet; shared rules restyle page background, text, headings, links, primary buttons, cards/blocks and activity rows and add CSS-only spacing. No DOM rewriting, no `display: none`, no third-party brand assets, no rules for alerts or notices, no student-supplied CSS.
+- Presets are off on assessment pages: the appearance script judges the address at `document_start` and the page again once the DOM is ready (the ML-022 guard); while the guard is active the preset class is not set. Dark mode, larger text, line width and hidden blocks are unchanged by the guard.
 
 ### Backup (ML-023 part 2)
 
@@ -46,3 +47,4 @@ As a student, I open one screen and immediately know what to do today, what chan
 4. Appearance toggle is idempotent and fully reversible; tested on 2 themes.
 5. Backup round-trip restores the same state; invalid files are rejected with a localized error.
 6. All strings EN/ID.
+7. Theme presets: choosing and clearing a preset is idempotent and restores the root element exactly; an unknown preset is rejected; the preset is never applied while the assessment guard is active; preset text and link colors reach WCAG AA (4.5:1) on their surfaces.
