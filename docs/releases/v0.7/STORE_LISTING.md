@@ -1,14 +1,14 @@
-# Chrome Web Store Listing Draft — Closed Beta (v0.7 scope + v0.8 AI study)
+# Chrome Web Store Listing — v0.9 release candidate and v1.0 (v0.7 scope + v0.8 AI study)
 
-Dashboard-ready copy for the first beta submission. Refreshed for the v0.8 AI study scope on 2026-10-20; if the submitted build is made with `MOODLENS_AI=off` (D-007), use the v0.7 AI lines kept under Submission notes instead. Use **Private / trusted testers** for the initial ten-person cohort; use **Unlisted** only if link-based installation is intentionally acceptable. Both modes receive the same Chrome Web Store policy review.
+Dashboard-ready copy for the beta and the v1.0 public submission. Refreshed for the v0.8 AI study scope and finalized for the v0.9 release candidate on 2026-10-20 (Indonesian wording aligned with `docs/07_I18N.md`; screenshots regenerated); if the submitted build is made with `MOODLENS_AI=off` (D-007), use the v0.7 AI lines kept under Submission notes instead. Use **Private / trusted testers** for the initial ten-person cohort; use **Unlisted** only if link-based installation is intentionally acceptable; switch to **Public** for v1.0 after the gates in `docs/PRE_RELEASE_NOTES.md`. All modes receive the same Chrome Web Store policy review.
 
 ## Shared settings
 
 - **Name:** Moodlens
-- **Fallback name if written trademark permission is absent:** Moodle Lens (see `TRADEMARK_REVIEW.md`)
+- **Fallback name if written trademark permission is absent:** BelajarLens (see `TRADEMARK_REVIEW.md`)
 - **Primary category:** Education
 - **Primary language:** English
-- **Visibility:** Private / trusted testers
+- **Visibility:** Private / trusted testers for the beta cohort; Public for v1.0
 - **Support URL:** `https://github.com/andynur/moodlens/issues`
 - **Privacy policy URL after push:** `https://github.com/andynur/moodlens/blob/main/PRIVACY.md`
 - **Homepage:** `https://github.com/andynur/moodlens`

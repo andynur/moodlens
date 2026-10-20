@@ -3,7 +3,7 @@
 ![Moodlens: All in One Moodle AI Agent for Student. Side panel showing due-soon tasks and flashcard review.](store-assets/hero-en-1280x640.jpg)
 
 [![CI](https://github.com/andynur/moodlens/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/andynur/moodlens/actions/workflows/ci.yml)
-![Status: closed beta preparation](https://img.shields.io/badge/status-v0.7%20closed%20beta-orange)
+![Status: v0.9 release candidate](https://img.shields.io/badge/status-v0.9%20release%20candidate-orange)
 ![Chrome MV3](https://img.shields.io/badge/Chrome-MV3%20%E2%89%A5116-4285F4)
 ![Languages: EN | ID](https://img.shields.io/badge/i18n-EN%20%7C%20ID-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -34,7 +34,7 @@ Moodlens is a Chrome side panel extension that reads your own Moodle course page
 
 | | |
 |---|---|
-| Current release | **v0.7 — Closed beta on the Chrome Web Store** (in progress) |
+| Current release | **v0.9 — Release candidate** (local; store publication pending) |
 | Target | v1.0 on the Chrome Web Store |
 | First verified site | `https://solusi.sibermu.ac.id/` |
 | Live handoff | [`docs/00_STATUS.md`](docs/00_STATUS.md) |
@@ -44,7 +44,7 @@ Moodlens is pre-release software. Expect breaking changes to stored local data b
 
 ## Features
 
-### Available in the v0.7 build
+### Available in the v0.9 build
 
 - Manifest V3 side panel in English and Bahasa Indonesia.
 - Runtime enablement for individual HTTPS Moodle sites; no static host access.
@@ -54,12 +54,13 @@ Moodlens is pre-release software. Expect breaking changes to stored local data b
 - Private flashcards with spaced repetition, guarded finished-review practice, local XP and streaks.
 - Focus timer, per-activity notes, backup/restore, site removal and clear-all controls.
 - Assessment guard that pauses study help during active assessments and fails closed.
-- Optional AI study with your own key for OpenAI, Gemini, DeepSeek, Qwen, Kimi, Command Code or SumoPod (v0.8, unreleased): local PDF reading, a consent screen showing the exact text and destination before every request, page-cited summaries and answers, and generated flashcards you check before saving.
+- Keyboard and screen-reader friendly side panel: WCAG 2.2 AA contrast in light and dark, no layout overflow at 320 px.
+- Optional AI study with your own key for OpenAI, Gemini, DeepSeek, Qwen, Kimi, Command Code or SumoPod: local PDF reading, a consent screen showing the exact text and destination before every request, page-cited summaries and answers, and generated flashcards you check before saving.
 
 ### Coming later
 
 - A local Ollama provider (needs a loopback host permission) is deferred past v0.8.
-- Accessibility, performance and final localization review are scheduled for the v0.9 release candidate.
+- Native-speaker Indonesian review, live checks on three Moodle sites and the store review are the last steps before v1.0 ([`docs/PRE_RELEASE_NOTES.md`](docs/PRE_RELEASE_NOTES.md)).
 
 Full list with priorities: [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLOG.md).
 
@@ -84,7 +85,7 @@ Read the complete bilingual [What Moodlens Never Does](WHAT_WE_NEVER_DO.md) page
 
 ## Getting started
 
-Moodlens is preparing a closed Chrome Web Store beta. Until a tester link is published, build it from source.
+Moodlens is not on the Chrome Web Store yet. Until it is, build it from source.
 
 ### Requirements
 

@@ -10,6 +10,10 @@
 
 - Performance pass (`docs/releases/v0.9/PERFORMANCE.md`): side panel shows Today in a median 154 ms; PDF.js stays lazy. Course records of one site now also have a 1,000,000-character budget, so a large site cannot fill the 10 MB `chrome.storage.local` quota.
 
+### Release candidate docs (v0.9)
+
+- Version 0.9.0. README status, store listing (v1.0 visibility, fallback name corrected to BelajarLens) and release checklist updated; store and README images regenerated.
+
 ### Localization (v0.9)
 
 - Indonesian pre-review (`docs/releases/v0.9/I18N_REVIEW.md`): flashcard review is "ulas" instead of "ulangan" (which reads as a class test), quiz review page is "tinjauan" as in Moodle, one term "penilaian" for assessment, "perlu diulas" instead of "jatuh tempo", consent "Alamat tujuan". Removed the internal "(D-009)" from a student-facing hint, five unused keys and the "Local development build" footer (now "Free and open source (MIT)"). Glossary extended in `docs/07_I18N.md`.

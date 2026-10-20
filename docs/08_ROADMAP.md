@@ -118,7 +118,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] Accessibility pass (keyboard, screen reader labels, contrast). axe 0 violations, Tab walk, 320 px reflow, token contrast test (`docs/releases/v0.9/ACCESSIBILITY.md`, 2026-10-20). Manual screen reader session still open.
 - [x] Performance pass (panel open time, storage size caps). Median 154 ms to Today; per-site course-records byte budget added (`docs/releases/v0.9/PERFORMANCE.md`, 2026-10-20).
 - [~] i18n review by a native Indonesian speaker. Agent pre-review and fixes done; reviewer sheet in `docs/releases/v0.9/I18N_REVIEW.md` (2026-10-20). Native-speaker sign-off open (owner).
-- [ ] Docs, README, CHANGELOG, store listing final.
+- [x] Docs, README, CHANGELOG, store listing final. Version 0.9.0, README status, store listing header and fallback name (BelajarLens), release checklist, regenerated store images (2026-10-20).
 
 **Exit gate:** `docs/10_RELEASE_CHECKLIST.md` fully checked.
 
