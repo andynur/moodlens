@@ -62,6 +62,14 @@ describe('provider settings and keys', () => {
     expect((await send<AiSettingsView>({ type: 'AI_SETTINGS' })).keys.openai).toBe(false);
   });
 
+  it('gives back provider host access on Forget key but keeps Moodle site access', async () => {
+    await setUp();
+    stub.granted.add(`${A}/*`);
+    await send({ type: 'AI_FORGET_KEYS' });
+    expect(stub.granted.has('https://api.openai.com/*')).toBe(false);
+    expect(stub.granted.has(`${A}/*`)).toBe(true);
+  });
+
   it('refuses keys and settings from content scripts', async () => {
     const tab = { id: 'moodlens-test', tab: { id: 3 } as chrome.tabs.Tab, url: `${A}/my/`, origin: A };
     await expect(send({ type: 'AI_SAVE_KEY', provider: 'openai', key: KEY }, tab)).resolves.toEqual({ ok: false });
@@ -156,7 +164,9 @@ describe('provider errors', () => {
     [() => Promise.resolve(reply({ error: {} }, 503)), 'provider-down'],
     [() => Promise.reject(new TypeError('Failed to fetch')), 'provider-down'],
     [() => Promise.resolve(new Response('not json')), 'bad-response'],
-    [() => Promise.resolve(reply({ choices: [{ message: { content: 'plain words' } }] })), 'bad-response']
+    [() => Promise.resolve(reply({ choices: [{ message: { content: 'plain words' } }] })), 'bad-response'],
+    [() => Promise.resolve(new Response('x'.repeat(2_000_001))), 'bad-response'],
+    [() => Promise.resolve(new Response('{}', { headers: { 'Content-Length': '9999999' } })), 'bad-response']
   ])('maps a failure to a clear error (%#)', async (respond, error) => {
     await setUp();
     const preview = await prepare();

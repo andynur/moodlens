@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Security (v0.9 release candidate)
+
+- v0.9 security review (`docs/releases/v0.9/SECURITY_REVIEW.md`): no Critical/High/Medium. Fixed: provider replies are capped while streaming instead of read whole; Forget key also gives back provider host access (enabled Moodle sites keep theirs).
+
 ### Changed
 
 - App icon now uses the graduation cap from the side panel header (gold spark kept) instead of the magnifying glass; toolbar, store icon, logo and header share one `BrandMark`.

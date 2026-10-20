@@ -114,7 +114,7 @@ Goal: accurate deadlines without fragile scraping.
 
 ## v0.9 — Release candidate
 
-- [ ] Run `prompts/SECURITY_REVIEW_PROMPT.md`; fix all Critical/High.
+- [x] Run `prompts/SECURITY_REVIEW_PROMPT.md`; fix all Critical/High. No Critical/High/Medium; two Low fixed (`docs/releases/v0.9/SECURITY_REVIEW.md`, 2026-10-20).
 - [ ] Accessibility pass (keyboard, screen reader labels, contrast).
 - [ ] Performance pass (panel open time, storage size caps).
 - [ ] i18n review by a native Indonesian speaker.

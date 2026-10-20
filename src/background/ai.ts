@@ -35,6 +35,7 @@ import {
 } from '../shared/ai/prompt';
 import type { AiPrepareResponse, AiSendResponse, AiSettingsView, OkResponse } from '../shared/types';
 import { guardStatus } from './guard';
+import { loadSites } from './sites';
 
 const KEY_PREFIX = 'aiKey:';
 const PENDING_KEY = 'ai:pending';
@@ -108,10 +109,50 @@ export async function saveAiKey(input: { provider: unknown; key: unknown }): Pro
   return { ok: true };
 }
 
-/** "Forget key": drops every stored key and any prepared request. */
+/**
+ * "Forget key": drops every stored key and any prepared request, and gives back the provider host
+ * access, so the next request needs a fresh permission prompt. An enabled Moodle site keeps its access.
+ */
 export async function forgetAiKeys(): Promise<OkResponse> {
   await chrome.storage.session.remove([...AI_PROVIDERS.map(keyName), PENDING_KEY]);
+  const siteOrigins = new Set((await loadSites()).map((site) => site.origin));
+  const origins = AI_PROVIDERS.map((id) => PROVIDER_INFO[id])
+    .filter((info) => !siteOrigins.has(info.origin))
+    .map((info) => info.permission);
+  const { origins: granted = [] } = await chrome.permissions.getAll();
+  const held = origins.filter((origin) => granted.includes(origin));
+  if (held.length > 0) await chrome.permissions.remove({ origins: held }).catch(() => false);
   return { ok: true };
+}
+
+/** Reads a response body without holding more than `max` bytes; null when it is longer. */
+async function readCapped(response: Response, max: number): Promise<string | null> {
+  const declared = Number(response.headers.get('Content-Length'));
+  if (Number.isFinite(declared) && declared > max) {
+    await response.body?.cancel().catch(() => undefined);
+    return null;
+  }
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
 }
 
 export async function cancelAiTask(): Promise<OkResponse> {
@@ -220,9 +261,10 @@ export async function sendAiTask(
     } catch {
       return fail('provider-down');
     }
-    const body = await response.text().catch(() => '');
-    if (!response.ok) return fail(classifyHttpError(stored.provider, response.status, body.slice(0, 2000)));
-    if (body.length > MAX_RESPONSE_BYTES) return fail('bad-response');
+    // The body is capped while it streams, so a huge reply never sits whole in worker memory.
+    const body = await readCapped(response, MAX_RESPONSE_BYTES).catch(() => null);
+    if (!response.ok) return fail(classifyHttpError(stored.provider, response.status, (body ?? '').slice(0, 2000)));
+    if (body === null) return fail('bad-response');
     let json: unknown;
     try {
       json = JSON.parse(body);
