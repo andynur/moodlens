@@ -43,7 +43,7 @@ See the full [`PRIVACY.md`](PRIVACY.md), the public [source code](https://github
 
 ## Bahasa Indonesia
 
-### Kami tidak pernah bertindak sebagai Anda di Moodle
+### Kami tidak pernah bertindak atas namamu di Moodle
 
 - Kami tidak pernah menandai aktivitas sebagai selesai.
 - Kami tidak pernah mengirim presensi, tugas, kuis, formulir, atau berkas.
@@ -54,25 +54,25 @@ See the full [`PRIVACY.md`](PRIVACY.md), the public [source code](https://github
 
 - Pengaman penilaian menjeda bantuan belajar pada percobaan kuis dan keadaan penilaian lain yang dijaga.
 - Pengaman gagal secara tertutup: halaman penilaian yang tidak diketahui atau tidak terjangkau tidak akan membuka bantuan.
-- Kartu latihan hanya dapat dibuat dari halaman tinjauan milik Anda yang telah selesai ketika Moodle sudah menampilkan jawaban benar.
+- Kartu latihan hanya dapat dibuat dari halaman tinjauan milikmu yang telah selesai ketika Moodle sudah menampilkan jawaban benar.
 - Kartu turunan kuis tetap privat dan tidak dapat diekspor, dicadangkan, disinkronkan, atau dibagikan.
 
 ### Kami tidak pernah mengambil akses yang luas atau tersembunyi
 
 - Kami tidak pernah meminta akses statis ke semua situs web.
-- Anda mengaktifkan satu situs Moodle HTTPS setiap kali melalui dialog izin Chrome.
+- Kamu mengaktifkan satu situs Moodle HTTPS setiap kali melalui dialog izin Chrome.
 - Menghapus situs mencabut aksesnya dan menghapus data lokal Moodlens untuk situs tersebut.
 - Kami tidak pernah merayapi atau melakukan polling Moodle setelah tab-nya ditutup.
 
-### Kami tidak pernah memonetisasi atau memantau data belajar Anda
+### Kami tidak pernah memonetisasi atau memantau data belajarmu
 
 - Tidak ada backend pengembang, akun, iklan, analitik, atau telemetri.
-- Kami tidak pernah menjual, menyewakan, atau memindahkan data Anda untuk iklan atau pembuatan profil.
+- Kami tidak pernah menjual, menyewakan, atau memindahkan datamu untuk iklan atau pembuatan profil.
 - Kami tidak pernah membaca kata sandi atau cookie, serta tidak pernah menyimpan atau mencatat nilai `sesskey` Moodle.
 - Kami tidak pernah menganggap teks halaman Moodle, PDF, atau keluaran AI sebagai instruksi tepercaya.
-- Kami tidak pernah mengirim apa pun ke penyedia AI sebelum Anda melihat teks dan tujuan yang persis lalu menekan Lanjutkan, dan tidak pernah saat halaman penilaian terbuka.
+- Kami tidak pernah mengirim apa pun ke penyedia AI sebelum kamu melihat teks dan tujuan yang persis lalu menekan Lanjutkan, dan tidak pernah saat halaman penilaian terbuka.
 
-### Kami tidak pernah mengaku sebagai Moodle atau institusi Anda
+### Kami tidak pernah mengaku sebagai Moodle atau institusimu
 
 Moodlens tidak menggunakan logo Moodle atau universitas dan tidak mengaku mendapat dukungan. Moodlens bukan buku nilai dan XP Moodlens tidak pernah menjadi nilai Moodle.
 

@@ -77,7 +77,7 @@ Every shipped feature supports that purpose: read-only course capture, Today and
 
 ### Deskripsi lengkap
 
-> Moodlens adalah pendamping belajar dwibahasa dan lokal untuk situs mata kuliah Moodle yang Anda pilih untuk diaktifkan.
+> Moodlens adalah pendamping belajar dwibahasa dan lokal untuk situs mata kuliah Moodle yang kamu pilih untuk diaktifkan.
 >
 > Lihat hal yang perlu diperhatikan tanpa mengubah Moodle:
 >
@@ -86,23 +86,23 @@ Every shipped feature supports that purpose: read-only course capture, Today and
 > - Lacak perubahan sejak kunjungan terakhir.
 > - Ekspor tenggat ke kalender `.ics` dan aktifkan pengingat lokal opsional.
 > - Buat deck kartu belajar privat dengan pengulangan terjadwal.
-> - Simpan kesalahan dari tinjauan kuis milik Anda yang telah selesai ketika Moodle sudah menampilkan jawabannya.
+> - Simpan kesalahan dari tinjauan kuis milikmu yang telah selesai ketika Moodle sudah menampilkan jawabannya.
 > - Gunakan XP lokal, rentetan harian, sesi fokus, dan catatan per aktivitas.
 > - Sesuaikan halaman Moodle aktif dengan mode gelap, teks lebih besar, dan lebar baca yang nyaman.
 >
-> Belajar dengan AI opsional memakai kunci API Anda sendiri:
+> Belajar dengan AI opsional memakai kunci API-mu sendiri:
 >
-> - Pilih PDF mata kuliah; PDF dibaca di perangkat Anda.
-> - Dapatkan ringkasan dan jawaban dengan sitasi halaman, atau draf kartu belajar dan soal latihan yang Anda periksa sebelum disimpan.
-> - Gunakan kunci Anda sendiri untuk Google Gemini, OpenAI, DeepSeek, Qwen, Kimi, Command Code, atau SumoPod. Kunci disimpan di penyimpanan sesi browser sampai browser ditutup atau Anda menekan Lupakan kunci.
-> - Sebelum setiap permintaan, Anda melihat penyedia, alamat tujuan yang persis, dan teks yang persis. Tidak ada yang dikirim sebelum Anda menekan Lanjutkan.
+> - Pilih PDF mata kuliah; PDF dibaca di perangkatmu.
+> - Dapatkan ringkasan dan jawaban dengan sitasi halaman, atau draf kartu belajar dan soal latihan yang kamu periksa sebelum disimpan.
+> - Gunakan kuncimu sendiri untuk Google Gemini, OpenAI, DeepSeek, Qwen, Kimi, Command Code, atau SumoPod. Kunci disimpan di penyimpanan sesi browser sampai browser ditutup atau kamu menekan Lupakan kunci.
+> - Sebelum setiap permintaan, kamu melihat penyedia, alamat tujuan yang persis, dan teks yang persis. Tidak ada yang dikirim sebelum kamu menekan Lanjutkan.
 > - Mati secara bawaan, dan dijeda selama halaman penilaian terbuka.
 >
 > Privasi dan kendali:
 >
 > - Tanpa akun Moodlens, backend, iklan, analitik, atau telemetri.
-> - Data belajar tetap berada di browser Anda. Hanya kutipan yang Anda setujui untuk belajar dengan AI yang dikirim ke penyedia pilihan Anda.
-> - Akses diminta untuk satu situs Moodle HTTPS setiap kali setelah Anda mengeklik Aktifkan.
+> - Data belajar tetap berada di browsermu. Hanya kutipan yang kamu setujui untuk belajar dengan AI yang dikirim ke penyedia pilihanmu.
+> - Akses diminta untuk satu situs Moodle HTTPS setiap kali setelah kamu mengeklik Aktifkan.
 > - Menghapus situs mencabut akses dan menghapus data lokal Moodlens untuk situs tersebut.
 > - Sumber terbuka, dengan kebijakan privasi dan desain keamanan publik.
 >
@@ -114,7 +114,7 @@ Every shipped feature supports that purpose: read-only course capture, Today and
 >
 > Tersedia dalam English dan Bahasa Indonesia.
 >
-> Keluaran AI bisa salah; periksa terhadap halaman yang dikutip. Ketentuan dan tagihan penyedia Anda berlaku.
+> Keluaran AI bisa salah; periksa terhadap halaman yang dikutip. Ketentuan dan tagihan penyediamu berlaku.
 >
 > Proyek independen. Tidak berafiliasi dengan atau didukung oleh Moodle Pty Ltd maupun universitas mana pun.
 
@@ -184,7 +184,8 @@ Limited Use certification statement:
 
 - Store icon: `store-assets/icon-128.png`
 - Small promo tile: `store-assets/promo-440x280.jpg`
-- English screenshots: `store-assets/en/01-today-1280x800.jpg`, `02-tasks-1280x800.jpg`, `03-practice-1280x800.jpg`
+- Marquee promo tile (optional): `store-assets/marquee-en-1400x560.jpg`, `store-assets/marquee-id-1400x560.jpg`
+- English screenshots: `store-assets/en/01-today-1280x800.jpg`, `02-tasks-1280x800.jpg`, `03-practice-1280x800.jpg`, `04-ai-1280x800.jpg`, `05-consent-1280x800.jpg` (drop 04 and 05 for a `MOODLENS_AI=off` build)
 - Indonesian screenshots: matching files under `store-assets/id/`
 - Every screenshot uses synthetic course and site data only.
 

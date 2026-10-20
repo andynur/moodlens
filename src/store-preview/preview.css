@@ -38,7 +38,7 @@ body,
   letter-spacing: -0.4px;
 }
 
-.store-brand img {
+.store-brand svg {
   width: 52px;
   height: 52px;
 }
@@ -171,23 +171,11 @@ body,
 
 .promo-lens {
   position: absolute;
-  top: 67px;
-  left: 152px;
-  display: grid;
-  width: 136px;
-  height: 136px;
-  place-items: center;
-  border-radius: 38px;
-  background: linear-gradient(145deg, #6a5ae0, #4534b3);
-  box-shadow: 0 24px 48px rgb(0 0 0 / 35%);
-}
-
-.promo-lens > div {
-  width: 66px;
-  height: 66px;
-  border: 14px solid white;
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 2px rgb(10 21 48 / 16%);
+  top: 72px;
+  left: 162px;
+  width: 116px;
+  height: 116px;
+  filter: drop-shadow(0 24px 30px rgb(0 0 0 / 35%));
 }
 
 .promo-card {
@@ -245,4 +233,90 @@ body,
   bottom: 48px;
   left: 132px;
   font-size: 18px;
+}
+
+.banner-canvas {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  align-items: center;
+  gap: 40px;
+  overflow: hidden;
+  padding: 0 64px 0 84px;
+  background:
+    radial-gradient(circle at 18% 20%, rgb(123 63 242 / 32%), transparent 28%),
+    radial-gradient(circle at 90% 90%, rgb(42 157 153 / 24%), transparent 30%), #0a1530;
+  color: white;
+}
+
+.banner-hero {
+  width: 1280px;
+  height: 640px;
+}
+
+.banner-marquee {
+  width: 1400px;
+  height: 560px;
+  grid-template-columns: 1fr 560px;
+  padding-left: 96px;
+}
+
+.banner-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.banner-copy .store-brand {
+  margin-bottom: 36px;
+}
+
+.banner-copy h1 {
+  max-width: 600px;
+  margin: 0;
+  font-size: 54px;
+  font-weight: 650;
+  line-height: 1.06;
+  letter-spacing: -1.6px;
+}
+
+.banner-marquee .banner-copy h1 {
+  font-size: 50px;
+}
+
+.banner-panels {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+}
+
+.banner-panels .preview-panel {
+  position: absolute;
+  width: 360px;
+  height: 600px;
+  overflow: hidden;
+  mask-image: linear-gradient(black 80%, transparent);
+}
+
+.banner-panel-front {
+  top: 64px;
+  left: 0;
+}
+
+.banner-panel-back {
+  top: 28px;
+  right: 0;
+  opacity: 0.9;
+  transform: rotate(4deg);
+}
+
+.banner-marquee .banner-panels .preview-panel {
+  height: 520px;
+}
+
+.banner-marquee .banner-panel-front {
+  top: 48px;
+}
+
+.banner-marquee .banner-panel-back {
+  top: 16px;
 }

@@ -1,5 +1,7 @@
 # Moodlens
 
+![Moodlens: All in One Moodle AI Agent for Student. Side panel showing due-soon tasks and flashcard review.](store-assets/hero-en-1280x640.jpg)
+
 [![CI](https://github.com/andynur/moodlens/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/andynur/moodlens/actions/workflows/ci.yml)
 ![Status: closed beta preparation](https://img.shields.io/badge/status-v0.7%20closed%20beta-orange)
 ![Chrome MV3](https://img.shields.io/badge/Chrome-MV3%20%E2%89%A5116-4285F4)
@@ -17,6 +19,7 @@ Moodlens is a Chrome side panel extension that reads your own Moodle course page
 
 - [Project status](#project-status)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [What Moodlens never does](#what-moodlens-never-does)
 - [Privacy policy](PRIVACY.md)
 - [Getting started](#getting-started)
@@ -59,6 +62,16 @@ Moodlens is pre-release software. Expect breaking changes to stored local data b
 - Accessibility, performance and final localization review are scheduled for the v0.9 release candidate.
 
 Full list with priorities: [`docs/02_FEATURE_BACKLOG.md`](docs/02_FEATURE_BACKLOG.md).
+
+## Screenshots
+
+All screenshots use synthetic sites, courses and tasks. Indonesian versions are in [`store-assets/id/`](store-assets/id/).
+
+| | |
+|---|---|
+| ![Today: due soon, overdue count and course changes](store-assets/en/01-today-1280x800.jpg) | ![Tasks: filters, reminders and calendar export](store-assets/en/02-tasks-1280x800.jpg) |
+| ![Study: flashcard review with spaced repetition and local XP](store-assets/en/03-practice-1280x800.jpg) | ![AI study: page-cited summary of a PDF](store-assets/en/04-ai-1280x800.jpg) |
+| ![AI consent: exact text and destination before anything is sent](store-assets/en/05-consent-1280x800.jpg) | |
 
 ## What Moodlens never does
 

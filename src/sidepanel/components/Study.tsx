@@ -52,7 +52,8 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
   const xp = useXpView(xpRefresh);
 
   const apply = (next: StudyOverviewResponse) => {
-    setOverview(next);
+    // A refused or malformed reply must not crash the page; show the empty state instead.
+    setOverview(next.ok && Array.isArray(next.queue) && Array.isArray(next.decks) ? next : EMPTY);
     setQueueAt(0);
     setRevealed(false);
   };
@@ -198,8 +199,6 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
         <Hint className="mt-0.5">{translate('flashcardsHint')}</Hint>
       </div>
 
-      {xp && <XpCard view={xp} refreshed={() => setXpRefresh((count) => count + 1)} {...feedback} />}
-
       <Card className="space-y-3">
         <CardTitle
           icon={BookCheck}
@@ -268,6 +267,8 @@ export function StudyPage({ sites, guard, ...feedback }: Feedback & { sites: Sit
         )}
       </Card>
 
+      {/* Review comes first: it is the daily action; XP only reports on it. */}
+      {xp && <XpCard view={xp} refreshed={() => setXpRefresh((count) => count + 1)} {...feedback} />}
       {overview.offer && !guard.active && (
         <Card variant="accent" className="space-y-3">
           <CardTitle icon={Sparkles} tone="brand">

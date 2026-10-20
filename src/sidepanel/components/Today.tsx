@@ -9,13 +9,16 @@ import {
   Eye,
   EyeOff,
   Flame,
+  ListChecks,
   Pin,
   SlidersHorizontal
 } from 'lucide-react';
 import {
   DASHBOARD_KEY,
   dueSoon,
+  isUrgent,
   moveWidget,
+  overdueCount,
   normalizeLayout,
   toggleWidget,
   type DashboardLayout,
@@ -28,7 +31,7 @@ import { isTaskUrl } from '../../shared/validation';
 import { courseTitle, openCourse, type CourseEntry } from '../courseEntries';
 import { openTask } from '../openTask';
 import { hasChrome } from '../useSites';
-import { Button, Card, CardTitle, Hint, ProgressBar, type Tone } from '../ui';
+import { Button, Card, CardTitle, cx, Hint, ProgressBar, type Tone } from '../ui';
 import { ChangeList, ColorDot } from './CourseDetail';
 import { NewBadge } from './Courses';
 import { useXpView } from './Xp';
@@ -40,6 +43,9 @@ type WidgetProps = Feedback & {
   tasks: MoodleTask[];
   sites: Site[];
   locale: Locale;
+  /** Course names from task datasets, keyed `<siteId>/<courseId>`, for courses without a snapshot. */
+  courseNames: ReadonlyMap<string, string>;
+  onOpenTasks: () => void;
 };
 
 const widgetMeta: Record<WidgetId, { title: TranslationKey; icon: typeof Bell; tone: Tone }> = {
@@ -111,42 +117,93 @@ function DueSoon(props: WidgetProps) {
   const showSite = new Set(props.sites.map((site) => site.id)).size > 1;
   const hidden = new Set(props.entries.filter((entry) => entry.prefs.hidden).map((entry) => entry.key));
   const tasks = dueSoon(props.tasks, hidden);
-  if (tasks.length === 0) return <Hint>{translate('dueSoonEmpty')}</Hint>;
+  const overdue = overdueCount(props.tasks, hidden);
+  const overdueLink = overdue > 0 && (
+    <button
+      type="button"
+      onClick={props.onOpenTasks}
+      className="mb-2 flex w-full items-center gap-2 rounded-lg bg-error-soft px-3 py-2 text-left text-xs font-medium text-error-ink hover:brightness-95"
+    >
+      <span className="min-w-0 flex-1">
+        {translate('overdueLabel')}: <span className="font-semibold tabular-nums">{overdue}</span>
+      </span>
+      <ListChecks size={14} aria-hidden="true" />
+      {translate('viewTasks')}
+    </button>
+  );
+  if (tasks.length === 0)
+    return (
+      <>
+        {overdueLink}
+        <Hint>{translate('dueSoonEmpty')}</Hint>
+      </>
+    );
   const byKey = new Map(props.entries.map((entry) => [entry.key, entry]));
   return (
-    <ul className="-my-1 divide-y divide-line">
-      {tasks.map((task) => {
-        const site = props.sites.find((item) => item.id === task.siteId);
-        const entry = byKey.get(`${task.siteId}/${task.courseId}`);
-        return (
-          <li
-            key={`${task.siteId}|${task.courseId}|${task.url}|${task.dueAt}`}
-            className="flex items-center gap-2 py-2"
-          >
-            <ColorDot color={entry?.prefs.color} />
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium break-words">{task.title}</span>
-              <span className="block text-xs break-words text-ink-2">
-                <span className="font-medium text-warning-ink">{formatRelativeDue(task.dueAt!, locale)}</span>
-                {entry ? ` · ${courseTitle(entry, translate)}` : ''}
-                {showSite && site ? ` · ${site.label}` : ''}
+    <>
+      {overdueLink}
+      <ul className="-my-1 divide-y divide-line">
+        {tasks.map((task) => {
+          const site = props.sites.find((item) => item.id === task.siteId);
+          const entry = byKey.get(`${task.siteId}/${task.courseId}`);
+          const course = entry
+            ? courseTitle(entry, translate)
+            : props.courseNames.get(`${task.siteId}/${task.courseId}`);
+          return (
+            <li
+              key={`${task.siteId}|${task.courseId}|${task.url}|${task.dueAt}`}
+              className="flex items-center gap-2 py-2"
+            >
+              <ColorDot color={entry?.prefs.color} />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium break-words">{task.title}</span>
+                <span className="block text-xs break-words text-ink-2">
+                  <span className={cx('font-medium', isUrgent(task.dueAt!) ? 'text-error-ink' : 'text-warning-ink')}>
+                    {formatRelativeDue(task.dueAt!, locale)}
+                  </span>
+                  {course ? ` · ${course}` : ''}
+                  {showSite && site ? ` · ${site.label}` : ''}
+                </span>
               </span>
+              {site && isTaskUrl(task.url, site.origin) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={translate('open')}
+                  title={translate('open')}
+                  onClick={() => openTask(task, site)}
+                >
+                  <ExternalLink size={14} />
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
+/** Shown on Today until a site is enabled, instead of five empty widgets. */
+function GetStarted({ translate }: Pick<WidgetProps, 'translate'>) {
+  const steps: TranslationKey[] = ['startStep1', 'startStep2', 'startStep3'];
+  return (
+    <Card>
+      <CardTitle className="mb-3">{translate('startTitle')}</CardTitle>
+      <ol className="space-y-3 text-sm leading-relaxed">
+        {steps.map((step, index) => (
+          <li key={step} className="flex gap-3">
+            <span
+              aria-hidden="true"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent-soft text-xs font-semibold text-accent-ink"
+            >
+              {index + 1}
             </span>
-            {site && isTaskUrl(task.url, site.origin) && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={translate('open')}
-                title={translate('open')}
-                onClick={() => openTask(task, site)}
-              >
-                <ExternalLink size={14} />
-              </Button>
-            )}
+            <span className="min-w-0 flex-1">{translate(step)}</span>
           </li>
-        );
-      })}
-    </ul>
+        ))}
+      </ol>
+    </Card>
   );
 }
 
@@ -234,6 +291,7 @@ export function Today(props: WidgetProps) {
   const [customizing, setCustomizing] = useState(false);
   const entries = props.entries.filter((entry) => !entry.prefs.hidden);
   const shown = customizing ? layout.order : layout.order.filter((widget) => !layout.hidden.includes(widget));
+  if (props.sites.length === 0) return <GetStarted translate={translate} />;
   return (
     <>
       <div className="flex items-center justify-between gap-2 px-1">

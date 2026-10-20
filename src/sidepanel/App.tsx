@@ -94,6 +94,15 @@ export default function App() {
   const entries = useMemo(() => courseEntries(sitesState), [sitesState]);
   const taskData = useTaskData(sitesState.sites);
   const tasks = useMemo(() => mergeTaskDatasets(Object.values(taskData)), [taskData]);
+  const courseNames = useMemo(
+    () =>
+      new Map(
+        Object.values(taskData).flatMap((data) =>
+          data.courses.map((course) => [`${course.siteId}/${course.id}`, course.name] as const)
+        )
+      ),
+    [taskData]
+  );
   const hiddenCourses = useMemo(() => hiddenCourseKeys(sitesState.prefs), [sitesState.prefs]);
   const selectedEntry = entries.find((entry) => entry.key === selected) ?? null;
   const feedback = {
@@ -157,9 +166,9 @@ export default function App() {
   const navigation: { key: Page; icon: typeof House; label: TranslationKey | 'tasks' }[] = [
     { key: 'today', icon: House, label: 'today' },
     { key: 'tasks', icon: ListChecks, label: 'tasks' },
-    { key: 'courses', icon: Library, label: 'courses' },
+    { key: 'courses', icon: Library, label: 'navCourses' },
     { key: 'study', icon: Sparkles, label: 'study' },
-    { key: 'settings', icon: Settings2, label: 'settings' }
+    { key: 'settings', icon: Settings2, label: 'navSettings' }
   ];
   return (
     <div className="flex min-h-screen flex-col bg-surface text-ink">
@@ -170,7 +179,8 @@ export default function App() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[15px] leading-tight font-semibold">{translate('appName')}</h1>
-            <p className="truncate text-[11px] text-ink-3">{translate('tagline')}</p>
+            {/* The tagline is shown in full during onboarding; afterwards the header stays compact. */}
+            {onboarding && <p className="text-[11px] leading-snug text-ink-3">{translate('tagline')}</p>}
           </div>
           <Segmented
             label={translate('language')}
@@ -244,7 +254,9 @@ export default function App() {
                     tasks={tasks}
                     sites={sitesState.sites}
                     locale={locale}
+                    courseNames={courseNames}
                     onSelect={selectCourse}
+                    onOpenTasks={() => setPage('tasks')}
                     {...feedback}
                   />
                 )}
@@ -271,9 +283,6 @@ export default function App() {
                   <AiStudy locale={locale} guard={guard} onCardsSaved={() => setStudyVersion((count) => count + 1)} />
                 )}
                 <StudyPage key={studyVersion} sites={sitesState.sites} guard={guard} {...feedback} />
-                <Hint faint className="px-1">
-                  {translate('studyPrivacy')}
-                </Hint>
               </>
             )}
             {page === 'settings' && (

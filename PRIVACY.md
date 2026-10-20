@@ -66,19 +66,19 @@ Moodlens adalah ekstensi Chrome gratis dan sumber terbuka yang membantu mahasisw
 ### Ringkasnya
 
 - Moodlens tidak memiliki backend pengembang, iklan, analitik, atau telemetri.
-- Data belajar Anda tetap berada di penyimpanan lokal ekstensi Chrome dan IndexedDB pada perangkat Anda.
-- Moodlens hanya membaca situs Moodle yang Anda aktifkan secara langsung, menggunakan sesi browser yang sudah masuk. Moodlens tidak membaca kata sandi atau cookie Anda.
-- Moodlens tidak pernah menjual, menyewakan, atau memindahkan data Anda untuk iklan, pembuatan profil, atau tujuan lain yang tidak terkait.
+- Data belajarmu tetap berada di penyimpanan lokal ekstensi Chrome dan IndexedDB pada perangkatmu.
+- Moodlens hanya membaca situs Moodle yang kamu aktifkan secara langsung, menggunakan sesi browser yang sudah masuk. Moodlens tidak membaca kata sandi atau cookie kamu.
+- Moodlens tidak pernah menjual, menyewakan, atau memindahkan datamu untuk iklan, pembuatan profil, atau tujuan lain yang tidak terkait.
 
 ### Data yang ditangani Moodlens
 
 | Data | Alasan penggunaan | Penyimpanan dan pembagian |
 |---|---|---|
 | Bahasa, tema, tata letak dasbor, dan pilihan tampilan | Menyesuaikan ekstensi dan halaman Moodle yang diaktifkan | Disimpan secara lokal; tidak dibagikan |
-| Origin dan label situs yang diaktifkan | Membatasi Moodlens ke situs yang Anda pilih | Disimpan secara lokal; tidak dibagikan |
+| Origin dan label situs yang diaktifkan | Membatasi Moodlens ke situs yang kamu pilih | Disimpan secara lokal; tidak dibagikan |
 | Nama mata kuliah, aktivitas, status penyelesaian, dan tenggat | Menampilkan Mata kuliah, Hari ini, Tugas, dan perubahan sejak kunjungan terakhir | Disimpan secara lokal per situs; tidak dibagikan |
 | Kartu belajar, riwayat tinjauan, catatan, sesi fokus, XP, rentetan harian, dan target | Menyediakan alat belajar lokal | Disimpan secara lokal; tidak dibagikan |
-| Kartu tinjauan kuis dari halaman tinjauan milik Anda yang telah selesai | Meninjau kesalahan secara pribadi setelah penilaian | Disimpan secara lokal; tidak masuk cadangan atau ekspor kartu; tidak dibagikan |
+| Kartu tinjauan kuis dari halaman tinjauan milikmu yang telah selesai | Meninjau kesalahan secara pribadi setelah penilaian | Disimpan secara lokal; tidak masuk cadangan atau ekspor kartu; tidak dibagikan |
 | Pengaturan pengingat | Menjadwalkan notifikasi tenggat lokal opsional | Disimpan secara lokal; tidak dibagikan |
 
 Moodlens tidak dengan sengaja membaca atau menyimpan kata sandi, cookie, nilai, pesan, daftar peserta, atau data mahasiswa lain. `sesskey` Moodle dapat dibaca dari halaman terbuka untuk satu permintaan baca-saja ke situs yang sama; nilainya hanya berada di memori halaman selama panggilan tersebut dan tidak pernah disimpan, dicatat, atau dikirim ke konteks ekstensi lain.
@@ -87,28 +87,28 @@ Moodlens tidak dengan sengaja membaca atau menyimpan kata sandi, cookie, nilai, 
 
 Moodlens tidak memiliki server yang dioperasikan pengembang. Saat tab Moodle yang diaktifkan terbuka, Moodlens dapat membuat permintaan baca-saja yang dibatasi ke endpoint AJAX standar pada situs Moodle yang sama untuk memperoleh informasi mata kuliah dan kalender. Browser menyertakan sesi Moodle yang sudah ada; Moodlens tidak mengambil atau menyimpan cookie sesi. Moodlens tidak melakukan polling ketika situs Moodle ditutup.
 
-Fitur belajar dengan AI (sejak v0.8) bersifat opsional dan mati sampai Anda memilih penyedia (OpenAI, Google Gemini, DeepSeek, Qwen (Alibaba Model Studio), Kimi (Moonshot AI), Command Code atau SumoPod) dan memasukkan kunci API milik Anda sendiri. Kunci disimpan di penyimpanan sesi Chrome sampai browser ditutup atau Anda menekan "Lupakan kunci"; penyimpanan sesi bukan enkripsi, dan kunci tidak pernah disinkronkan, dicadangkan, atau dikirim ke mana pun selain ke penyedia tersebut sebagai header permintaan. PDF yang Anda pilih dibaca di perangkat Anda dan hanya disimpan di panel yang sedang terbuka. Sebelum setiap permintaan, layar persetujuan menampilkan penyedia, alamat tujuan yang persis, tujuan penggunaan, dan teks persis yang akan dikirim; tidak ada yang dikirim sebelum Anda menekan Lanjutkan, dan Chrome lebih dulu meminta akses ke alamat penyedia. Saat Anda melanjutkan, kutipan yang dipilih dan pertanyaan Anda keluar dari perangkat, dan ketentuan, pencatatan, serta penyimpanan data milik penyedia berlaku. Fitur AI dijeda selama halaman penilaian terbuka.
+Fitur belajar dengan AI (sejak v0.8) bersifat opsional dan mati sampai kamu memilih penyedia (OpenAI, Google Gemini, DeepSeek, Qwen (Alibaba Model Studio), Kimi (Moonshot AI), Command Code atau SumoPod) dan memasukkan kunci API milikmu sendiri. Kunci disimpan di penyimpanan sesi Chrome sampai browser ditutup atau kamu menekan "Lupakan kunci"; penyimpanan sesi bukan enkripsi, dan kunci tidak pernah disinkronkan, dicadangkan, atau dikirim ke mana pun selain ke penyedia tersebut sebagai header permintaan. PDF yang kamu pilih dibaca di perangkatmu dan hanya disimpan di panel yang sedang terbuka. Sebelum setiap permintaan, layar persetujuan menampilkan penyedia, alamat tujuan yang persis, tujuan penggunaan, dan teks persis yang akan dikirim; tidak ada yang dikirim sebelum kamu menekan Lanjutkan, dan Chrome lebih dulu meminta akses ke alamat penyedia. Saat kamu melanjutkan, kutipan yang dipilih dan pertanyaanmu keluar dari perangkat, dan ketentuan, pencatatan, serta penyimpanan data milik penyedia berlaku. Fitur AI dijeda selama halaman penilaian terbuka.
 
 ### Izin
 
 - `storage`: menyimpan pengaturan dan data belajar secara lokal.
 - `sidePanel`: menampilkan Moodlens di samping mata kuliah.
-- `scripting`: memasang pembaca mata kuliah baca-saja dan stylesheet tampilan yang dikemas hanya pada situs yang Anda aktifkan.
+- `scripting`: memasang pembaca mata kuliah baca-saja dan stylesheet tampilan yang dikemas hanya pada situs yang kamu aktifkan.
 - `alarms`: menjadwalkan pengingat tenggat lokal dan penyelesaian sesi fokus.
-- `notifications` opsional: menampilkan pengingat tenggat hanya setelah Anda mengaktifkannya.
-- Akses host `https://*/*` opsional: Chrome dapat meminta satu origin Moodle HTTPS setiap kali setelah Anda mengeklik Aktifkan. Moodlens tidak memiliki akses statis ke semua situs web.
+- `notifications` opsional: menampilkan pengingat tenggat hanya setelah kamu mengaktifkannya.
+- Akses host `https://*/*` opsional: Chrome dapat meminta satu origin Moodle HTTPS setiap kali setelah kamu mengeklik Aktifkan. Moodlens tidak memiliki akses statis ke semua situs web.
 
 ### Retensi, ekspor, dan penghapusan
 
-Cuplikan mata kuliah dibatasi pada dua versi terbaru per mata kuliah. Retensi log tinjauan Anda pilih sendiri: 90 hari, 1 tahun, atau 2 tahun. Kartu dan catatan tetap tersimpan sampai Anda menghapusnya, deck-nya, atau situsnya. Menghapus situs akan menghapus data lokal Moodlens untuk situs tersebut dan mencabut akses host. Pengaturan juga menyediakan Hapus semua data lokal.
+Cuplikan mata kuliah dibatasi pada dua versi terbaru per mata kuliah. Retensi log tinjauan kamu pilih sendiri: 90 hari, 1 tahun, atau 2 tahun. Kartu dan catatan tetap tersimpan sampai kamu menghapusnya, deck-nya, atau situsnya. Menghapus situs akan menghapus data lokal Moodlens untuk situs tersebut dan mencabut akses host. Pengaturan juga menyediakan Hapus semua data lokal.
 
-Cadangan JSON opsional hanya berisi pengaturan, metadata situs aktif, cuplikan mata kuliah, dan preferensi yang diizinkan. Cadangan tidak berisi kunci API, kartu turunan kuis, catatan, tugas, atau pengingat. Ekspor kartu hanya berisi kartu yang Anda tulis atau impor, bukan kartu turunan kuis. Ekspor kalender membuat berkas `.ics` hanya saat Anda memintanya. Anda menentukan tujuan berkas hasil ekspor.
+Cadangan JSON opsional hanya berisi pengaturan, metadata situs aktif, cuplikan mata kuliah, dan preferensi yang diizinkan. Cadangan tidak berisi kunci API, kartu turunan kuis, catatan, tugas, atau pengingat. Ekspor kartu hanya berisi kartu yang kamu tulis atau impor, bukan kartu turunan kuis. Ekspor kalender membuat berkas `.ics` hanya saat kamu memintanya. Kamu menentukan tujuan berkas hasil ekspor.
 
-Menghapus pemasangan ekstensi akan menghapus penyimpanan ekstensi Chrome sesuai perilaku Chrome. Berkas yang sebelumnya Anda ekspor berada di luar ekstensi dan perlu dihapus secara terpisah.
+Menghapus pemasangan ekstensi akan menghapus penyimpanan ekstensi Chrome sesuai perilaku Chrome. Berkas yang sebelumnya kamu ekspor berada di luar ekstensi dan perlu dihapus secara terpisah.
 
-### Pilihan Anda
+### Pilihanmu
 
-Anda dapat memeriksa kode sumber, mengaktifkan atau menghapus situs satu per satu, membiarkan notifikasi mati, mengubah retensi log tinjauan, mengekspor data yang diizinkan, atau menghapus semua data lokal. Moodlens tidak memiliki akun, sehingga pengembang tidak memiliki profil sisi server untuk diakses, diperbaiki, atau dihapus.
+Kamu dapat memeriksa kode sumber, mengaktifkan atau menghapus situs satu per satu, membiarkan notifikasi mati, mengubah retensi log tinjauan, mengekspor data yang diizinkan, atau menghapus semua data lokal. Moodlens tidak memiliki akun, sehingga pengembang tidak memiliki profil sisi server untuk diakses, diperbaiki, atau dihapus.
 
 ### Perubahan dan kontak
 

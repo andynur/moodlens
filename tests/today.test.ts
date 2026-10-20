@@ -43,7 +43,11 @@ function entry(owner: Site, courseId: string): CourseEntry {
   };
 }
 
-function renderToday(sites: Site[], entries: CourseEntry[]) {
+function renderToday(
+  sites: Site[],
+  entries: CourseEntry[],
+  extra: { tasks?: MoodleTask[]; courseNames?: Map<string, string>; onOpenTasks?: () => void } = {}
+) {
   container = document.createElement('div');
   document.body.append(container);
   root = createRoot(container);
@@ -57,6 +61,7 @@ function renderToday(sites: Site[], entries: CourseEntry[]) {
     status: 'open',
     source: 'ajax'
   }));
+  tasks.push(...(extra.tasks ?? []));
   act(() =>
     root.render(
       createElement(Today, {
@@ -67,7 +72,9 @@ function renderToday(sites: Site[], entries: CourseEntry[]) {
         translate: (key: TranslationKey) => t('en', key),
         onSelect: vi.fn(),
         onError: vi.fn(),
-        onNotice: vi.fn()
+        onNotice: vi.fn(),
+        courseNames: extra.courseNames ?? new Map(),
+        onOpenTasks: extra.onOpenTasks ?? vi.fn()
       })
     )
   );
@@ -94,5 +101,51 @@ describe('Today multi-site labels', () => {
     renderToday([only], [entry(only, '10')]);
 
     expect(container.textContent).not.toContain('Only Moodle');
+  });
+});
+
+function task(owner: Site, courseId: string, hours: number, title: string): MoodleTask {
+  return {
+    siteId: owner.id,
+    courseId,
+    title,
+    dueAt: new Date(Date.now() + hours * 3_600_000).toISOString(),
+    url: `${owner.origin}/mod/assign/view.php?id=9`,
+    kind: 'assign',
+    status: hours < 0 ? 'overdue' : 'open',
+    source: 'ajax'
+  };
+}
+
+describe('Today due soon', () => {
+  it('shows a get-started guide instead of empty widgets when no site is enabled', () => {
+    renderToday([], []);
+
+    expect(container.textContent).toContain(t('en', 'startTitle'));
+    expect(container.textContent).not.toContain(t('en', 'dueSoon'));
+  });
+
+  it('links overdue tasks to the Tasks page', () => {
+    const only = site('only', 'Only Moodle');
+    const onOpenTasks = vi.fn();
+    renderToday([only], [], { tasks: [task(only, '10', -5, 'Late report')], onOpenTasks });
+
+    const link = Array.from(container.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes(t('en', 'viewTasks'))
+    );
+    expect(link?.textContent).toContain(`${t('en', 'overdueLabel')}: 1`);
+    act(() => link?.click());
+    expect(onOpenTasks).toHaveBeenCalledOnce();
+  });
+
+  it('names the course from task data when no snapshot exists', () => {
+    const only = site('only', 'Only Moodle');
+    renderToday([only], [], {
+      tasks: [task(only, '30', 48, 'Quiz two')],
+      courseNames: new Map([['only/30', 'Databases']])
+    });
+
+    expect(container.textContent).toContain('Quiz two');
+    expect(container.textContent).toContain('Databases');
   });
 });

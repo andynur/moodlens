@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import type { TaskDataset } from '../shared/types';
+import { buildPrompt, estimateTokens, promptPreview, validateTaskInput } from '../shared/ai/prompt';
+import { buildProviderRequest, PROVIDER_INFO } from '../shared/ai/providers';
+import type { AiConsentPreview, TaskDataset } from '../shared/types';
 import './preview.css';
 
 const now = Date.now();
@@ -37,6 +39,17 @@ const taskData: Record<string, TaskDataset> = {
         url: 'https://learn.example/mod/forum/view.php?id=502',
         status: 'open',
         source: 'ajax'
+      },
+      {
+        siteId: 'demo-a',
+        courseId: '102',
+        activityId: '503',
+        kind: 'assign',
+        title: 'Essay outline',
+        dueAt: iso(-20 * 60 * 60_000),
+        url: 'https://learn.example/mod/assign/view.php?id=503',
+        status: 'overdue',
+        source: 'ajax'
       }
     ]
   },
@@ -67,13 +80,68 @@ const storageValues: Record<string, unknown> = {
   'site:demo-b:tasks': taskData['demo-b']
 };
 
+const locale = new URLSearchParams(window.location.search).get('locale') === 'id' ? 'id' : 'en';
+// Synthetic AI reply for the AI screenshots: no provider is called; the consent text is the real prompt.
+const aiAnswer = {
+  en: '• A stack removes the newest item first (LIFO) [S1]\n• A queue removes the oldest item first (FIFO), which suits waiting lines and breadth-first search [S2]\n• Both push and pop in constant time with a linked list [S3]',
+  id: '• Stack mengambil item terbaru lebih dulu (LIFO) [S1]\n• Queue mengambil item terlama lebih dulu (FIFO), cocok untuk antrean dan breadth-first search [S2]\n• Dengan linked list, push dan pop keduanya berjalan dalam waktu konstan [S3]'
+}[locale];
+const aiProvider = 'gemini' as const;
+const aiModel = PROVIDER_INFO[aiProvider].defaultModel;
+
+function aiPrepare(task: unknown): { ok: true; preview: AiConsentPreview } | { ok: false; error: 'invalid' } {
+  const input = validateTaskInput(task);
+  if (!input) return { ok: false, error: 'invalid' };
+  const prompt = buildPrompt(input);
+  const text = promptPreview(prompt);
+  return {
+    ok: true,
+    preview: {
+      nonce: 'preview',
+      provider: aiProvider,
+      model: aiModel,
+      destination: buildProviderRequest(aiProvider, aiModel, '', prompt).url,
+      purpose: input.purpose,
+      text,
+      tokens: estimateTokens(text),
+      permission: PROVIDER_INFO[aiProvider].permission
+    }
+  };
+}
+
 const listeners = { addListener: () => undefined, removeListener: () => undefined };
 Object.defineProperty(globalThis, 'chrome', {
   configurable: true,
   value: {
     runtime: {
       id: 'moodlens-store-preview',
-      sendMessage: async (message: { type?: string }) => {
+      sendMessage: async (message: { type?: string; task?: unknown }) => {
+        if (message.type === 'AI_SETTINGS') {
+          return {
+            ok: true,
+            enabled: true,
+            provider: aiProvider,
+            models: {
+              ...Object.fromEntries(Object.entries(PROVIDER_INFO).map(([id, info]) => [id, info.defaultModel]))
+            },
+            keys: Object.fromEntries(Object.keys(PROVIDER_INFO).map((id) => [id, id === aiProvider]))
+          };
+        }
+        if (message.type === 'AI_PREPARE') return aiPrepare(message.task);
+        if (message.type === 'AI_SEND') {
+          return {
+            ok: true,
+            result: {
+              kind: 'answer',
+              text: aiAnswer,
+              citations: [
+                { id: 'S1', page: 1 },
+                { id: 'S2', page: 2 },
+                { id: 'S3', page: 3 }
+              ]
+            }
+          };
+        }
         if (message.type === 'STUDY_OVERVIEW') {
           return {
             ok: true,
@@ -86,8 +154,11 @@ Object.defineProperty(globalThis, 'chrome', {
                 id: 'card-1',
                 siteId: 'demo-a',
                 deckId: 'deck-1',
-                front: 'What does FIFO mean in a queue?',
-                back: 'First In, First Out: the earliest item added is the first item removed.',
+                front: locale === 'id' ? 'Apa arti FIFO pada queue?' : 'What does FIFO mean in a queue?',
+                back:
+                  locale === 'id'
+                    ? 'First In, First Out: item yang pertama masuk adalah yang pertama keluar.'
+                    : 'First In, First Out: the earliest item added is the first item removed.',
                 origin: 'manual',
                 intervals: { again: 1, hard: 2, good: 4, easy: 8 }
               }

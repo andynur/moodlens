@@ -66,3 +66,18 @@ export function dueSoon(tasks: MoodleTask[], hidden: ReadonlySet<string>, now = 
     .sort((a, b) => Date.parse(a.dueAt!) - Date.parse(b.dueAt!))
     .slice(0, DUE_SOON_LIMIT);
 }
+
+/** Open tasks whose due date has passed, without hidden courses; Today links to them on the Tasks page. */
+export function overdueCount(tasks: MoodleTask[], hidden: ReadonlySet<string>, now = new Date()): number {
+  const start = now.valueOf();
+  return tasks.filter((task) => {
+    const due = task.dueAt ? Date.parse(task.dueAt) : NaN;
+    return task.status !== 'done' && due < start && !hidden.has(`${task.siteId}/${task.courseId}`);
+  }).length;
+}
+
+/** True when an open task is due within `URGENT_HOURS`; Today shows it in the error tone. */
+export const URGENT_HOURS = 24;
+export function isUrgent(dueAt: string, now = new Date()): boolean {
+  return Date.parse(dueAt) - now.valueOf() <= URGENT_HOURS * 3_600_000;
+}

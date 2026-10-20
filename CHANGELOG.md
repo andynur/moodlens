@@ -11,7 +11,19 @@
 
 - Moodle theme presets per site: Clean, Sepia reading and High contrast (ML-018, D-020). Token-based CSS only, AA contrast tested, nothing hidden, Moodle notices untouched, and the preset stays off on quiz, exam and other assessment pages. EN/ID.
 
+### Added (store and README assets)
+
+- `npm run store:assets` (`scripts/capture-store-assets.mjs`) renders every store and README image from `store-preview.html` in headless Chrome with synthetic data: five 1280×800 screenshots per locale (Today, Tasks, Practice, AI answer, AI consent), 1400×560 marquee and 1280×640 README hero in EN and ID, the 440×280 promo tile, and a vector `store-assets/logo.svg`. README shows the hero and a screenshot gallery.
+
+### Changed (side panel UX)
+
+- Indonesian copy now addresses the student as "kamu" everywhere (UI, store listing, `PRIVACY.md`, `WHAT_WE_NEVER_DO.md`, store images), matching the AI study strings; rule added to `docs/07_I18N.md`.
+
+- Today shows a three-step get-started guide instead of five empty widgets until a site is enabled; Due soon lists overdue tasks as a count that opens Tasks, shows deadlines within 24 hours in the error tone, and names the course from task data when no course page was captured yet. Study puts today's review above the XP card and no longer repeats the privacy line. The header drops the truncated tagline after onboarding, Indonesian navigation uses short labels (Kuliah, Setelan) that fit at 360px, and the "never" onboarding screen marks points with a cross instead of a check. EN/ID.
+
 ### Fixed (v0.8)
+
+- Study page no longer goes blank when the background refuses or malforms the overview reply; it shows the empty state.
 
 - Sites card: the "access to this site is off" sentence wraps instead of being clipped as a one-line badge at narrow widths.
 - Gemini default model is now `gemini-flash-latest`: the pinned `gemini-2.5-flash` answered 404 "no longer available to new users" against a real key, so every Gemini request failed with the default settings.

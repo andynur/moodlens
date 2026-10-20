@@ -2,18 +2,20 @@ import { GraduationCap, House, Library, ListChecks, Settings2, Sparkles } from '
 import { t, type TranslationKey } from '../shared/i18n';
 import type { Locale, MoodleTask, Site } from '../shared/types';
 import { Today } from '../sidepanel/components/Today';
+import { AiStudy } from '../sidepanel/components/AiStudy';
 import { StudyPage } from '../sidepanel/components/Study';
 import { TasksView } from '../sidepanel/components/Tasks';
 import type { CourseEntry } from '../sidepanel/courseEntries';
 import { taskText } from '../sidepanel/taskStrings';
 import '../sidepanel/styles.css';
 
-type Screen = 'today' | 'tasks' | 'practice';
+type Screen = 'today' | 'tasks' | 'practice' | 'ai' | 'consent';
+const SCREENS: readonly Screen[] = ['today', 'tasks', 'practice', 'ai', 'consent'];
 
 const params = new URLSearchParams(window.location.search);
 const locale: Locale = params.get('locale') === 'id' ? 'id' : 'en';
-const requestedScreen = params.get('screen');
-const screen: Screen = requestedScreen === 'tasks' || requestedScreen === 'practice' ? requestedScreen : 'today';
+const requestedScreen = params.get('screen') as Screen | null;
+const screen: Screen = requestedScreen && SCREENS.includes(requestedScreen) ? requestedScreen : 'today';
 
 const sites: Site[] = [
   { id: 'demo-a', origin: 'https://learn.example', label: 'Demo Learning Site', enabledAt: '2026-10-01T00:00:00Z' },
@@ -130,7 +132,23 @@ const entries: CourseEntry[] = [
     }
   }
 ];
+const courseNames = new Map([
+  ['demo-a/101', 'Data Structures'],
+  ['demo-a/102', 'Academic Writing'],
+  ['demo-b/201', 'Statistics Lab']
+]);
 const tasks: MoodleTask[] = [
+  {
+    siteId: 'demo-a',
+    courseId: '102',
+    activityId: '503',
+    kind: 'assign',
+    title: 'Essay outline',
+    dueAt: iso(-20 * 60 * 60_000),
+    url: 'https://learn.example/mod/assign/view.php?id=503',
+    status: 'overdue',
+    source: 'ajax'
+  },
   {
     siteId: 'demo-a',
     courseId: '101',
@@ -175,17 +193,31 @@ const copy = {
     tasksBody: 'Filter every task, open the source safely, or export your own calendar in one click.',
     practiceTitle: 'Private practice that stays private.',
     practiceBody: 'Review with spaced repetition, local XP and an assessment guard built for integrity.',
+    aiTitle: 'Ask your PDF. Get page-cited answers.',
+    aiBody: 'Bring your own Gemini, OpenAI or other key. Summaries, answers and flashcards point back to their pages.',
+    consentTitle: 'See every word before it leaves.',
+    consentBody: 'Each AI request first shows the exact text and destination. Nothing is sent until you continue.',
+    heroBody:
+      'Courses, deadlines, flashcards and AI study for any Moodle site you enable—free, local-first and read-only.',
     foot: 'Local-first · Read-only · No telemetry',
     disclaimer: 'Independent project · Not affiliated with Moodle Pty Ltd or any university'
   },
   id: {
     eyebrow: 'HARI BELAJAR DALAM SATU TEMPAT',
     todayTitle: 'Tahu yang perlu diperhatikan.',
-    todayBody: 'Mata kuliah, tenggat, progres, dan perubahan—diatur lokal dari situs yang Anda aktifkan.',
+    todayBody: 'Mata kuliah, tenggat, progres, dan perubahan—diatur lokal dari situs yang kamu aktifkan.',
     tasksTitle: 'Tenggat tanpa berburu tab.',
-    tasksBody: 'Filter semua tugas, buka sumber dengan aman, atau ekspor kalender Anda dalam sekali klik.',
+    tasksBody: 'Filter semua tugas, buka sumber dengan aman, atau ekspor kalendermu dalam sekali klik.',
     practiceTitle: 'Latihan privat tetap privat.',
     practiceBody: 'Tinjau dengan pengulangan terjadwal, XP lokal, dan pengaman penilaian untuk integritas.',
+    aiTitle: 'Tanya PDF-mu. Jawaban dengan nomor halaman.',
+    aiBody:
+      'Pakai key Gemini, OpenAI, atau penyedia lain milikmu. Ringkasan, jawaban, dan flashcard menunjuk ke halamannya.',
+    consentTitle: 'Lihat setiap kata sebelum terkirim.',
+    consentBody:
+      'Setiap permintaan AI menampilkan teks dan tujuan persisnya lebih dulu. Tidak ada yang terkirim sebelum kamu lanjut.',
+    heroBody:
+      'Mata kuliah, tenggat, flashcard, dan belajar dengan AI untuk situs Moodle yang kamu aktifkan—gratis, lokal, dan baca‑saja.',
     foot: 'Lokal · Baca-saja · Tanpa telemetri',
     disclaimer: 'Proyek independen · Tidak berafiliasi dengan Moodle Pty Ltd atau universitas mana pun'
   }
@@ -194,16 +226,16 @@ const copy = {
 const navigation = [
   { key: 'today', icon: House, label: 'today' as TranslationKey },
   { key: 'tasks', icon: ListChecks, label: null },
-  { key: 'courses', icon: Library, label: 'courses' as TranslationKey },
+  { key: 'courses', icon: Library, label: 'navCourses' as TranslationKey },
   { key: 'practice', icon: Sparkles, label: 'study' as TranslationKey },
-  { key: 'settings', icon: Settings2, label: 'settings' as TranslationKey }
+  { key: 'settings', icon: Settings2, label: 'navSettings' as TranslationKey }
 ];
 
-function Panel() {
+function Panel({ screen, className = '' }: { screen: Screen; className?: string }) {
   const translate = (key: TranslationKey) => t(locale, key);
   const feedback = { translate, onNotice: () => undefined, onError: () => undefined };
   return (
-    <div className="preview-panel">
+    <div className={`preview-panel ${className}`}>
       <header className="sticky top-0 z-10 border-b border-line bg-canvas">
         <div className="flex items-center gap-3 px-4 pt-3 pb-2">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-white shadow-card">
@@ -211,7 +243,6 @@ function Panel() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[15px] leading-tight font-semibold">Moodlens</h1>
-            <p className="truncate text-[11px] text-ink-3">{translate('tagline')}</p>
           </div>
           <span className="rounded-md bg-well px-2 py-1 text-[11px] font-semibold text-ink-2">
             {locale.toUpperCase()}
@@ -221,7 +252,7 @@ function Panel() {
           {navigation.map((item) => (
             <span
               key={item.key}
-              className={`flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] font-medium ${screen === item.key ? 'bg-accent-soft text-accent-ink' : 'text-ink-3'}`}
+              className={`flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] font-medium ${screen === item.key || (item.key === 'practice' && (screen === 'ai' || screen === 'consent')) ? 'bg-accent-soft text-accent-ink' : 'text-ink-3'}`}
             >
               <item.icon size={17} />
               <span className="max-w-full truncate">
@@ -238,14 +269,31 @@ function Panel() {
             tasks={tasks}
             sites={sites}
             locale={locale}
+            courseNames={courseNames}
             onSelect={() => undefined}
+            onOpenTasks={() => undefined}
             {...feedback}
           />
         )}
         {screen === 'tasks' && <TasksView sites={sites} locale={locale} hidden={new Set()} />}
         {screen === 'practice' && <StudyPage sites={sites} guard={{ active: false, reasons: [] }} {...feedback} />}
+        {(screen === 'ai' || screen === 'consent') && (
+          <AiStudy locale={locale} guard={{ active: false, reasons: [] }} onCardsSaved={() => undefined} />
+        )}
       </main>
     </div>
+  );
+}
+
+/** Vector copy of the extension icon (same geometry as scripts/make-icons.mjs and store-assets/logo.svg). */
+function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="16 16 96 96" className={className} aria-hidden="true">
+      <rect x="16" y="16" width="96" height="96" rx="23.04" fill="#5645d4" />
+      <circle cx="60.16" cy="61.44" r="22.72" fill="none" stroke="#fff" strokeWidth="10.88" />
+      <line x1="78.08" y1="79.36" x2="92.16" y2="93.44" stroke="#fff" strokeWidth="11.52" strokeLinecap="round" />
+      <polygon points="88.32,27.52 95.36,37.12 88.32,46.72 81.28,37.12" fill="#f5d75e" />
+    </svg>
   );
 }
 
@@ -263,34 +311,64 @@ function Promo() {
       <div className="promo-card promo-card-three">
         <span />
       </div>
-      <div className="promo-lens">
-        <div />
-      </div>
+      <BrandMark className="promo-lens" />
       <div className="promo-spark promo-spark-one">✦</div>
       <div className="promo-spark promo-spark-two">✦</div>
     </main>
   );
 }
 
-export function StorePreview() {
-  if (params.get('asset') === 'promo') return <Promo />;
+/** README hero (1280×640, also the GitHub social preview size) and store marquee (1400×560). */
+function Banner({ kind }: { kind: 'hero' | 'marquee' }) {
   const words = copy[locale];
-  const title = screen === 'today' ? words.todayTitle : screen === 'tasks' ? words.tasksTitle : words.practiceTitle;
-  const body = screen === 'today' ? words.todayBody : screen === 'tasks' ? words.tasksBody : words.practiceBody;
+  return (
+    <main className={`banner-canvas banner-${kind}`}>
+      <section className="banner-copy">
+        <div className="store-brand">
+          <BrandMark />
+          <span>Moodlens</span>
+        </div>
+        <h1>{t(locale, 'tagline')}</h1>
+        <p className="store-body">{words.heroBody}</p>
+        <p className="store-foot">{words.foot}</p>
+      </section>
+      <div className="banner-panels">
+        <Panel screen="practice" className="banner-panel-back" />
+        <Panel screen="today" className="banner-panel-front" />
+      </div>
+      <div className="store-dot store-dot-one" />
+      <div className="store-grid" />
+    </main>
+  );
+}
+
+const headings: Record<Screen, { title: keyof (typeof copy)['en']; body: keyof (typeof copy)['en'] }> = {
+  today: { title: 'todayTitle', body: 'todayBody' },
+  tasks: { title: 'tasksTitle', body: 'tasksBody' },
+  practice: { title: 'practiceTitle', body: 'practiceBody' },
+  ai: { title: 'aiTitle', body: 'aiBody' },
+  consent: { title: 'consentTitle', body: 'consentBody' }
+};
+
+export function StorePreview() {
+  const asset = params.get('asset');
+  if (asset === 'promo') return <Promo />;
+  if (asset === 'hero' || asset === 'marquee') return <Banner kind={asset} />;
+  const words = copy[locale];
   return (
     <main className="store-canvas">
       <section className="store-copy">
         <div className="store-brand">
-          <img src="/icons/icon-128.png" alt="" />
+          <BrandMark />
           <span>Moodlens</span>
         </div>
         <p className="store-eyebrow">{words.eyebrow}</p>
-        <h1>{title}</h1>
-        <p className="store-body">{body}</p>
+        <h1>{words[headings[screen].title]}</h1>
+        <p className="store-body">{words[headings[screen].body]}</p>
         <p className="store-foot">{words.foot}</p>
         <p className="store-disclaimer">{words.disclaimer}</p>
       </section>
-      <Panel />
+      <Panel screen={screen} />
       <div className="store-dot store-dot-one" />
       <div className="store-dot store-dot-two" />
       <div className="store-grid" />

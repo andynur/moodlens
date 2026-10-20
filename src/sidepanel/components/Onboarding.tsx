@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { Ban, Check, Globe, Sparkles } from 'lucide-react';
+import { Ban, Check, Globe, Sparkles, X } from 'lucide-react';
 import type { TranslationKey } from '../../shared/i18n';
 import { Button, Card, cx, type Tone } from '../ui';
 
 export const ONBOARDED_KEY = 'onboarded';
 
-const screens: { icon: typeof Sparkles; tone: Tone; title: TranslationKey; points: TranslationKey[] }[] = [
+/** `never` screens list refusals, so their points get a cross instead of a check. */
+const screens: {
+  icon: typeof Sparkles;
+  tone: Tone;
+  title: TranslationKey;
+  points: TranslationKey[];
+  never?: boolean;
+}[] = [
   {
     icon: Sparkles,
     tone: 'lavender',
@@ -16,7 +23,8 @@ const screens: { icon: typeof Sparkles; tone: Tone; title: TranslationKey; point
     icon: Ban,
     tone: 'rose',
     title: 'onboardingNeverTitle',
-    points: ['onboardingNever1', 'onboardingNever2', 'onboardingNever3']
+    points: ['onboardingNever1', 'onboardingNever2', 'onboardingNever3'],
+    never: true
   },
   {
     icon: Globe,
@@ -54,7 +62,11 @@ export function Onboarding(props: { translate: (key: TranslationKey) => string; 
       <ul className="space-y-3 text-sm leading-relaxed">
         {screen.points.map((point) => (
           <li key={point} className="flex gap-2.5">
-            <Check size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-accent-ink" />
+            {screen.never ? (
+              <X size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-error-ink" />
+            ) : (
+              <Check size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-accent-ink" />
+            )}
             <span>{translate(point)}</span>
           </li>
         ))}

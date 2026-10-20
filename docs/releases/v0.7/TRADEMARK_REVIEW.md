@@ -24,7 +24,7 @@ Before submitting a store item named Moodlens:
 - **Name:** BelajarLens
 - **Tagline:** Your local-first study companion
 - **English compatibility line:** Works with Moodle course sites that you choose to enable.
-- **Indonesian compatibility line:** Bekerja dengan situs mata kuliah Moodle yang Anda pilih untuk diaktifkan.
+- **Indonesian compatibility line:** Bekerja dengan situs mata kuliah Moodle yang kamu pilih untuk diaktifkan.
 - **Disclaimer:** Independent project. Not affiliated with or endorsed by Moodle Pty Ltd or any university.
 - **Indonesian disclaimer:** Proyek independen. Tidak berafiliasi dengan atau didukung oleh Moodle Pty Ltd maupun universitas mana pun.
 

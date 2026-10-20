@@ -19,7 +19,8 @@
     "check": "node scripts/check.mjs",
     "release:zip": "node scripts/package-release.mjs",
     "fixture:sanitize": "node scripts/sanitize-fixture.ts",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "node scripts/make-icons.mjs",
+    "store:assets": "node scripts/capture-store-assets.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.58.0",
