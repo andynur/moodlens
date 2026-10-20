@@ -34,7 +34,7 @@ Use for the first official public release. The v0.7 development milestone closed
 ## Engineering
 
 - [~] Local full gate green, lockfile updated and committed, and `npm audit` reports 0 vulnerabilities; CI on the release tag waits for push/tag.
-- [x] Version `0.9.0` in `package.json`, built manifest and UI footer match (v0.9 release candidate). `package-lock.json` root version still reads 0.7.0: run `npm install --package-lock-only` once (owner).
+- [x] Version `0.9.0` in `package.json`, built manifest and UI footer match (v0.9 release candidate). `package-lock.json` synced to 0.9.0 (dependency tree unchanged except previously unmet optional WASM deps of `@tailwindcss/oxide`; audit 0, `npm ci --dry-run` ok).
 - [x] `dist/` inspected: 12 files plus 2 directory entries; no source maps, secrets, test fixtures, store-preview harness or remote code.
 - [x] Final `dist/` loaded in a clean Chrome 154 profile: service worker `0.7.0`, no Moodlens runtime errors, EN/ID onboarding and initial dashboard fit 320px without overflow (`docs/releases/v0.7/RELEASE_EVIDENCE.md`).
 - [x] Security review (`prompts/SECURITY_REVIEW_PROMPT.md`) with no open Critical/High (`docs/releases/v0.7/SECURITY_REVIEW.md`; v0.9 incl. AI: `docs/releases/v0.9/SECURITY_REVIEW.md`).
