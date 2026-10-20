@@ -18,7 +18,6 @@ export const en = {
   courses: 'Courses',
   study: 'Study',
   settings: 'Settings',
-  currentCourse: 'Last viewed course',
   activities: 'Activities',
   noData: 'Open a course page on an enabled site to load its activities.',
   lastSeen: 'Last captured',
@@ -28,8 +27,6 @@ export const en = {
   unknown: 'Unknown',
   statusSummary: 'Activity overview',
   open: 'Open in LMS',
-  ready: 'Ready to inspect course activities',
-  studyPlanned: 'AI study features are planned for a future release.',
   language: 'Language',
   theme: 'Appearance',
   light: 'Light',
@@ -113,7 +110,6 @@ export const en = {
   cardBack: 'Back (answer)',
   cardSaved: 'Card saved.',
   reviewToday: 'Review today',
-  startReview: 'Start review',
   showAnswer: 'Show answer',
   reviewEmpty: 'Nothing to review today.',
   reviewLater: 'cards are scheduled for later',
@@ -132,7 +128,7 @@ export const en = {
   cardsImportInvalid: 'That file could not be read as Moodlens cards.',
   exportCardsEmpty: 'There are no student-authored cards to export.',
   practiceOffer: 'Wrong answers on the open review page',
-  practiceOfferHint: 'Saved cards stay private: they are never exported, backed up or sent anywhere (D-009).',
+  practiceOfferHint: 'Saved cards stay private: they are never exported, backed up or sent anywhere.',
   practiceSave: 'Save to deck',
   practiceSaved: 'Wrong answers saved to the deck.',
   practiceSaveError: 'Nothing was saved. Open the finished review page again and try once more.',
@@ -199,7 +195,6 @@ export const en = {
   personalize: 'Personalize',
   personalizeHint: 'These settings stay in this browser. Moodle is not changed.',
   openCourse: 'Open course in LMS',
-  viewCourse: 'View activities',
   backup: 'Backup',
   backupHint:
     'Save settings, sites and course snapshots to a JSON file, or restore one. Site access must be granted again on a new browser.',
@@ -264,7 +259,7 @@ export const en = {
   noteEdit: 'Edit note',
   noteHint: 'Plain text, kept only on this device and not in backups. Save it empty to delete it.',
   noteSaved: 'Note saved.',
-  copyright: 'Local development build'
+  copyright: 'Free and open source (MIT)'
 } as const;
 
 export type TranslationKey = keyof typeof en;

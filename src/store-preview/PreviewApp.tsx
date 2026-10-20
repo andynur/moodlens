@@ -210,7 +210,7 @@ const copy = {
     tasksTitle: 'Tenggat tanpa berburu tab.',
     tasksBody: 'Filter semua tugas, buka sumber dengan aman, atau ekspor kalendermu dalam sekali klik.',
     practiceTitle: 'Latihan privat tetap privat.',
-    practiceBody: 'Tinjau dengan pengulangan terjadwal, XP lokal, dan pengaman penilaian untuk integritas.',
+    practiceBody: 'Ulas kartu dengan pengulangan terjadwal, XP lokal, dan pengaman penilaian untuk integritas.',
     aiTitle: 'Tanya PDF-mu. Jawaban dengan nomor halaman.',
     aiBody:
       'Pakai key Gemini, OpenAI, atau penyedia lain milikmu. Ringkasan, jawaban, dan flashcard menunjuk ke halamannya.',

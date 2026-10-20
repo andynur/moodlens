@@ -126,7 +126,7 @@ const aiStrings = {
       'Bukti tidak cukup: tidak ada bagian dokumen ini yang cocok dengan pertanyaanmu. Tidak ada yang dikirim.',
     aiConsentTitle: 'Kirim ke penyedia AI?',
     aiConsentProvider: 'Penyedia',
-    aiConsentDestination: 'Tujuan',
+    aiConsentDestination: 'Alamat tujuan',
     aiConsentPurpose: 'Tujuan penggunaan',
     aiConsentText: 'Teks persis yang akan dikirim (kuncimu hanya dikirim sebagai header)',
     aiConsentTokens: 'Sekitar {n} token masukan. Biaya ditagihkan penyedia ke akunmu; Moodlens tidak memungut biaya.',

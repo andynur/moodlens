@@ -117,7 +117,7 @@ Goal: accurate deadlines without fragile scraping.
 - [x] Run `prompts/SECURITY_REVIEW_PROMPT.md`; fix all Critical/High. No Critical/High/Medium; two Low fixed (`docs/releases/v0.9/SECURITY_REVIEW.md`, 2026-10-20).
 - [x] Accessibility pass (keyboard, screen reader labels, contrast). axe 0 violations, Tab walk, 320 px reflow, token contrast test (`docs/releases/v0.9/ACCESSIBILITY.md`, 2026-10-20). Manual screen reader session still open.
 - [x] Performance pass (panel open time, storage size caps). Median 154 ms to Today; per-site course-records byte budget added (`docs/releases/v0.9/PERFORMANCE.md`, 2026-10-20).
-- [ ] i18n review by a native Indonesian speaker.
+- [~] i18n review by a native Indonesian speaker. Agent pre-review and fixes done; reviewer sheet in `docs/releases/v0.9/I18N_REVIEW.md` (2026-10-20). Native-speaker sign-off open (owner).
 - [ ] Docs, README, CHANGELOG, store listing final.
 
 **Exit gate:** `docs/10_RELEASE_CHECKLIST.md` fully checked.

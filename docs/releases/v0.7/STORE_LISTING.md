@@ -85,7 +85,7 @@ Every shipped feature supports that purpose: read-only course capture, Today and
 > - Sematkan, beri nama panggilan, warna, dan sembunyikan mata kuliah secara lokal.
 > - Lacak perubahan sejak kunjungan terakhir.
 > - Ekspor tenggat ke kalender `.ics` dan aktifkan pengingat lokal opsional.
-> - Buat deck kartu belajar privat dengan pengulangan terjadwal.
+> - Buat dek kartu belajar privat dengan pengulangan terjadwal.
 > - Simpan kesalahan dari tinjauan kuis milikmu yang telah selesai ketika Moodle sudah menampilkan jawabannya.
 > - Gunakan XP lokal, rentetan harian, sesi fokus, dan catatan per aktivitas.
 > - Sesuaikan halaman Moodle aktif dengan mode gelap, teks lebih besar, dan lebar baca yang nyaman.

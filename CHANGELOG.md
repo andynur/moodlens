@@ -10,6 +10,10 @@
 
 - Performance pass (`docs/releases/v0.9/PERFORMANCE.md`): side panel shows Today in a median 154 ms; PDF.js stays lazy. Course records of one site now also have a 1,000,000-character budget, so a large site cannot fill the 10 MB `chrome.storage.local` quota.
 
+### Localization (v0.9)
+
+- Indonesian pre-review (`docs/releases/v0.9/I18N_REVIEW.md`): flashcard review is "ulas" instead of "ulangan" (which reads as a class test), quiz review page is "tinjauan" as in Moodle, one term "penilaian" for assessment, "perlu diulas" instead of "jatuh tempo", consent "Alamat tujuan". Removed the internal "(D-009)" from a student-facing hint, five unused keys and the "Local development build" footer (now "Free and open source (MIT)"). Glossary extended in `docs/07_I18N.md`.
+
 ### Accessibility (v0.9)
 
 - Accessibility pass (`docs/releases/v0.9/ACCESSIBILITY.md`): tertiary text tokens darkened to AA in light and dark, AI study heading level fixed, consent text box keyboard-scrollable, AI notices and results announced to screen readers, deck select named. axe reports 0 violations on every side panel screen in EN/ID/dark; no overflow at 320 px. New `tests/sidepanel-contrast.test.ts`.
